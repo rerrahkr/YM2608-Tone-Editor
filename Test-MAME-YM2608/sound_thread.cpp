@@ -4,8 +4,8 @@
 #include <mutex>
 #include "SDL.h"
 
-#include <iostream>
-#include <chrono>
+//#include <iostream>
+//#include <chrono>
 
 namespace thread
 {

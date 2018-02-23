@@ -46,7 +46,9 @@ void JamKeyOff(chip::OPNA& opna);
 
 int main(int argc, char* argv[])
 {
-	chip::OPNA chip(3993600 * 2, 0);
+	size_t bufferTime = 40;
+
+	chip::OPNA chip(3993600 * 2, 0, bufferTime);
 
 #ifndef REGION
 	Voice voice;
@@ -120,7 +122,7 @@ int main(int argc, char* argv[])
 			SDL_UpdateWindowSurface(window);
 		}
 
-		thread::SoundThread at(chip, 40);
+		thread::SoundThread at(chip, bufferTime);
 
 		while (true) {
 			SDL_Event ev;
