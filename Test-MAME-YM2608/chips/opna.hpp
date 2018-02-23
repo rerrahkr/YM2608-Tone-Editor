@@ -18,7 +18,7 @@ namespace chip
 		void setRate(uint32 rate);
 		uint32 getRate() const;
 		void setVolume(float dBFM, float dBPSG);	// NOT work
-		void mix(int16* stream, size_t nSamples);	// Do mutex
+		void mix(int16* stream, size_t nSamples);
 
 	private:
 		const int id_;
