@@ -17,14 +17,21 @@ extern "C"
 }
 #endif // __cplusplus
 
+//////////////////////////
+// ReleaseÇ…Ç∑ÇÈÇ∆vectorÇ…êÿÇËë÷Ç¶
+#define DEBUG
+//////////////////////////
+
 namespace chip
 {
+	size_t OPNA::count_ = 0;
 	//const int OPNA::MAX_AMP_ = 32767;	// half-max of int16
 	//const int OPNA::DEF_AMP_FM_ = 11722;
 	//const int OPNA::DEF_AMP_PSG_ = 7250;
+	const int OPNA::SINC_OFFSET_ = 16;
 
-	OPNA::OPNA(uint32 clock, uint32 rate)
-		: id_(0)
+	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime)
+		: id_(count_++)
 	{
 		bufFM_[0] = new stream_sample_t[SMPL_BUFSIZE];
 		bufFM_[1] = new stream_sample_t[SMPL_BUFSIZE];
@@ -33,23 +40,6 @@ namespace chip
 		tmpBuf_[0] = new stream_sample_t[SMPL_BUFSIZE];
 		tmpBuf_[1] = new stream_sample_t[SMPL_BUFSIZE];
 
-		init(clock, rate);
-	}
-
-	OPNA::~OPNA()
-	{
-		deinit();
-
-		delete[] bufFM_[0];
-		delete[] bufFM_[1];
-		delete[] bufPSG_[0];
-		delete[] bufPSG_[1];
-		delete[] tmpBuf_[0];
-		delete[] tmpBuf_[1];
-	}
-
-	void OPNA::init(uint32 clock, uint32 rate)
-	{
 		setRate(rate, true);
 
 		UINT8 EmuCore = 0;
@@ -63,7 +53,55 @@ namespace chip
 
 		setVolume(0, 0);
 
+		initSincTables(maxTime);
+
 		reset();
+	}
+
+	void OPNA::initSincTables(size_t maxTime)
+	{
+		if (internalRateFM_ != rate_) {
+			size_t intrSize = calculateInternalSampleSize(maxTime * internalRateFM_ / 1000, internalRateFM_);
+			funcInitSincTables(sincTableFM_, intrSize, rateRatioFM_);
+		}
+
+		if (internalRatePSG_ != rate_) {
+			size_t intrSize = calculateInternalSampleSize(maxTime * internalRatePSG_ / 1000, internalRatePSG_);
+			funcInitSincTables(sincTablePSG_, intrSize, rateRatioPSG_);
+		}
+	}
+
+	// UNDONE: å≈íËè¨êîì_?Ç≈çÇë¨âª
+	void OPNA::funcInitSincTables(std::vector<float>& vector, size_t intrSize, float rateRatio)
+	{
+		if (vector.size()) vector.clear();
+
+		for (size_t j = 0; j < intrSize; ++j) {
+			float rcurn = j * rateRatio;
+			int curn = static_cast<int>(rcurn);
+			int k = curn - SINC_OFFSET_;
+			if (k < 0) k = 0;
+			int end = curn + SINC_OFFSET_;
+			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
+			for (; k < end; ++k) {
+				float dif = rcurn - k;
+				vector.push_back(sinc(F_PI * dif));
+			}
+		}
+	}
+
+	OPNA::~OPNA()
+	{
+		device_stop_ym2608(id_);
+
+		delete[] bufFM_[0];
+		delete[] bufFM_[1];
+		delete[] bufPSG_[0];
+		delete[] bufPSG_[1];
+		delete[] tmpBuf_[0];
+		delete[] tmpBuf_[1];
+
+		--count_;
 	}
 
 	void OPNA::reset()
@@ -71,11 +109,6 @@ namespace chip
 		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
 
 		device_reset_ym2608(id_);
-	}
-
-	void OPNA::deinit()
-	{
-		device_stop_ym2608(id_);
 	}
 
 	void OPNA::setRegister(uint32 offset, uint32 value)
@@ -151,7 +184,7 @@ namespace chip
 		else {
 			size_t intrSize = calculateInternalSampleSize(nSamples, internalRateFM_);
 			ym2608_stream_update(id_, tmpBuf_, intrSize);
-			sincResample(bufFM_, intrSize, rateRatioFM_);
+			sincResample(bufFM_, intrSize, sincTableFM_, rateRatioFM_);
 		}
 
 		// Set PSG buffer
@@ -161,7 +194,7 @@ namespace chip
 		else {
 			size_t intrSize = calculateInternalSampleSize(nSamples, internalRatePSG_);
 			ym2608_stream_update_ay(id_, tmpBuf_, intrSize);
-			sincResample(bufPSG_, intrSize, rateRatioPSG_);
+			sincResample(bufPSG_, intrSize, sincTablePSG_, rateRatioPSG_);
 		}
 
 		for (size_t i = 0; i < nSamples; ++i) {
@@ -173,19 +206,24 @@ namespace chip
 	}
 
 	// UNDONE: çÇë¨âª
-	void OPNA::sincResample(sample** dest, size_t intrSize, float rateRatio)
+	void OPNA::sincResample(sample** dest, size_t intrSize, std::vector<float>& vector, float rateRatio)
 	{
-		int offset = 16;
 		for (size_t i = 0; i < 2; ++i) {
+			int vecIndex = 0;
 			for (size_t j = 0; j < intrSize; ++j) {
 				int curn = static_cast<int>(j * rateRatio);
-				int k = curn - offset;
+				int k = curn - SINC_OFFSET_;
 				if (k < 0) k = 0;
-				int end = curn + offset;
-				if (end > intrSize) end = static_cast<int>(intrSize);
+				int end = curn + SINC_OFFSET_;
+				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 				sample samp = 0;
 				for (; k < end; ++k) {
+				#ifdef DEBUG
 					samp += static_cast<sample>(tmpBuf_[i][k] * sinc(F_PI * (curn - k)));
+				#else
+					samp += static_cast<sample>(tmpBuf_[i][k] * vector[vecIndex]);
+					++vecIndex;
+				#endif
 				}
 				dest[i][j] = samp;
 			}
