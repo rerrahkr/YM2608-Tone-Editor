@@ -175,18 +175,14 @@ namespace chip
 	// UNDONE: çÇë¨âª
 	void OPNA::sincResample(sample** dest, size_t intrSize, float rateRatio)
 	{
-		size_t offset = 16;
+		int offset = 16;
 		for (size_t i = 0; i < 2; ++i) {
 			for (size_t j = 0; j < intrSize; ++j) {
-				size_t curn = static_cast<size_t>(j * rateRatio);
-				size_t k;
-				{
-					int z = static_cast<int>(curn) - offset;
-					if (z < 0) z = 0;
-					k = static_cast<size_t>(z);
-				}
-				size_t end = curn + offset;
-				if (end > intrSize) end = intrSize;
+				int curn = static_cast<int>(j * rateRatio);
+				int k = curn - offset;
+				if (k < 0) k = 0;
+				int end = curn + offset;
+				if (end > intrSize) end = static_cast<int>(intrSize);
 				sample samp = 0;
 				for (; k < end; ++k) {
 					samp += static_cast<sample>(tmpBuf_[i][k] * sinc(F_PI * (curn - k)));

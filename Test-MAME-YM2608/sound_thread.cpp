@@ -4,6 +4,9 @@
 #include <mutex>
 #include "SDL.h"
 
+#include <iostream>
+#include <chrono>
+
 namespace thread
 {
 	SoundThread::SoundThread(chip::OPNA& opna, size_t bufferTime)
@@ -67,7 +70,10 @@ namespace thread
 					SDL_PauseAudioDevice(dev, 0);
 				}
 				else if (SDL_GetQueuedAudioSize(dev) < supplyLine) {	// Load sound
+					//auto s = std::chrono::system_clock::now();
 					chip_.mix(buffer.get(), nSamples);
+					//auto e = std::chrono::system_clock::now();
+					//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count() << std::endl;
 					SDL_QueueAudio(dev, buffer.get(), bufferSize);
 				}
 			}
