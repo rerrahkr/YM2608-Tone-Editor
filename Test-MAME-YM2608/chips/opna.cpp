@@ -35,7 +35,7 @@ namespace chip
 			bufPSG_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 		}
-		setRate(rate, true);
+		setRate(rate);
 
 		UINT8 EmuCore = 0;
 		ym2608_set_ay_emu_core(EmuCore);
@@ -44,11 +44,9 @@ namespace chip
 		UINT8 AYFlags = 0;		// none
 		internalRateFM_ = device_start_ym2608(id_, clock, AYDisable, AYFlags, reinterpret_cast<int*>(&internalRatePSG_));
 
-		setRate(rate, false);	// Set rate ratio
+		setRate(rate, maxTime);	// Set rate ratio
 
 		setVolume(0, 0);
-
-		initSincTables(maxTime);
 
 		reset();
 	}
@@ -80,8 +78,7 @@ namespace chip
 			int end = curn + SINC_OFFSET_;
 			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 			for (; k < end; ++k) {
-				float dif = rcurn - k;
-				vector.push_back(sinc(F_PI_ * dif));
+				vector.push_back(sinc(F_PI_ * (rcurn - k)));
 			}
 		}
 	}
@@ -135,18 +132,19 @@ namespace chip
 
 	void OPNA::setRate(uint32 rate)
 	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
-		setRate(rate, false);
+		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
 	}
 
-	void OPNA::setRate(uint32 rate, bool isInit)
+	void OPNA::setRate(uint32 rate, size_t maxTime)
 	{
-		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
+		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
 
-		if (!isInit) {
-			rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
-			rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
-		}
+		setRate(rate);
+
+		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
+		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
+
+		initSincTables(maxTime);
 	}
 
 	uint32 OPNA::getRate() const
