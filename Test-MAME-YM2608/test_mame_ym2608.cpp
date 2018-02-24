@@ -1,3 +1,5 @@
+#include "common.hpp"
+
 //#include <iostream>
 //#include <fstream>
 //#include <iomanip>
@@ -229,8 +231,6 @@ int main(int argc, char* argv[])
 //	ofs.close();
 //}
 
-#define FMSOUND
-//#define PSGSOUND
 
 void JamKeyOn(chip::OPNA& opna, uint32 keynum)
 {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <mutex>
 #include <vector>
 #include "../types.h"
@@ -24,6 +25,7 @@ namespace chip
 	private:
 		const int id_;
 		static size_t count_;
+		static const size_t SMPL_BUFSIZE_;
 		/*float dBFM_, dBPSG_;*/
 		float volumeRatioFM_, volumeRatioPSG_;
 		//static const int MAX_AMP_;
@@ -33,6 +35,7 @@ namespace chip
 		int rate_;
 		float rateRatioFM_, rateRatioPSG_;
 		std::vector<float> sincTableFM_, sincTablePSG_;
+		static const float F_PI_;
 		static const int SINC_OFFSET_;
 		std::mutex mutex_;
 
@@ -44,6 +47,11 @@ namespace chip
 		inline size_t calculateInternalSampleSize(size_t nSamples, int intrRate)
 		{
 			return static_cast<size_t>(nSamples * intrRate / rate_);
+		}
+
+		static inline float sinc(float x)
+		{
+			return ((!x) ? 1.0f : (std::sin(x) / x));
 		}
 	};
 }

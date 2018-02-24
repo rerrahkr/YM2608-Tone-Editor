@@ -1,13 +1,13 @@
+#include "../common.hpp"
 #include "opna.hpp"
-#include "../misc.hpp"
 
 #ifdef  __cplusplus
 extern "C"
 {
 #endif //  __cplusplus
 
-#include "mame/mamedef.h"
-#include "mame/2608intf.h"
+	#include "mame/mamedef.h"
+	#include "mame/2608intf.h"
 
 	UINT8 CHIP_SAMPLING_MODE = 0x00;
 	INT32 CHIP_SAMPLE_RATE;
@@ -17,29 +17,24 @@ extern "C"
 }
 #endif // __cplusplus
 
-//////////////////////////
-// ReleaseÇ…Ç∑ÇÈÇ∆vectorÇ…êÿÇËë÷Ç¶
-#define DEBUG
-//////////////////////////
-
 namespace chip
 {
 	size_t OPNA::count_ = 0;
+	const size_t OPNA::SMPL_BUFSIZE_ = 0x10000;
 	//const int OPNA::MAX_AMP_ = 32767;	// half-max of int16
 	//const int OPNA::DEF_AMP_FM_ = 11722;
 	//const int OPNA::DEF_AMP_PSG_ = 7250;
+	const float OPNA::F_PI_ = 3.14159265f;
 	const int OPNA::SINC_OFFSET_ = 16;
 
 	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime)
 		: id_(count_++)
 	{
-		bufFM_[0] = new stream_sample_t[SMPL_BUFSIZE];
-		bufFM_[1] = new stream_sample_t[SMPL_BUFSIZE];
-		bufPSG_[0] = new stream_sample_t[SMPL_BUFSIZE];
-		bufPSG_[1] = new stream_sample_t[SMPL_BUFSIZE];
-		tmpBuf_[0] = new stream_sample_t[SMPL_BUFSIZE];
-		tmpBuf_[1] = new stream_sample_t[SMPL_BUFSIZE];
-
+		for (int i = 0; i < 2; ++i) {
+			bufFM_[i] = new stream_sample_t[SMPL_BUFSIZE_];
+			bufPSG_[i] = new stream_sample_t[SMPL_BUFSIZE_];
+			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];
+		}
 		setRate(rate, true);
 
 		UINT8 EmuCore = 0;
@@ -71,7 +66,6 @@ namespace chip
 		}
 	}
 
-	// UNDONE: å≈íËè¨êîì_?Ç≈çÇë¨âª
 	void OPNA::funcInitSincTables(std::vector<float>& vector, size_t intrSize, float rateRatio)
 	{
 		if (vector.size()) vector.clear();
@@ -85,7 +79,7 @@ namespace chip
 			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 			for (; k < end; ++k) {
 				float dif = rcurn - k;
-				vector.push_back(sinc(F_PI * dif));
+				vector.push_back(sinc(F_PI_ * dif));
 			}
 		}
 	}
@@ -94,12 +88,11 @@ namespace chip
 	{
 		device_stop_ym2608(id_);
 
-		delete[] bufFM_[0];
-		delete[] bufFM_[1];
-		delete[] bufPSG_[0];
-		delete[] bufPSG_[1];
-		delete[] tmpBuf_[0];
-		delete[] tmpBuf_[1];
+		for (int i = 0; i < 2; ++i) {
+			delete[] bufFM_[i];
+			delete[] bufPSG_[i];
+			delete[] tmpBuf_[i];
+		}
 
 		--count_;
 	}
@@ -205,7 +198,6 @@ namespace chip
 		}
 	}
 
-	// UNDONE: çÇë¨âª
 	void OPNA::sincResample(sample** dest, size_t intrSize, std::vector<float>& vector, float rateRatio)
 	{
 		for (size_t i = 0; i < 2; ++i) {
@@ -219,7 +211,7 @@ namespace chip
 				sample samp = 0;
 				for (; k < end; ++k) {
 				#ifdef DEBUG
-					samp += static_cast<sample>(tmpBuf_[i][k] * sinc(F_PI * (curn - k)));
+					samp += static_cast<sample>(tmpBuf_[i][k] * sinc(F_PI_ * (curn - k)));
 				#else
 					samp += static_cast<sample>(tmpBuf_[i][k] * vector[vecIndex]);
 					++vecIndex;
