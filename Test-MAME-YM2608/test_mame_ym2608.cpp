@@ -1,5 +1,3 @@
-#include "common.hpp"
-
 //#include <iostream>
 //#include <fstream>
 //#include <iomanip>
@@ -42,8 +40,10 @@ void SetFMTone(chip::OPNA &opna, int channel, uint32 octave, uint32 keynum);
 void SetPSGTone(chip::OPNA &opna, int channel, uint32 octave, uint32 keynum);
 void InitPan(chip::OPNA& opna);
 
-void JamKeyOn(chip::OPNA& opna, uint32 keynum);
-void JamKeyOff(chip::OPNA& opna);
+void JamKeyOnFM(chip::OPNA& opna, uint32 octave, uint32 keynum);
+void JamKeyOnPSG(chip::OPNA& opna, uint32 octave, uint32 keynum);
+void JamKeyOffFM(chip::OPNA& opna);
+void JamKeyOffPSG(chip::OPNA& opna);
 
 
 int main(int argc, char* argv[])
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 
 	chip::OPNA chip(3993600 * 2, 0, bufferTime);
 
-#ifndef REGION
 	Voice voice;
+	#ifndef VOICE
 	voice.name = "detune";
 	voice.AL = 5;
 	voice.FB = 5;
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 	voice.op[3].ML = 0;
 	voice.op[3].DT = 0;
 	voice.op[3].AM = 0;
-#endif
+	#endif
 
 	chip.setRegister(0x29, 0x80);	// Init interrupt
 	InitPan(chip);
@@ -109,9 +109,7 @@ int main(int argc, char* argv[])
 
 	if (SDL_Init(SDL_INIT_VIDEO)) return 1;
 
-	int h = 500;
-	int w = 500;
-	SDL_Window* window = SDL_CreateWindow("test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, 0);
+	SDL_Window* window = SDL_CreateWindow("test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 500, 500, 0);
 
 	if (window != nullptr) {
 
@@ -126,25 +124,54 @@ int main(int argc, char* argv[])
 
 		thread::SoundThread at(chip, bufferTime);
 
+		int octaveFM = 3;
+		int octavePSG = 3;
+
 		while (true) {
 			SDL_Event ev;
 			while (SDL_PollEvent(&ev)) {
 				switch (ev.type) {
-				case SDL_KEYDOWN:	// Keydown event
+				case SDL_KEYDOWN:
 					switch (ev.key.keysym.sym) {
-					case SDLK_z: JamKeyOn(chip, 0);		break;
-					case SDLK_s: JamKeyOn(chip, 1);		break;
-					case SDLK_x: JamKeyOn(chip, 2);		break;
-					case SDLK_d: JamKeyOn(chip, 3);		break;
-					case SDLK_c: JamKeyOn(chip, 4);		break;
-					case SDLK_v: JamKeyOn(chip, 5);		break;
-					case SDLK_g: JamKeyOn(chip, 6);		break;
-					case SDLK_b: JamKeyOn(chip, 7);		break;
-					case SDLK_h: JamKeyOn(chip, 8);		break;
-					case SDLK_n: JamKeyOn(chip, 9);		break;
-					case SDLK_j: JamKeyOn(chip, 10);	break;
-					case SDLK_m: JamKeyOn(chip, 11);	break;
-					case SDLK_r:	// Reset sound
+					case SDLK_z:			JamKeyOnFM(chip, octaveFM, 0);			break;
+					case SDLK_s:			JamKeyOnFM(chip, octaveFM, 1);			break;
+					case SDLK_x:			JamKeyOnFM(chip, octaveFM, 2);			break;
+					case SDLK_d:			JamKeyOnFM(chip, octaveFM, 3);			break;
+					case SDLK_c:			JamKeyOnFM(chip, octaveFM, 4);			break;
+					case SDLK_v:			JamKeyOnFM(chip, octaveFM, 5);			break;
+					case SDLK_g:			JamKeyOnFM(chip, octaveFM, 6);			break;
+					case SDLK_b:			JamKeyOnFM(chip, octaveFM, 7);			break;
+					case SDLK_h:			JamKeyOnFM(chip, octaveFM, 8);			break;
+					case SDLK_n:			JamKeyOnFM(chip, octaveFM, 9);			break;
+					case SDLK_j:			JamKeyOnFM(chip, octaveFM, 10);			break;
+					case SDLK_m:			JamKeyOnFM(chip, octaveFM, 11);			break;
+					case SDLK_COMMA:		JamKeyOnFM(chip, (octaveFM + 1), 0);	break;
+					case SDLK_l:			JamKeyOnFM(chip, (octaveFM + 1), 1);	break;
+					case SDLK_PERIOD:		JamKeyOnFM(chip, (octaveFM + 1), 2);	break;
+					case SDLK_SEMICOLON:	JamKeyOnFM(chip, (octaveFM + 1), 3);	break;
+					case SDLK_SLASH:		JamKeyOnFM(chip, (octaveFM + 1), 4);	break;
+					case SDLK_q:			JamKeyOnPSG(chip, octavePSG, 0);		break;
+					case SDLK_2:			JamKeyOnPSG(chip, octavePSG, 1);		break;
+					case SDLK_w:			JamKeyOnPSG(chip, octavePSG, 2);		break;
+					case SDLK_3:			JamKeyOnPSG(chip, octavePSG, 3);		break;
+					case SDLK_e:			JamKeyOnPSG(chip, octavePSG, 4);		break;
+					case SDLK_r:			JamKeyOnPSG(chip, octavePSG, 5);		break;
+					case SDLK_5:			JamKeyOnPSG(chip, octavePSG, 6);		break;
+					case SDLK_t:			JamKeyOnPSG(chip, octavePSG, 7);		break;
+					case SDLK_6:			JamKeyOnPSG(chip, octavePSG, 8);		break;
+					case SDLK_y:			JamKeyOnPSG(chip, octavePSG, 9);		break;
+					case SDLK_7:			JamKeyOnPSG(chip, octavePSG, 10);		break;
+					case SDLK_u:			JamKeyOnPSG(chip, octavePSG, 11);		break;
+					case SDLK_i:			JamKeyOnPSG(chip, (octavePSG + 1), 0);	break;
+					case SDLK_9:			JamKeyOnPSG(chip, (octavePSG + 1), 1);	break;
+					case SDLK_o:			JamKeyOnPSG(chip, (octavePSG + 1), 2);	break;
+					case SDLK_0:			JamKeyOnPSG(chip, (octavePSG + 1), 3);	break;
+					case SDLK_p:			JamKeyOnPSG(chip, (octavePSG + 1), 4);	break;
+					case SDLK_UP:		if (octaveFM < 7)	++octaveFM;		break;
+					case SDLK_DOWN:		if (octaveFM > 1)	--octaveFM;		break;
+					case SDLK_RIGHT:	if (octavePSG < 6)	++octavePSG;	break;
+					case SDLK_LEFT:		if (octavePSG > 1)	--octavePSG;	break;
+					case SDLK_RETURN:	// Reset sound
 						at.stopSound();
 						chip.reset();
 						at.restartSound();
@@ -153,14 +180,51 @@ int main(int argc, char* argv[])
 						InitPan(chip);
 						SetFMVoice(chip, voice, 1);
 						break;
-					case SDLK_ESCAPE:
-						goto END_LABEL;
-					default:
-						break;
+					case SDLK_ESCAPE:	goto END_LABEL;
+					default:			break;
 					}
 					break;
-				case SDL_KEYUP:		// Keyup event
-					JamKeyOff(chip);
+				case SDL_KEYUP:
+					switch (ev.key.keysym.sym) {
+					case SDLK_z:
+					case SDLK_s:
+					case SDLK_x:
+					case SDLK_d:
+					case SDLK_c:
+					case SDLK_v:
+					case SDLK_g:
+					case SDLK_b:
+					case SDLK_h:
+					case SDLK_n:
+					case SDLK_j:
+					case SDLK_m:
+					case SDLK_COMMA:
+					case SDLK_l:
+					case SDLK_PERIOD:
+					case SDLK_SEMICOLON:
+					case SDLK_SLASH:
+						JamKeyOffFM(chip);
+						break;
+					case SDLK_q:
+					case SDLK_2:
+					case SDLK_w:
+					case SDLK_3:
+					case SDLK_e:
+					case SDLK_r:
+					case SDLK_5:
+					case SDLK_t:
+					case SDLK_6:
+					case SDLK_y:
+					case SDLK_7:
+					case SDLK_u:
+					case SDLK_i:
+					case SDLK_9:
+					case SDLK_o:
+					case SDLK_0:
+					case SDLK_p:
+						JamKeyOffPSG(chip);
+						break;
+					}
 					break;
 				default:
 					break;
@@ -232,29 +296,28 @@ int main(int argc, char* argv[])
 //}
 
 
-void JamKeyOn(chip::OPNA& opna, uint32 keynum)
+void JamKeyOnFM(chip::OPNA& opna, uint32 octave, uint32 keynum)
 {
-#ifdef FMSOUND
-	SetFMTone(opna, 1, 4, keynum);
+	SetFMTone(opna, 1, octave, keynum);
 	SetFMKeyOn(opna, 1);
-#endif // FMSOUND
-#ifdef PSGSOUND
-	SetPSGTone(opna, 1, 3, keynum);
-	opna.setRegister(0x08, 0x0f);
-	opna.setRegister(0x07, 0x7e);
-#endif // PSGSOUND
 }
 
-
-void JamKeyOff(chip::OPNA& opna)
+void JamKeyOnPSG(chip::OPNA& opna, uint32 octave, uint32 keynum)
 {
-#ifdef FMSOUND
+	SetPSGTone(opna, 1, octave, keynum);
+	opna.setRegister(0x08, 0x0f);
+	opna.setRegister(0x07, 0x7e);
+}
+
+void JamKeyOffFM(chip::OPNA& opna)
+{
 	SetFMKeyOff(opna, 1);
-#endif // FMSOUND
-#ifdef PSGSOUND
+}
+
+void JamKeyOffPSG(chip::OPNA& opna)
+{
 	opna.setRegister(0x08, 0x00);
 	opna.setRegister(0x07, 0x7f);
-#endif // PSGSOUND
 }
 
 
