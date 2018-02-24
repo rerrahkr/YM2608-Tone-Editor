@@ -1,11 +1,9 @@
+#include "common.hpp"
 #include "sound_thread.hpp"
 #include <memory>
 #include <condition_variable>
 #include <mutex>
 #include "SDL.h"
-
-//#include <iostream>
-//#include <chrono>
 
 namespace thread
 {
@@ -42,8 +40,10 @@ namespace thread
 		if (SDL_InitSubSystem(SDL_INIT_AUDIO)) return;
 
 		size_t nSamples = chip_.getRate() * bufferTime_ / 1000;
+		#ifdef DEBUG
 		size_t bufferSize = nSamples << 2;	// nSamples * 2(stereo) * 2(sizeof(int16))
 		size_t supplyLine = bufferSize + (bufferSize >> 1);
+		#endif
 
 		std::unique_ptr<int16[]> buffer = std::make_unique<int16[]>(nSamples << 1);
 
@@ -52,8 +52,13 @@ namespace thread
 		desired.format = AUDIO_S16SYS;	// int16
 		desired.channels = 2;			// Stereo
 		desired.samples = static_cast<uint16>(nSamples);
+		#ifdef DEBUG
 		desired.callback = nullptr;
 		desired.userdata = nullptr;
+		#else
+		desired.callback = &soundCallback;
+		desired.userdata = &chip_;
+		#endif
 
 		SDL_AudioDeviceID dev = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
 		if (dev != 0) {
@@ -69,16 +74,21 @@ namespace thread
 					}
 					SDL_PauseAudioDevice(dev, 0);
 				}
+				#ifdef DEBUG
 				else if (SDL_GetQueuedAudioSize(dev) < supplyLine) {	// Load sound
-					//auto s = std::chrono::system_clock::now();
 					chip_.mix(buffer.get(), nSamples);
-					//auto e = std::chrono::system_clock::now();
-					//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(e - s).count() << std::endl;
 					SDL_QueueAudio(dev, buffer.get(), bufferSize);
 				}
+				#endif
 			}
 			SDL_CloseAudioDevice(dev);
 		}
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	}
+
+	void SoundThread::soundCallback(void* userdata, uint8* stream, int len)
+	{
+		auto chip = reinterpret_cast<chip::OPNA*>(userdata);
+		chip->mix(reinterpret_cast<int16*>(stream), len >> 2);	// len / sizeof(short) / stereo
 	}
 }

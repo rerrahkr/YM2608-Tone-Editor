@@ -34,5 +34,6 @@ namespace thread
 		SoundThread& operator= (SoundThread&&) noexcept = delete;
 
 		void threadFunction();
+		static void soundCallback(void* userdata, uint8* stream, int len);
 	};
 }
