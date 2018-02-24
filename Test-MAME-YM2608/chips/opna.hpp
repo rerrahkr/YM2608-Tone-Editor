@@ -40,9 +40,9 @@ namespace chip
 		std::mutex mutex_;
 
 		void initSincTables(size_t maxTime);
-		void funcInitSincTables(std::vector<float>& map, size_t intrSize, float rateRatio);
+		void funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio);
 		void setRate(uint32 rate, bool isInit);
-		void sincResample(sample** dest, size_t intrSize, std::vector<float>& map, float rateRatio);
+		void sincResample(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& map, float rateRatio);
 
 		inline size_t calculateInternalSampleSize(size_t nSamples, int intrRate)
 		{
