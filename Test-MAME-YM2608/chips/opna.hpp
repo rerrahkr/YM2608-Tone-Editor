@@ -17,7 +17,7 @@ namespace chip
 		void reset();
 		void setRegister(uint32 offset, uint32 value);
 		uint32 getRegister(uint32 offset) const;
-		void setRate(uint32 rate);
+		void setRate(uint32 rate, size_t maxTime);
 		uint32 getRate() const;
 		void setVolume(float dBFM, float dBPSG);	// NOT work
 		void mix(int16* stream, size_t nSamples);
@@ -41,7 +41,7 @@ namespace chip
 
 		void initSincTables(size_t maxTime);
 		void funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio);
-		void setRate(uint32 rate, bool isInit);
+		void setRate(uint32 rate);
 		void sincResample(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& map, float rateRatio);
 
 		inline size_t calculateInternalSampleSize(size_t nSamples, int intrRate)
