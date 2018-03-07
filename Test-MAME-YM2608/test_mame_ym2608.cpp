@@ -48,9 +48,10 @@ void JamKeyOffPSG(chip::OPNA& opna);
 
 int main(int argc, char* argv[])
 {
+	int clock = 3993600 * 2;
+	int rate = 0;	// Auto mode
 	size_t bufferTime = 40;
-
-	chip::OPNA chip(3993600 * 2, 0, bufferTime);
+	chip::OPNA chip(clock, rate, bufferTime);
 
 	Voice voice;
 	#ifndef VOICE
