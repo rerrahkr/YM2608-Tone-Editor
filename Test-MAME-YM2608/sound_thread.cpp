@@ -10,6 +10,7 @@ namespace thread
 	SoundThread::SoundThread(chip::OPNA& opna, size_t bufferTime)
 		: chip_(opna),
 		bufferTime_(bufferTime),
+		readIntrCount_(0),
 		shouldReset_(false),
 		shouldContinue_(true),
 		thread_(&SoundThread::threadFunction, this)
@@ -57,7 +58,8 @@ namespace thread
 		desired.userdata = nullptr;
 		#else
 		desired.callback = &soundCallback;
-		desired.userdata = &chip_;
+		CallBackArg cba = { chip_, readIntrCount_ };
+		desired.userdata = &cba;
 		#endif
 
 		SDL_AudioDeviceID dev = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
@@ -88,7 +90,29 @@ namespace thread
 
 	void SoundThread::soundCallback(void* userdata, uint8* stream, int len)
 	{
-		auto chip = reinterpret_cast<chip::OPNA*>(userdata);
-		chip->mix(reinterpret_cast<int16*>(stream), len >> 2);	// len / sizeof(short) / stereo
+		auto cba = reinterpret_cast<CallBackArg*>(userdata);
+		chip::OPNA& chip = cba->chip;
+		int rate = chip.getRate();
+		size_t& readIntrCount = cba->readIntrCount;
+		size_t requiredCount = static_cast<size_t>(len >> 2);	// len / sizeof(short) / stereo
+		auto destPtr = reinterpret_cast<int16*>(stream);
+		
+		size_t count;
+		while (requiredCount) {
+			if (!readIntrCount) {	// Read data
+				// UNDONE:: ここにパターン読み込み処理
+				// tempoはパターンで読み込む
+				int bpm = 150;
+				readIntrCount = rate * 60 / bpm;
+			}
+
+			count = (requiredCount > readIntrCount) ? readIntrCount : requiredCount;
+			requiredCount -= count;
+			readIntrCount -= count;
+			
+			chip.mix(destPtr, count);
+			
+			destPtr += (count << 1);	// Move head
+		}
 	}
 }

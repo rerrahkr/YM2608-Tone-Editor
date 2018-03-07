@@ -20,13 +20,14 @@ namespace thread
 	private:
 		chip::OPNA& chip_;
 		size_t bufferTime_;
+		size_t readIntrCount_;
 
 		std::atomic_bool shouldReset_;
 		std::atomic_bool shouldContinue_;
 
-		std::thread thread_;
 		std::condition_variable cv;
 		std::mutex mutex_;
+		std::thread thread_;
 
 		SoundThread(const SoundThread&) = delete;
 		SoundThread& operator= (const SoundThread&) = delete;
@@ -35,5 +36,11 @@ namespace thread
 
 		void threadFunction();
 		static void soundCallback(void* userdata, uint8* stream, int len);
+
+		struct CallBackArg
+		{
+			chip::OPNA& chip;
+			size_t& readIntrCount;
+		};
 	};
 }
