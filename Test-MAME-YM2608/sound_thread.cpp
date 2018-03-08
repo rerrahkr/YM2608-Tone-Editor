@@ -1,4 +1,3 @@
-#include "common.hpp"
 #include "sound_thread.hpp"
 #include <memory>
 #include <condition_variable>
@@ -41,11 +40,6 @@ namespace thread
 		if (SDL_InitSubSystem(SDL_INIT_AUDIO)) return;
 
 		size_t nSamples = chip_.getRate() * bufferTime_ / 1000;
-		#ifdef DEBUG
-		size_t bufferSize = nSamples << 2;	// nSamples * 2(stereo) * 2(sizeof(int16))
-		size_t supplyLine = bufferSize + (bufferSize >> 1);
-		#endif
-
 		std::unique_ptr<int16[]> buffer = std::make_unique<int16[]>(nSamples << 1);
 
 		SDL_AudioSpec desired, obtained;
@@ -53,14 +47,9 @@ namespace thread
 		desired.format = AUDIO_S16SYS;	// int16
 		desired.channels = 2;			// Stereo
 		desired.samples = static_cast<uint16>(nSamples);
-		#ifdef DEBUG
-		desired.callback = nullptr;
-		desired.userdata = nullptr;
-		#else
 		desired.callback = &soundCallback;
 		CallBackArg cba = { chip_, readIntrCount_ };
 		desired.userdata = &cba;
-		#endif
 
 		SDL_AudioDeviceID dev = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
 		if (dev != 0) {
@@ -76,12 +65,6 @@ namespace thread
 					}
 					SDL_PauseAudioDevice(dev, 0);
 				}
-				#ifdef DEBUG
-				else if (SDL_GetQueuedAudioSize(dev) < supplyLine) {	// Load sound
-					chip_.mix(buffer.get(), nSamples);
-					SDL_QueueAudio(dev, buffer.get(), bufferSize);
-				}
-				#endif
 			}
 			SDL_CloseAudioDevice(dev);
 		}
@@ -103,7 +86,7 @@ namespace thread
 				// UNDONE:: ここにパターン読み込み処理
 				// tempoはパターンで読み込む
 				// 下の設定だとrowsize=6で16分音符
-				int bpm = 150;
+				int bpm = 120;
 				readIntrCount = ((rate * 5) >> 2) / bpm;
 			}
 
