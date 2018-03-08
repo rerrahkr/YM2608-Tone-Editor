@@ -3,6 +3,7 @@
 #include <cmath>
 #include <mutex>
 #include <vector>
+#include "../common.hpp"
 #include "../types.h"
 
 namespace chip
@@ -34,24 +35,34 @@ namespace chip
 		int internalRateFM_, internalRatePSG_;
 		int rate_;
 		float rateRatioFM_, rateRatioPSG_;
+		#ifdef SINC_INTERPOLATION
 		std::vector<float> sincTableFM_, sincTablePSG_;
 		static const float F_PI_;
 		static const int SINC_OFFSET_;
+		#endif
 		std::mutex mutex_;
 
+		void setRate(uint32 rate);
+		#ifdef SINC_INTERPOLATION
 		void initSincTables(size_t maxTime);
 		void funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio);
-		void setRate(uint32 rate);
-		void sincResample(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& map, float rateRatio);
+		void sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& map, float rateRatio);
+		#else
+		void linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
+		#endif
 
-		inline size_t calculateInternalSampleSize(size_t nSamples, int intrRate)
+		inline size_t calculateInternalSampleSize(size_t nSamples, float rateRatio)
 		{
-			return static_cast<size_t>(nSamples * intrRate / rate_);
+			float f = nSamples * rateRatio;
+			size_t i = static_cast<size_t>(f);
+			return ((f - i) ? (i + 1) : i);
 		}
 
+		#ifdef SINC_INTERPOLATION
 		static inline float sinc(float x)
 		{
 			return ((!x) ? 1.0f : (std::sin(x) / x));
 		}
+		#endif
 	};
 }

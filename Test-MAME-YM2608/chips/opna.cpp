@@ -1,4 +1,3 @@
-#include "../common.hpp"
 #include "opna.hpp"
 
 #ifdef  __cplusplus
@@ -24,8 +23,10 @@ namespace chip
 	//const int OPNA::MAX_AMP_ = 32767;	// half-max of int16
 	//const int OPNA::DEF_AMP_FM_ = 11722;
 	//const int OPNA::DEF_AMP_PSG_ = 7250;
+	#ifdef SINC_INTERPOLATION
 	const float OPNA::F_PI_ = 3.14159265f;
 	const int OPNA::SINC_OFFSET_ = 16;
+	#endif
 
 	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime)
 		: id_(count_++)
@@ -49,38 +50,6 @@ namespace chip
 		setVolume(0, 0);
 
 		reset();
-	}
-
-	void OPNA::initSincTables(size_t maxTime)
-	{
-		size_t maxSamples = rate_ * maxTime / 1000;
-
-		if (internalRateFM_ != rate_) {
-			size_t intrSize = calculateInternalSampleSize(maxSamples, internalRateFM_);
-			funcInitSincTables(sincTableFM_, maxSamples, intrSize, rateRatioFM_);
-		}
-
-		if (internalRatePSG_ != rate_) {
-			size_t intrSize = calculateInternalSampleSize(maxSamples, internalRatePSG_);
-			funcInitSincTables(sincTablePSG_, maxSamples, intrSize, rateRatioPSG_);
-		}
-	}
-
-	void OPNA::funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio)
-	{
-		if (vector.size()) vector.clear();
-
-		for (size_t j = 0; j < maxSamples; ++j) {
-			float rcurn = j * rateRatio;
-			int curn = static_cast<int>(rcurn);
-			int k = curn - SINC_OFFSET_;
-			if (k < 0) k = 0;
-			int end = curn + SINC_OFFSET_;
-			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
-			for (; k < end; ++k) {
-				vector.push_back(sinc(F_PI_ * (rcurn - k)));
-			}
-		}
 	}
 
 	OPNA::~OPNA()
@@ -144,8 +113,44 @@ namespace chip
 		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
 		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
 
+		#ifdef SINC_INTERPOLATION
 		initSincTables(maxTime);
+		#endif
 	}
+
+	#ifdef SINC_INTERPOLATION
+	void OPNA::initSincTables(size_t maxTime)
+	{
+		size_t maxSamples = rate_ * maxTime / 1000;
+
+		if (internalRateFM_ != rate_) {
+			size_t intrSize = calculateInternalSampleSize(maxSamples, rateRatioFM_);
+			funcInitSincTables(sincTableFM_, maxSamples, intrSize, rateRatioFM_);
+		}
+
+		if (internalRatePSG_ != rate_) {
+			size_t intrSize = calculateInternalSampleSize(maxSamples, rateRatioPSG_);
+			funcInitSincTables(sincTablePSG_, maxSamples, intrSize, rateRatioPSG_);
+		}
+	}
+
+	void OPNA::funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio)
+	{
+		if (vector.size()) vector.clear();
+
+		for (size_t j = 0; j < maxSamples; ++j) {
+			float rcurn = j * rateRatio;
+			int curn = static_cast<int>(rcurn);
+			int k = curn - SINC_OFFSET_;
+			if (k < 0) k = 0;
+			int end = curn + SINC_OFFSET_;
+			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
+			for (; k < end; ++k) {
+				vector.push_back(sinc(F_PI_ * (rcurn - k)));
+			}
+		}
+	}
+	#endif
 
 	uint32 OPNA::getRate() const
 	{
@@ -175,9 +180,13 @@ namespace chip
 			ym2608_stream_update(id_, bufFM_, nSamples);
 		}
 		else {
-			size_t intrSize = calculateInternalSampleSize(nSamples, internalRateFM_);
+			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioFM_);
 			ym2608_stream_update(id_, tmpBuf_, intrSize);
-			sincResample(bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
+			#ifdef SINC_INTERPOLATION
+			sincInterpolate(bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
+			#else
+			linearInterpolate(bufFM_, nSamples, intrSize, rateRatioFM_);
+			#endif
 		}
 
 		// Set PSG buffer
@@ -185,9 +194,13 @@ namespace chip
 			ym2608_stream_update_ay(id_, bufPSG_, nSamples);
 		}
 		else {
-			size_t intrSize = calculateInternalSampleSize(nSamples, internalRatePSG_);
+			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioPSG_);
 			ym2608_stream_update_ay(id_, tmpBuf_, intrSize);
-			sincResample(bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
+			#ifdef SINC_INTERPOLATION
+			sincInterpolate(bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
+			#else
+			linearInterpolate(bufPSG_, nSamples, intrSize, rateRatioPSG_);
+			#endif
 		}
 
 		for (size_t i = 0; i < nSamples; ++i) {
@@ -198,7 +211,8 @@ namespace chip
 		}
 	}
 
-	void OPNA::sincResample(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& vector, float rateRatio)
+	#ifdef SINC_INTERPOLATION
+	void OPNA::sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& vector, float rateRatio)
 	{
 		for (size_t i = 0; i < 2; ++i) {
 			int vecIndex = 0;
@@ -210,15 +224,29 @@ namespace chip
 				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 				sample samp = 0;
 				for (; k < end; ++k) {
-				#ifdef DEBUG
-					samp += static_cast<sample>(tmpBuf_[i][k] * sinc(F_PI_ * (curn - k)));
-				#else
 					samp += static_cast<sample>(tmpBuf_[i][k] * vector[vecIndex]);
 					++vecIndex;
-				#endif
 				}
 				dest[i][j] = samp;
 			}
 		}
 	}
+	#else
+	void OPNA::linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio)
+	{
+		for (size_t i = 0; i < 2; ++i) {
+			for (size_t j = 0; j < nSamples; ++j) {
+				float curnf = j * rateRatio;
+				int curni = static_cast<int>(curnf);
+				float sub = curnf - curni;
+				if (sub) {	// Linear interpolation
+					dest[i][j] = static_cast<sample>(tmpBuf_[i][curni] + (tmpBuf_[i][curni + 1] - tmpBuf_[i][curni]) * sub);
+				}
+				else /* if (sub == 0) */ {
+					dest[i][j] = tmpBuf_[i][curni];
+				}
+			}
+		}
+	}
+	#endif
 }
