@@ -102,8 +102,9 @@ namespace thread
 			if (!readIntrCount) {	// Read data
 				// UNDONE:: ここにパターン読み込み処理
 				// tempoはパターンで読み込む
+				// 下の設定だとrowsize=6で16分音符
 				int bpm = 150;
-				readIntrCount = rate * 60 / bpm;
+				readIntrCount = ((rate * 5) >> 2) / bpm;
 			}
 
 			count = (requiredCount > readIntrCount) ? readIntrCount : requiredCount;
