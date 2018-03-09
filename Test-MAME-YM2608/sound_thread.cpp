@@ -83,7 +83,7 @@ namespace thread
 		size_t count;
 		while (requiredCount) {
 			if (!readIntrCount) {	// Read data
-				// UNDONE:: ここにパターン読み込み処理
+				// UNDONE: ここにパターン読み込み処理
 				// tempoはパターンで読み込む
 				// 下の設定だとrowsize=6で16分音符
 				int bpm = 120;

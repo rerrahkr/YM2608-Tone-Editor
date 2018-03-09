@@ -134,11 +134,14 @@ namespace chip
 		}
 	}
 
-	void OPNA::funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio)
+	void OPNA::funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio)
 	{
-		if (vector.size()) vector.clear();
+		if (table.size()) table.clear();
+		size_t offsetx2 = SINC_OFFSET_ << 1;
+		table.resize(maxSamples * offsetx2);
 
 		for (size_t j = 0; j < maxSamples; ++j) {
+			size_t seg = j * offsetx2;
 			float rcurn = j * rateRatio;
 			int curn = static_cast<int>(rcurn);
 			int k = curn - SINC_OFFSET_;
@@ -146,7 +149,7 @@ namespace chip
 			int end = curn + SINC_OFFSET_;
 			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 			for (; k < end; ++k) {
-				vector.push_back(sinc(F_PI_ * (rcurn - k)));
+				table[seg + SINC_OFFSET_ + (k - curn)] = sinc(F_PI_ * (rcurn - k));
 			}
 		}
 	}
@@ -157,7 +160,7 @@ namespace chip
 		return rate_;
 	}
 
-	// UNDONE: ‰¹—Ê‚ÌÚ×’²®Œ»ÝFM*6/PSG*3=3.1...
+	// TODO: Volume settings
 	void OPNA::setVolume(float dBFM, float dBPSG)
 	{
 		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
@@ -212,11 +215,12 @@ namespace chip
 	}
 
 	#ifdef SINC_INTERPOLATION
-	void OPNA::sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& vector, float rateRatio)
+	void OPNA::sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio)
 	{
+		size_t offsetx2 = SINC_OFFSET_ << 1;
 		for (size_t i = 0; i < 2; ++i) {
-			int vecIndex = 0;
 			for (size_t j = 0; j < nSamples; ++j) {
+				size_t seg = j * offsetx2;
 				int curn = static_cast<int>(j * rateRatio);
 				int k = curn - SINC_OFFSET_;
 				if (k < 0) k = 0;
@@ -224,8 +228,7 @@ namespace chip
 				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 				sample samp = 0;
 				for (; k < end; ++k) {
-					samp += static_cast<sample>(tmpBuf_[i][k] * vector[vecIndex]);
-					++vecIndex;
+					samp += static_cast<sample>(tmpBuf_[i][k] * table[seg + SINC_OFFSET_ + (k - curn)]);
 				}
 				dest[i][j] = samp;
 			}
