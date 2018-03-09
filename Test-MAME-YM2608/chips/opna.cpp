@@ -136,7 +136,6 @@ namespace chip
 
 	void OPNA::funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio)
 	{
-		if (table.size()) table.clear();
 		size_t offsetx2 = SINC_OFFSET_ << 1;
 		table.resize(maxSamples * offsetx2);
 
