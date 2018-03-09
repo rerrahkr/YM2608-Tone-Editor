@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include "chips/opna.hpp"
 
@@ -11,8 +12,8 @@ namespace thread
 	{
 	public:
 		// bufferTime: miliseconds
-		explicit SoundThread(chip::OPNA& opna, size_t bufferTime);
-		~SoundThread() noexcept;
+		explicit SoundThread(chip::OPNA& chip, size_t bufferTime);
+		~SoundThread();
 
 		void stopSound();
 		void restartSound();

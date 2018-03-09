@@ -1,13 +1,10 @@
 #include "sound_thread.hpp"
-#include <memory>
-#include <condition_variable>
-#include <mutex>
 #include "SDL.h"
 
 namespace thread
 {
-	SoundThread::SoundThread(chip::OPNA& opna, size_t bufferTime)
-		: chip_(opna),
+	SoundThread::SoundThread(chip::OPNA& chip, size_t bufferTime)
+		: chip_(chip),
 		bufferTime_(bufferTime),
 		readIntrCount_(0),
 		shouldReset_(false),
@@ -16,7 +13,7 @@ namespace thread
 	{
 	}
 
-	SoundThread::~SoundThread() noexcept
+	SoundThread::~SoundThread()
 	{
 		shouldContinue_.store(false);
 
@@ -40,7 +37,6 @@ namespace thread
 		if (SDL_InitSubSystem(SDL_INIT_AUDIO)) return;
 
 		size_t nSamples = chip_.getRate() * bufferTime_ / 1000;
-		std::unique_ptr<int16[]> buffer = std::make_unique<int16[]>(nSamples << 1);
 
 		SDL_AudioSpec desired, obtained;
 		desired.freq = chip_.getRate();
