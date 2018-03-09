@@ -14,7 +14,7 @@ namespace chip
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
 		OPNA(uint32 clock, uint32 rate, size_t maxTime);
-		~OPNA() noexcept;
+		~OPNA();
 		void reset();
 		void setRegister(uint32 offset, uint32 value);
 		uint32 getRegister(uint32 offset) const;

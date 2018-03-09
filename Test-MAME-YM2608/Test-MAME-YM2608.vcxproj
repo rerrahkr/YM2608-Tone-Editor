@@ -132,7 +132,6 @@
     <ClInclude Include="chips\mame\ymdeltat.h" />
     <ClInclude Include="chips\opna.hpp" />
     <ClInclude Include="common.hpp" />
-    <ClInclude Include="singleton.hpp" />
     <ClInclude Include="sound_thread.hpp" />
     <ClInclude Include="types.h" />
   </ItemGroup>
