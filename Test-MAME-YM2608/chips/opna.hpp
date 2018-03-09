@@ -45,8 +45,8 @@ namespace chip
 		void setRate(uint32 rate);
 		#ifdef SINC_INTERPOLATION
 		void initSincTables(size_t maxTime);
-		void funcInitSincTables(std::vector<float>& vector, size_t maxSamples, size_t intrSize, float rateRatio);
-		void sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& map, float rateRatio);
+		void funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio);
+		void sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
 		#else
 		void linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
 		#endif
