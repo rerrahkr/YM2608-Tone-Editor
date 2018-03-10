@@ -120,7 +120,7 @@
     <ClCompile Include="chips\mame\fm.c" />
     <ClCompile Include="chips\mame\ymdeltat.c" />
     <ClCompile Include="chips\opna.cpp" />
-    <ClCompile Include="sound_thread.cpp" />
+    <ClCompile Include="audio_stream.cpp" />
     <ClCompile Include="test_mame_ym2608.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -132,7 +132,7 @@
     <ClInclude Include="chips\mame\ymdeltat.h" />
     <ClInclude Include="chips\opna.hpp" />
     <ClInclude Include="common.hpp" />
-    <ClInclude Include="sound_thread.hpp" />
+    <ClInclude Include="audio_stream.hpp" />
     <ClInclude Include="types.h" />
   </ItemGroup>
   <ItemGroup>

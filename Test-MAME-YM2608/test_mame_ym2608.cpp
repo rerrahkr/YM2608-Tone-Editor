@@ -8,7 +8,7 @@
 
 #include "types.h"
 #include "chips/opna.hpp"
-#include "sound_thread.hpp"
+#include "audio_stream.hpp"
 
 
 //void Out(int16* buf, size_t len, int rate);
@@ -123,7 +123,8 @@ int main(int argc, char* argv[])
 			SDL_UpdateWindowSurface(window);
 		}
 
-		thread::SoundThread at(chip, bufferTime);
+		AudioStream audio(chip, bufferTime);
+		audio.start();
 
 		int octaveFM = 3;
 		int octavePSG = 3;
@@ -173,9 +174,10 @@ int main(int argc, char* argv[])
 					case SDLK_RIGHT:	if (octavePSG < 6)	++octavePSG;	break;
 					case SDLK_LEFT:		if (octavePSG > 1)	--octavePSG;	break;
 					case SDLK_RETURN:	// Reset sound
-						at.stopSound();
+						audio.stop();
+						audio.reset();
 						chip.reset();
-						at.restartSound();
+						audio.start();
 
 						chip.setRegister(0x29, 0x80);	// Init interrupt
 						InitPan(chip);
