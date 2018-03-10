@@ -30,9 +30,6 @@
     <ClCompile Include="test_mame_ym2608.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="sound_thread.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="chips\opna.cpp">
       <Filter>Chips</Filter>
     </ClCompile>
@@ -48,11 +45,11 @@
     <ClCompile Include="chips\mame\emu2149.c">
       <Filter>Chips\MAME\PSG</Filter>
     </ClCompile>
+    <ClCompile Include="audio_stream.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sound_thread.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="types.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -78,6 +75,9 @@
       <Filter>Chips\MAME\PSG</Filter>
     </ClInclude>
     <ClInclude Include="common.hpp">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_stream.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
