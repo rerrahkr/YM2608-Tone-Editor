@@ -9,9 +9,13 @@ MainWindow::MainWindow(QWidget *parent) :
     chip_(3993600 * 2, 0, 40),
     audio_(chip_, 40),
     octaveFM_(3),
-    octavePSG_(3)
+    octavePSG_(3),
+    pressedKeyNameFM_("FM: "),
+    pressedKeyNamePSG_("PSG: ")
 {
     ui->setupUi(this);
+    ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
+
 
     {
         voice_.name = "detune";
@@ -176,6 +180,10 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
         SetFMTone(1, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetFMKeyOn(1);
         jamKeyOnTableFM_[jamKeyNumber] = true;
+
+        pressedKeyNameFM_ = "FM: " + keyNumberToNameString(jamKeyNumber);
+        pressedKeyNameFM_ += QString::number(octaveFM_ + jamKeyNumber / 12);
+        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
     }
 }
 
@@ -186,6 +194,10 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
         chip_.setRegister(0x08, 0x0f);
         chip_.setRegister(0x07, 0x7e);
         jamKeyOnTablePSG_[jamKeyNumber] = true;
+
+        pressedKeyNamePSG_ = "PSG: " + keyNumberToNameString(jamKeyNumber);
+        pressedKeyNamePSG_ += QString::number(octavePSG_ + jamKeyNumber / 12);
+        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
     }
 }
 
@@ -194,6 +206,9 @@ void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
     if (!isRepeat && jamKeyOnTableFM_[jamKeyNumber]) {
         SetFMKeyOff(1);
         jamKeyOnTableFM_[jamKeyNumber] = false;
+
+        pressedKeyNameFM_ = "FM: ";
+        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
     }
 }
 
@@ -203,6 +218,9 @@ void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
         chip_.setRegister(0x08, 0x00);
         chip_.setRegister(0x07, 0x7f);
         jamKeyOnTablePSG_[jamKeyNumber] = false;
+
+        pressedKeyNamePSG_ = "PSG: ";
+        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
     }
 }
 
@@ -337,4 +355,28 @@ void MainWindow::InitPan()
     chip_.setRegister(0xb4, 0xc0);
     chip_.setRegister(0xb5, 0xc0);
     chip_.setRegister(0xb6, 0xc0);
+}
+
+QString MainWindow::keyNumberToNameString(uint32 jamKeyNumber)
+{
+    switch (jamKeyNumber) {
+    case 0:
+    case 12:    return "C";
+    case 1:
+    case 13:    return "C#";
+    case 2:
+    case 14:    return "D";
+    case 3:
+    case 15:    return "D#";
+    case 4:
+    case 16:    return "E";
+    case 5:     return "F";
+    case 6:     return "F#";
+    case 7:     return "G";
+    case 8:     return "G#";
+    case 9:     return "A";
+    case 10:    return "A#";
+    case 11:    return "B";
+    default:    return "";
+    }
 }
