@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
 #include "types.h"
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
@@ -51,6 +52,8 @@ private:
 
     int octaveFM_, octavePSG_;
     bool jamKeyOnTableFM_[17], jamKeyOnTablePSG_[17];
+    QString pressedKeyNameFM_, pressedKeyNamePSG_;
+
 
     void SetFMVoice(struct Voice voice, int channel);
     void SetFMKeyOn(int channel);
@@ -63,6 +66,8 @@ private:
     void JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat);
     void JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat);
     void JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat);
+
+    QString keyNumberToNameString(uint32 jamKeyNumber);
 
     const uint32 fm_tune_tbl[12] = {
         0x026a,	// C
