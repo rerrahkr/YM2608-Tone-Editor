@@ -35,7 +35,10 @@ SOURCES += \
     chips/mame/fm.c \
     chips/mame/ymdeltat.c \
     audio_stream.cpp \
-    audio_stream_mixier.cpp
+    audio_stream_mixier.cpp \
+    widgets/labeled_slider.cpp \
+    widgets/operator_sliders.cpp \
+    parameter_state.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -49,7 +52,12 @@ HEADERS += \
     common.hpp \
     types.h \
     audio_stream.hpp \
-    audio_stream_mixier.hpp
+    audio_stream_mixier.hpp \
+    widgets/labeled_slider.h \
+    widgets/operator_sliders.h \
+    parameter_state.hpp
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    widgets/labeled_slider.ui \
+    widgets/operator_sliders.ui
