@@ -6,6 +6,7 @@
 #include "types.h"
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
+#include "parameter_state.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -98,6 +99,11 @@ private:
         0x085e,	// A#
         0x07e6,	// B
     };
+
+private slots:
+    void onALChanged(int value);
+    void onFBChanged(int value);
+    void onParameterChanged(int op, const ParameterState& state);
 };
 
 #endif // MAINWINDOW_H
