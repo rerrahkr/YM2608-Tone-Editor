@@ -2,12 +2,11 @@
 #include "ui_mainwindow.h"
 #include <QKeyEvent>
 #include <algorithm>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    chip_(3993600 * 2, 0, 40),
+    chip_(3993600 * 2, 0),
     audio_(chip_, 40),
     octaveFM_(3),
     octavePSG_(3),

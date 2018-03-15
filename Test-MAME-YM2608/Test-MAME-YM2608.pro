@@ -38,7 +38,8 @@ SOURCES += \
     audio_stream_mixier.cpp \
     widgets/labeled_slider.cpp \
     widgets/operator_sliders.cpp \
-    parameter_state.cpp
+    parameter_state.cpp \
+    chips/chip.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -55,7 +56,8 @@ HEADERS += \
     audio_stream_mixier.hpp \
     widgets/labeled_slider.h \
     widgets/operator_sliders.h \
-    parameter_state.hpp
+    parameter_state.hpp \
+    chips/chip.hpp
 
 FORMS += \
         mainwindow.ui \
