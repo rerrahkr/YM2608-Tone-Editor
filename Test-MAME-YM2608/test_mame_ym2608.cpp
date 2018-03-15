@@ -51,7 +51,12 @@ int main(int argc, char* argv[])
 	int clock = 3993600 * 2;
 	int rate = 0;	// Auto mode
 	size_t bufferTime = 40;
+
+	#ifdef SINC_INTERPOLATION
 	chip::OPNA chip(clock, rate, bufferTime);
+	#else
+	chip::OPNA chip(clock, rate);
+	#endif
 
 	Voice voice;
 	#ifndef VOICE

@@ -8,9 +8,7 @@ extern "C"
 	#include "mame/mamedef.h"
 	#include "mame/2608intf.h"
 
-	UINT8 CHIP_SAMPLING_MODE = 0x00;
-	INT32 CHIP_SAMPLE_RATE;
-	stream_sample_t* DUMMYBUF[] = { nullptr, nullptr };
+	extern INT32 CHIP_SAMPLE_RATE;
 
 #ifdef __cplusplus
 }
@@ -28,15 +26,21 @@ namespace chip
 	const int OPNA::SINC_OFFSET_ = 16;
 	#endif
 
+	#ifdef SINC_INTERPOLATION
 	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime)
+	#else
+	OPNA::OPNA(uint32 clock, uint32 rate)
+	#endif
 		: id_(count_++)
 	{
+		// New FM & PSG bufer
 		for (int i = 0; i < 2; ++i) {
 			bufFM_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 			bufPSG_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 		}
-		setRate(rate);
+
+		funcSetRate(rate);
 
 		UINT8 EmuCore = 0;
 		ym2608_set_ay_emu_core(EmuCore);
@@ -45,7 +49,11 @@ namespace chip
 		UINT8 AYFlags = 0;		// none
 		internalRateFM_ = device_start_ym2608(id_, clock, AYDisable, AYFlags, reinterpret_cast<int*>(&internalRatePSG_));
 
-		setRate(rate, maxTime);	// Set rate ratio
+		setRateRatio();
+
+		#ifdef SINC_INTERPOLATION
+		initSincTables(maxTime);
+		#endif
 
 		setVolume(0, 0);
 
@@ -55,7 +63,8 @@ namespace chip
 	OPNA::~OPNA()
 	{
 		device_stop_ym2608(id_);
-
+		
+		// Delete FM & PSG buffer
 		for (int i = 0; i < 2; ++i) {
 			delete[] bufFM_[i];
 			delete[] bufPSG_[i];
@@ -99,23 +108,31 @@ namespace chip
 		return ym2608_read_port_r(id_, 1);
 	}
 
-	void OPNA::setRate(uint32 rate)
-	{
-		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
-	}
-
+	#ifdef SINC_INTERPOLATION
 	void OPNA::setRate(uint32 rate, size_t maxTime)
+	#else
+	void OPNA::setRate(uint32 rate)
+	#endif
 	{
 		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
 
-		setRate(rate);
-
-		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
-		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
+		funcSetRate(rate);
+		setRateRatio();
 
 		#ifdef SINC_INTERPOLATION
 		initSincTables(maxTime);
 		#endif
+	}
+
+	void OPNA::funcSetRate(uint32 rate)
+	{
+		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
+	}
+
+	void OPNA::setRateRatio()
+	{
+		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
+		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
 	}
 
 	#ifdef SINC_INTERPOLATION
@@ -185,9 +202,9 @@ namespace chip
 			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioFM_);
 			ym2608_stream_update(id_, tmpBuf_, intrSize);
 			#ifdef SINC_INTERPOLATION
-			sincInterpolate(bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
+			sincInterpolate(tmpBuf_, bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
 			#else
-			linearInterpolate(bufFM_, nSamples, intrSize, rateRatioFM_);
+			linearInterpolate(tmpBuf_, bufFM_, nSamples, intrSize, rateRatioFM_);
 			#endif
 		}
 
@@ -199,9 +216,9 @@ namespace chip
 			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioPSG_);
 			ym2608_stream_update_ay(id_, tmpBuf_, intrSize);
 			#ifdef SINC_INTERPOLATION
-			sincInterpolate(bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
+			sincInterpolate(tmpBuf_, bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
 			#else
-			linearInterpolate(bufPSG_, nSamples, intrSize, rateRatioPSG_);
+			linearInterpolate(tmpBuf_, bufPSG_, nSamples, intrSize, rateRatioPSG_);
 			#endif
 		}
 
@@ -214,7 +231,7 @@ namespace chip
 	}
 
 	#ifdef SINC_INTERPOLATION
-	void OPNA::sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio)
+	void OPNA::sincInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio)
 	{
 		size_t offsetx2 = SINC_OFFSET_ << 1;
 		for (size_t i = 0; i < 2; ++i) {
@@ -227,14 +244,14 @@ namespace chip
 				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
 				sample samp = 0;
 				for (; k < end; ++k) {
-					samp += static_cast<sample>(tmpBuf_[i][k] * table[seg + SINC_OFFSET_ + (k - curn)]);
+					samp += static_cast<sample>(src[i][k] * table[seg + SINC_OFFSET_ + (k - curn)]);
 				}
 				dest[i][j] = samp;
 			}
 		}
 	}
 	#else
-	void OPNA::linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio)
+	void OPNA::linearInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, float rateRatio)
 	{
 		for (size_t i = 0; i < 2; ++i) {
 			for (size_t j = 0; j < nSamples; ++j) {
@@ -242,10 +259,10 @@ namespace chip
 				int curni = static_cast<int>(curnf);
 				float sub = curnf - curni;
 				if (sub) {	// Linear interpolation
-					dest[i][j] = static_cast<sample>(tmpBuf_[i][curni] + (tmpBuf_[i][curni + 1] - tmpBuf_[i][curni]) * sub);
+					dest[i][j] = static_cast<sample>(src[i][curni] + (src[i][curni + 1] - src[i][curni]) * sub);
 				}
 				else /* if (sub == 0) */ {
-					dest[i][j] = tmpBuf_[i][curni];
+					dest[i][j] = src[i][curni];
 				}
 			}
 		}

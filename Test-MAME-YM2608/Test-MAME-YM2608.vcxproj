@@ -115,6 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="chips\chip.cpp" />
     <ClCompile Include="chips\mame\2608intf.c" />
     <ClCompile Include="chips\mame\emu2149.c" />
     <ClCompile Include="chips\mame\fm.c" />
@@ -124,6 +125,7 @@
     <ClCompile Include="test_mame_ym2608.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="chips\chip.hpp" />
     <ClInclude Include="chips\mame\2608intf.h" />
     <ClInclude Include="chips\mame\emu2149.h" />
     <ClInclude Include="chips\mame\emutypes.h" />

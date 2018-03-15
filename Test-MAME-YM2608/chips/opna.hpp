@@ -5,21 +5,33 @@
 #include <vector>
 #include "../common.hpp"
 #include "../types.h"
+//#include "chip.hpp"
 
 namespace chip
 {
-	class OPNA
+	class OPNA //: public Chip
 	{
 	public:
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
+		#ifdef SINC_INTERPOLATION
 		OPNA(uint32 clock, uint32 rate, size_t maxTime);
+		#else
+		OPNA(uint32 clock, uint32 rate);
+		#endif
 		~OPNA();
+
 		void reset();
 		void setRegister(uint32 offset, uint32 value);
 		uint32 getRegister(uint32 offset) const;
+
+		#ifdef SINC_INTERPOLATION
 		void setRate(uint32 rate, size_t maxTime);
+		#else
+		void setRate(uint32 rate);
+		#endif
 		uint32 getRate() const;
+		
 		void setVolume(float dBFM, float dBPSG);	// NOT work
 		void mix(int16* stream, size_t nSamples);
 
@@ -42,13 +54,15 @@ namespace chip
 		#endif
 		std::mutex mutex_;
 
-		void setRate(uint32 rate);
+		void funcSetRate(uint32 rate);
+		void setRateRatio();
+
 		#ifdef SINC_INTERPOLATION
 		void initSincTables(size_t maxTime);
 		void funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio);
-		void sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
+		void sincInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
 		#else
-		void linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
+		void linearInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
 		#endif
 
 		inline size_t calculateInternalSampleSize(size_t nSamples, float rateRatio)
