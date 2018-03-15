@@ -5,7 +5,7 @@ extern "C"
 {
 #endif //  __cplusplus
 
-#include "mame/mamedef.h"
+	#include "mame/mamedef.h"
 
 	UINT8 CHIP_SAMPLING_MODE = 0x00;
 	INT32 CHIP_SAMPLE_RATE;
@@ -24,11 +24,10 @@ namespace chip
 	#endif
 
 	#ifdef SINC_INTERPOLATION
-	Chip::Chip(uint32 clock, uint32 rate, size_t maxTime) :
+	Chip::Chip(uint32 clock, uint32 rate, size_t maxTime)
 	#else
-	Chip::Chip(uint32 clock, uint32 rate) :
+	Chip::Chip(uint32 clock, uint32 rate)
 	#endif
-		id_(0)
 	{
 		for (int i = 0; i < 2; ++i) {
 			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];

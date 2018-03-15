@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../common.hpp"
 #include <mutex>
-#include <vector>
 #ifdef SINC_INTERPOLATION
+#include <vector>
 #include <cmath>
 #endif
+#include "../common.hpp"
 #include "../types.h"
 
 namespace chip
@@ -37,8 +37,8 @@ namespace chip
 		virtual void mix(int16* stream, size_t nSamples) = 0;
 
 	protected:
-		const int id_;
 		std::mutex mutex_;
+
 		int rate_;
 		static const size_t SMPL_BUFSIZE_;
 		sample *tmpBuf_[2];		// [0]: left, [1]: right
@@ -59,7 +59,6 @@ namespace chip
 		}
 
 	private:
-
 		#ifdef SINC_INTERPOLATION
 		static const float F_PI_;
 		static const int SINC_OFFSET_;
