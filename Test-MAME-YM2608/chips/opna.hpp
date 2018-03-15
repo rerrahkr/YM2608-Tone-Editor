@@ -1,68 +1,56 @@
 #pragma once
 
-#include <cmath>
-#include <mutex>
-#include <vector>
-#include "../common.hpp"
-#include "../types.h"
+#include "chip.hpp"
 
 namespace chip
 {
-	class OPNA
+	class OPNA : public Chip
 	{
 	public:
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
+		#ifdef SINC_INTERPOLATION
 		OPNA(uint32 clock, uint32 rate, size_t maxTime);
+		#else
+		OPNA(uint32 clock, uint32 rate);
+		#endif
 		~OPNA();
-		void reset();
-		void setRegister(uint32 offset, uint32 value);
-		uint32 getRegister(uint32 offset) const;
-		void setRate(uint32 rate, size_t maxTime);
-		uint32 getRate() const;
+
+		void reset() override;
+		void setRegister(uint32 offset, uint32 value) override;
+		uint32 getRegister(uint32 offset) const override;
+
+		#ifdef SINC_INTERPOLATION
+		void setRate(uint32 rate, size_t maxTime) override;
+		#else
+		void setRate(uint32 rate) override;
+		#endif
+		
 		void setVolume(float dBFM, float dBPSG);	// NOT work
-		void mix(int16* stream, size_t nSamples);
+		void mix(int16* stream, size_t nSamples) override;
 
 	private:
 		const int id_;
 		static size_t count_;
-		static const size_t SMPL_BUFSIZE_;
+
+		int internalRateFM_, internalRatePSG_;
+		float rateRatioFM_, rateRatioPSG_;
+		sample *bufFM_[2], *bufPSG_[2];		// [0]: left, [1]: right
+
 		/*float dBFM_, dBPSG_;*/
 		float volumeRatioFM_, volumeRatioPSG_;
 		//static const int MAX_AMP_;
 		//static const int DEF_AMP_FM_, DEF_AMP_PSG_;
-		sample *bufFM_[2], *bufPSG_[2], *tmpBuf_[2];		// [0]: left, [1]: right
-		int internalRateFM_, internalRatePSG_;
-		int rate_;
-		float rateRatioFM_, rateRatioPSG_;
+
 		#ifdef SINC_INTERPOLATION
 		std::vector<float> sincTableFM_, sincTablePSG_;
-		static const float F_PI_;
-		static const int SINC_OFFSET_;
-		#endif
-		std::mutex mutex_;
-
-		void setRate(uint32 rate);
-		#ifdef SINC_INTERPOLATION
-		void initSincTables(size_t maxTime);
-		void funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio);
-		void sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
-		#else
-		void linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
 		#endif
 
-		inline size_t calculateInternalSampleSize(size_t nSamples, float rateRatio)
-		{
-			float f = nSamples * rateRatio;
-			size_t i = static_cast<size_t>(f);
-			return ((f - i) ? (i + 1) : i);
-		}
+		void funcSetRate(uint32 rate);
+		void setRateRatio();
 
 		#ifdef SINC_INTERPOLATION
-		static inline float sinc(float x)
-		{
-			return ((!x) ? 1.0f : (std::sin(x) / x));
-		}
+		void initSincTables(size_t maxTime) override;
 		#endif
 	};
 }

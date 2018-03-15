@@ -5,12 +5,9 @@ extern "C"
 {
 #endif //  __cplusplus
 
-	#include "mame/mamedef.h"
 	#include "mame/2608intf.h"
 
-	UINT8 CHIP_SAMPLING_MODE = 0x00;
-	INT32 CHIP_SAMPLE_RATE;
-	stream_sample_t* DUMMYBUF[] = { nullptr, nullptr };
+	extern INT32 CHIP_SAMPLE_RATE;
 
 #ifdef __cplusplus
 }
@@ -19,24 +16,27 @@ extern "C"
 namespace chip
 {
 	size_t OPNA::count_ = 0;
-	const size_t OPNA::SMPL_BUFSIZE_ = 0x10000;
+	
 	//const int OPNA::MAX_AMP_ = 32767;	// half-max of int16
 	//const int OPNA::DEF_AMP_FM_ = 11722;
 	//const int OPNA::DEF_AMP_PSG_ = 7250;
-	#ifdef SINC_INTERPOLATION
-	const float OPNA::F_PI_ = 3.14159265f;
-	const int OPNA::SINC_OFFSET_ = 16;
-	#endif
 
-	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime)
-		: id_(count_++)
+	#ifdef SINC_INTERPOLATION
+	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime) :
+		Chip(clock, rate, maxTime),
+	#else
+	OPNA::OPNA(uint32 clock, uint32 rate) :
+		Chip(clock, rate),
+	#endif
+		id_(count_++)
 	{
+		// New FM & PSG bufer
 		for (int i = 0; i < 2; ++i) {
 			bufFM_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 			bufPSG_[i] = new stream_sample_t[SMPL_BUFSIZE_];
-			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];
 		}
-		setRate(rate);
+
+		funcSetRate(rate);
 
 		UINT8 EmuCore = 0;
 		ym2608_set_ay_emu_core(EmuCore);
@@ -45,7 +45,11 @@ namespace chip
 		UINT8 AYFlags = 0;		// none
 		internalRateFM_ = device_start_ym2608(id_, clock, AYDisable, AYFlags, reinterpret_cast<int*>(&internalRatePSG_));
 
-		setRate(rate, maxTime);	// Set rate ratio
+		setRateRatio();
+
+		#ifdef SINC_INTERPOLATION
+		initSincTables(maxTime);
+		#endif
 
 		setVolume(0, 0);
 
@@ -55,11 +59,11 @@ namespace chip
 	OPNA::~OPNA()
 	{
 		device_stop_ym2608(id_);
-
+		
+		// Delete FM & PSG buffer
 		for (int i = 0; i < 2; ++i) {
 			delete[] bufFM_[i];
 			delete[] bufPSG_[i];
-			delete[] tmpBuf_[i];
 		}
 
 		--count_;
@@ -99,23 +103,31 @@ namespace chip
 		return ym2608_read_port_r(id_, 1);
 	}
 
-	void OPNA::setRate(uint32 rate)
-	{
-		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
-	}
-
+	#ifdef SINC_INTERPOLATION
 	void OPNA::setRate(uint32 rate, size_t maxTime)
+	#else
+	void OPNA::setRate(uint32 rate)
+	#endif
 	{
 		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
 
-		setRate(rate);
-
-		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
-		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
+		funcSetRate(rate);
+		setRateRatio();
 
 		#ifdef SINC_INTERPOLATION
 		initSincTables(maxTime);
 		#endif
+	}
+
+	void OPNA::funcSetRate(uint32 rate)
+	{
+		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
+	}
+
+	void OPNA::setRateRatio()
+	{
+		rateRatioFM_ = static_cast<float>(internalRateFM_) / rate_;
+		rateRatioPSG_ = static_cast<float>(internalRatePSG_) / rate_;
 	}
 
 	#ifdef SINC_INTERPOLATION
@@ -133,31 +145,7 @@ namespace chip
 			funcInitSincTables(sincTablePSG_, maxSamples, intrSize, rateRatioPSG_);
 		}
 	}
-
-	void OPNA::funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio)
-	{
-		size_t offsetx2 = SINC_OFFSET_ << 1;
-		table.resize(maxSamples * offsetx2);
-
-		for (size_t j = 0; j < maxSamples; ++j) {
-			size_t seg = j * offsetx2;
-			float rcurn = j * rateRatio;
-			int curn = static_cast<int>(rcurn);
-			int k = curn - SINC_OFFSET_;
-			if (k < 0) k = 0;
-			int end = curn + SINC_OFFSET_;
-			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
-			for (; k < end; ++k) {
-				table[seg + SINC_OFFSET_ + (k - curn)] = sinc(F_PI_ * (rcurn - k));
-			}
-		}
-	}
 	#endif
-
-	uint32 OPNA::getRate() const
-	{
-		return rate_;
-	}
 
 	// TODO: Volume settings
 	void OPNA::setVolume(float dBFM, float dBPSG)
@@ -185,9 +173,9 @@ namespace chip
 			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioFM_);
 			ym2608_stream_update(id_, tmpBuf_, intrSize);
 			#ifdef SINC_INTERPOLATION
-			sincInterpolate(bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
+			sincInterpolate(tmpBuf_, bufFM_, nSamples, intrSize, sincTableFM_, rateRatioFM_);
 			#else
-			linearInterpolate(bufFM_, nSamples, intrSize, rateRatioFM_);
+            linearInterpolate(tmpBuf_, bufFM_, nSamples, rateRatioFM_);
 			#endif
 		}
 
@@ -199,9 +187,9 @@ namespace chip
 			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatioPSG_);
 			ym2608_stream_update_ay(id_, tmpBuf_, intrSize);
 			#ifdef SINC_INTERPOLATION
-			sincInterpolate(bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
+			sincInterpolate(tmpBuf_, bufPSG_, nSamples, intrSize, sincTablePSG_, rateRatioPSG_);
 			#else
-			linearInterpolate(bufPSG_, nSamples, intrSize, rateRatioPSG_);
+            linearInterpolate(tmpBuf_, bufPSG_, nSamples, rateRatioPSG_);
 			#endif
 		}
 
@@ -212,43 +200,4 @@ namespace chip
 			*stream++ = static_cast<int16>(volumeRatioFM_ * bufFM_[1][i] + volumeRatioPSG_ * bufPSG_[1][i]);
 		}
 	}
-
-	#ifdef SINC_INTERPOLATION
-	void OPNA::sincInterpolate(sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio)
-	{
-		size_t offsetx2 = SINC_OFFSET_ << 1;
-		for (size_t i = 0; i < 2; ++i) {
-			for (size_t j = 0; j < nSamples; ++j) {
-				size_t seg = j * offsetx2;
-				int curn = static_cast<int>(j * rateRatio);
-				int k = curn - SINC_OFFSET_;
-				if (k < 0) k = 0;
-				int end = curn + SINC_OFFSET_;
-				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
-				sample samp = 0;
-				for (; k < end; ++k) {
-					samp += static_cast<sample>(tmpBuf_[i][k] * table[seg + SINC_OFFSET_ + (k - curn)]);
-				}
-				dest[i][j] = samp;
-			}
-		}
-	}
-	#else
-	void OPNA::linearInterpolate(sample** dest, size_t nSamples, size_t intrSize, float rateRatio)
-	{
-		for (size_t i = 0; i < 2; ++i) {
-			for (size_t j = 0; j < nSamples; ++j) {
-				float curnf = j * rateRatio;
-				int curni = static_cast<int>(curnf);
-				float sub = curnf - curni;
-				if (sub) {	// Linear interpolation
-					dest[i][j] = static_cast<sample>(tmpBuf_[i][curni] + (tmpBuf_[i][curni + 1] - tmpBuf_[i][curni]) * sub);
-				}
-				else /* if (sub == 0) */ {
-					dest[i][j] = tmpBuf_[i][curni];
-				}
-			}
-		}
-	}
-	#endif
 }
