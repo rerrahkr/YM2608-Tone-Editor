@@ -11,7 +11,7 @@ class AudioStream
 {
 public:
     // duration: miliseconds
-    AudioStream(chip::OPNA& chip, uint32 duration);
+    AudioStream(chip::OPNA& chip, uint32 rate, uint32 duration);
 	~AudioStream();
 
     void setRate(uint32 rate);

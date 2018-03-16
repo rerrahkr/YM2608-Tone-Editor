@@ -1,12 +1,15 @@
 #include "audio_stream_mixier.hpp"
 #include <algorithm>
 
-AudioStreamMixier::AudioStreamMixier(chip::OPNA& chip, size_t duration, QObject* parent) :
+AudioStreamMixier::AudioStreamMixier(chip::OPNA& chip, uint32 rate, uint32 duration, QObject* parent) :
     QIODevice(parent),
     chip_(chip),
+    rate_(rate),
     duration_(duration),
-    bufferSize_(chip_.getRate() * duration_ / 1000 * 2),
-    readIntrCount_(0)
+    bufferSampleSize_(rate * duration / 1000),
+    tickIntrCountNumer_((rate * 5) >> 2),
+    tickIntrCount_(0),
+    isFirstRead_(true)
 {
 }
 
@@ -17,6 +20,7 @@ AudioStreamMixier::~AudioStreamMixier()
 
 void AudioStreamMixier::start()
 {
+    isFirstRead_ = true;
     open(QIODevice::ReadOnly);
 }
 
@@ -30,6 +34,24 @@ bool AudioStreamMixier::hasRun()
     return isOpen();
 }
 
+void AudioStreamMixier::setRate(uint32 rate)
+{
+    rate_ = rate;
+    setBufferSampleSize(rate, duration_);
+    tickIntrCountNumer_ = (rate * 5) >> 2;
+}
+
+void AudioStreamMixier::setDuration(uint32 duration)
+{
+    duration_ = duration;
+    setBufferSampleSize(rate_, duration);
+}
+
+void  AudioStreamMixier::setBufferSampleSize(uint32 rate, uint32 duration)
+{
+    bufferSampleSize_ = rate * duration / 1000;
+}
+
 qint64 AudioStreamMixier::readData(char* data, qint64 maxlen)
 {
     qint64 generatedCount;
@@ -37,25 +59,24 @@ qint64 AudioStreamMixier::readData(char* data, qint64 maxlen)
         generatedCount = maxlen >> 2;
         isFirstRead_ = false;
     }
-    else {  // Fill appropriate counts
-        generatedCount = std::min((static_cast<qint64>(bufferSize_ >> 1)), (maxlen >> 2));
+    else {  // Fill appropriate sample counts
+        generatedCount = std::min(bufferSampleSize_, (maxlen >> 2));
     }
     size_t requiredCount = static_cast<size_t>(generatedCount);
-    size_t readIntrCountNumer = (chip_.getRate() * 5) >> 2;
     int16* destPtr = reinterpret_cast<int16*>(data);
 
     size_t count;
     while (requiredCount) {
-        if (!readIntrCount_) {	// Read data
+        if (!tickIntrCount_) {	// Read data
             // Read pattern data in here
-            // 1 row = 6 counts = 1/16 notes
+            // 1 step = 6 ticks = 1/16 note
             int bpm = 120;
-            readIntrCount_ = readIntrCountNumer / bpm;
+            tickIntrCount_ = tickIntrCountNumer_ / bpm;
         }
 
-        count = std::min(readIntrCount_, requiredCount);
+        count = std::min(tickIntrCount_, requiredCount);
         requiredCount -= count;
-        readIntrCount_ -= count;
+        tickIntrCount_ -= count;
 
         chip_.mix(destPtr, count);
 
