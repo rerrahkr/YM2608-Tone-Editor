@@ -35,6 +35,30 @@
    </item>
    <item row="0" column="0" alignment="Qt::AlignHCenter">
     <widget class="QSlider" name="verticalSlider">
+     <property name="styleSheet">
+      <string notr="true">QSlider::groove:vertical {
+	width: 4px;
+	background-color: #fefefe;
+	border: 1px solid #c4c4c4;
+	margin: 5px 0;
+	border-radius: 2px;
+}
+
+QSlider::handle:vertical {
+	height: 12px;
+	/*background-color: #3498db;*/
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3498db, stop:1 #8bb7d9);
+	border: 1px solid #2980b9;
+	margin: -6px -5px;
+	border-radius: 7px;
+}
+
+QSlider::add-page:vertical {
+	margin: 0 1px 6px;
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #edf9ff, stop:1 #c2e0f4);
+	border-radius: 2px;
+}</string>
+     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
