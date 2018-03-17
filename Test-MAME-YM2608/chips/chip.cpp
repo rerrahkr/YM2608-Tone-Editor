@@ -17,6 +17,8 @@ extern "C"
 
 namespace chip
 {
+	//const int Chip::MAX_AMP_ = 32767;	// half-max of int16
+
 	const size_t Chip::SMPL_BUFSIZE_ = 0x10000;
 	#ifdef SINC_INTERPOLATION
 	const float Chip::F_PI_ = 3.14159265f;

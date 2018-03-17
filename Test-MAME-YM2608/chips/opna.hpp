@@ -33,18 +33,7 @@ namespace chip
 		const int id_;
 		static size_t count_;
 
-		int internalRateFM_, internalRatePSG_;
-		float rateRatioFM_, rateRatioPSG_;
-		sample *bufFM_[2], *bufPSG_[2];		// [0]: left, [1]: right
-
-		/*float dBFM_, dBPSG_;*/
-		float volumeRatioFM_, volumeRatioPSG_;
-		//static const int MAX_AMP_;
-		//static const int DEF_AMP_FM_, DEF_AMP_PSG_;
-
-		#ifdef SINC_INTERPOLATION
-		std::vector<float> sincTableFM_, sincTablePSG_;
-		#endif
+		/*static const int DEF_AMP_FM_, DEF_AMP_PSG_;*/
 
 		void funcSetRate(uint32 rate);
 		void setRateRatio();
@@ -52,5 +41,11 @@ namespace chip
 		#ifdef SINC_INTERPOLATION
 		void initSincTables(size_t maxTime) override;
 		#endif
+
+		enum Module : int
+		{
+			FM  = 0,
+			PSG = 1
+		};
 	};
 }

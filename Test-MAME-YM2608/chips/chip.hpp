@@ -1,11 +1,11 @@
 #pragma once
 
-#include <mutex>
+#include "../common.hpp"
 #ifdef SINC_INTERPOLATION
 #include <vector>
 #include <cmath>
 #endif
-#include "../common.hpp"
+#include <mutex>
 #include "../types.h"
 
 namespace chip
@@ -40,16 +40,32 @@ namespace chip
 		std::mutex mutex_;
 
 		int rate_;
+		int internalRate_[2];
+		float rateRatio_[2];
+
 		static const size_t SMPL_BUFSIZE_;
-		sample *tmpBuf_[2];		// [0]: left, [1]: right
+		sample* buffer_[2][2];
+		sample* tmpBuf_[2];
+
+		/*float dB_[2];*/
+		float volumeRatio_[2];
+		/*static const int MAX_AMP_;*/
 
 		#ifdef SINC_INTERPOLATION
+		std::vector<float> sincTable_[2];
+
 		virtual void initSincTables(size_t maxTime) = 0;
 		void funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio);
 		void sincInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
 		#else
 		void linearInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
 		#endif
+
+		enum Stereo : int
+		{
+			LEFT = 0,
+			RIGHT = 1
+		};
 
 		inline size_t calculateInternalSampleSize(size_t nSamples, float rateRatio)
 		{
