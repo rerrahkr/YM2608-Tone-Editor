@@ -16,9 +16,9 @@ namespace chip
 		// [rate]
 		// 0 = auto-set mode (set internal chip rate)
 		#ifdef SINC_INTERPOLATION
-		Chip(uint32 clock, uint32 rate, size_t maxTime);
+		Chip(uint32 id, uint32 clock, uint32 rate, uint32 autoRate, size_t maxTime);
 		#else
-		Chip(uint32 clock, uint32 rate);
+		Chip(uint32 id, uint32 clock, uint32 rate, uint32 autoRate);
 		#endif
 		virtual ~Chip();
 
@@ -27,9 +27,9 @@ namespace chip
 		virtual uint32 getRegister(uint32 offset) const = 0;
 
 		#ifdef SINC_INTERPOLATION
-		virtual void setRate(uint32 rate, size_t maxTime) = 0;
+		virtual void setRate(uint32 rate, size_t maxTime);
 		#else		
-		virtual void setRate(uint32 rate) = 0;
+		virtual void setRate(uint32 rate);
 		#endif
 		uint32 getRate() const;
 		
@@ -37,13 +37,14 @@ namespace chip
 		virtual void mix(int16* stream, size_t nSamples) = 0;
 
 	protected:
+		const int id_;
 		std::mutex mutex_;
 
 		int rate_;
+		const int autoRate_;
 		int internalRate_[2];
 		float rateRatio_[2];
 
-		static const size_t SMPL_BUFSIZE_;
 		sample* buffer_[2][2];
 		sample* tmpBuf_[2];
 
@@ -53,9 +54,13 @@ namespace chip
 
 		#ifdef SINC_INTERPOLATION
 		std::vector<float> sincTable_[2];
+		#endif
 
-		virtual void initSincTables(size_t maxTime) = 0;
-		void funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio);
+		void funcSetRate(uint32 rate);
+		void setRateRatio();
+
+		#ifdef SINC_INTERPOLATION
+		void initSincTables(size_t maxTime);
 		void sincInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio);
 		#else
 		void linearInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, float rateRatio);
@@ -75,6 +80,8 @@ namespace chip
 		}
 
 	private:
+		static const size_t SMPL_BUFSIZE_;
+
 		#ifdef SINC_INTERPOLATION
 		static const float F_PI_;
 		static const int SINC_OFFSET_;

@@ -22,26 +22,20 @@ namespace chip
 
 	#ifdef SINC_INTERPOLATION
 	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime) :
-		Chip(clock, rate, maxTime),
+		Chip(count_++, clock, rate, 110933, maxTime)
 	#else
 	OPNA::OPNA(uint32 clock, uint32 rate) :
-		Chip(clock, rate),
+		Chip(count_++, clock, rate, 110933)
 	#endif
-		id_(count_++)
+	// autoRate = 110933: PSG internal rate
 	{
-		// New FM & PSG bufer
-		for (int pan = Stereo::LEFT; pan <= Stereo::RIGHT; ++pan) {
-			buffer_[FM][pan] = new stream_sample_t[SMPL_BUFSIZE_];
-			buffer_[PSG][pan] = new stream_sample_t[SMPL_BUFSIZE_];
-		}
-
 		funcSetRate(rate);
 
 		UINT8 EmuCore = 0;
 		ym2608_set_ay_emu_core(EmuCore);
 
-		UINT8 AYDisable = 0;	// enable
-		UINT8 AYFlags = 0;		// none
+		UINT8 AYDisable = 0;	// Enable
+		UINT8 AYFlags = 0;		// None
 		internalRate_[FM] = device_start_ym2608(id_, clock, AYDisable, AYFlags, reinterpret_cast<int*>(&internalRate_[PSG]));
 
 		setRateRatio();
@@ -58,26 +52,20 @@ namespace chip
 	OPNA::~OPNA()
 	{
 		device_stop_ym2608(id_);
-		
-		// Delete FM & PSG buffer
-		for (int pan = Stereo::LEFT; pan <= Stereo::RIGHT; ++pan) {
-			delete[] buffer_[FM][pan];
-			delete[] buffer_[PSG][pan];
-		}
 
 		--count_;
 	}
 
 	void OPNA::reset()
 	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
+		std::lock_guard<std::mutex> lg(mutex_);
 
 		device_reset_ym2608(id_);
 	}
 
 	void OPNA::setRegister(uint32 offset, uint32 value)
 	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex in this method
+		std::lock_guard<std::mutex> lg(mutex_);
 
 		if (offset & 0x100) {
 			ym2608_control_port_b_w(id_, 2, offset & 0xff);
@@ -103,66 +91,26 @@ namespace chip
 	}
 
 	#ifdef SINC_INTERPOLATION
-	void OPNA::setRate(uint32 rate, size_t maxTime)
-	#else
-	void OPNA::setRate(uint32 rate)
-	#endif
-	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
-
-		funcSetRate(rate);
-		setRateRatio();
-
-		#ifdef SINC_INTERPOLATION
-		initSincTables(maxTime);
-		#endif
-	}
-
-	void OPNA::funcSetRate(uint32 rate)
-	{
-		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : 110933);
-	}
-
-	void OPNA::setRateRatio()
-	{
-		rateRatio_[FM] = static_cast<float>(internalRate_[FM]) / rate_;
-		rateRatio_[PSG] = static_cast<float>(internalRate_[PSG]) / rate_;
-	}
-
-	#ifdef SINC_INTERPOLATION
-	void OPNA::initSincTables(size_t maxTime)
-	{
-		size_t maxSamples = rate_ * maxTime / 1000;
-
-		if (internalRate_[FM] != rate_) {
-			size_t intrSize = calculateInternalSampleSize(maxSamples, rateRatio_[FM]);
-			funcInitSincTables(sincTable_[FM], maxSamples, intrSize, rateRatio_[FM]);
-		}
-
-		if (internalRate_[PSG] != rate_) {
-			size_t intrSize = calculateInternalSampleSize(maxSamples, rateRatio_[PSG]);
-			funcInitSincTables(sincTable_[PSG], maxSamples, intrSize, rateRatio_[PSG]);
-		}
-	}
+	
 	#endif
 
 	// TODO: Volume settings
 	void OPNA::setVolume(float dBFM, float dBPSG)
 	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
+		std::lock_guard<std::mutex> lg(mutex_);
 
-		//dBFM_ = dBFM;
-		//dBPSG_ = dBPSG;
+		/*dB_[FM] = dBFM;*/
+		/*dB_[PSG] = dBFM;*/
 
-		/*fmVolumeRatio_ = maxAmplitude_ / defaultFMAmplitude_ * std::pow(10, fmdB / 20);
-		psgVolumeRatio_ = maxAmplitude_ / defaultPSGAmplitude_ * std::pow(10, psgdB / 20);*/
+		/*VolumeRatio_[FM] = maxAmplitude_ / defaultFMAmplitude_ * std::pow(10, fmdB / 20);
+		VolumeRatio_[PSG] = maxAmplitude_ / defaultPSGAmplitude_ * std::pow(10, psgdB / 20);*/
 		volumeRatio_[FM] = 1;
 		volumeRatio_[PSG] = 1;
 	}
 
 	void OPNA::mix(int16* stream, size_t nSamples)
 	{
-		std::lock_guard<std::mutex> lg(mutex_);	// Do mutex
+		std::lock_guard<std::mutex> lg(mutex_);
 
 		// Set FM buffer
 		if (internalRate_[FM] == rate_) {
@@ -193,8 +141,9 @@ namespace chip
 		}
 
 		for (size_t i = 0; i < nSamples; ++i) {
-			*stream++ = static_cast<int16>(volumeRatio_[FM] * buffer_[FM][LEFT][i] + volumeRatio_[PSG] * buffer_[PSG][LEFT][i]);
-			*stream++ = static_cast<int16>(volumeRatio_[FM] * buffer_[FM][RIGHT][i] + volumeRatio_[PSG] * buffer_[PSG][RIGHT][i]);
+			for (int pan = LEFT; pan <= RIGHT; ++pan) {
+				*stream++ = static_cast<int16>(volumeRatio_[FM] * buffer_[FM][pan][i] + volumeRatio_[PSG] * buffer_[PSG][pan][i]);
+			}
 		}
 	}
 }
