@@ -1,13 +1,12 @@
 #include "opna.hpp"
+#include "chip_misc.h"
 
 #ifdef  __cplusplus
 extern "C"
 {
 #endif //  __cplusplus
 
-	#include "mame/2608intf.h"
-
-	extern INT32 CHIP_SAMPLE_RATE;
+#include "mame/2608intf.h"
 
 #ifdef __cplusplus
 }
@@ -21,13 +20,11 @@ namespace chip
 	/*const int OPNA::DEF_AMP_PSG_ = 7250;*/
 
 	#ifdef SINC_INTERPOLATION
-	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxTime) :
-		Chip(count_++, clock, rate, 110933, maxTime)
+	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxDuration) :
 	#else
 	OPNA::OPNA(uint32 clock, uint32 rate) :
-		Chip(count_++, clock, rate, 110933)
 	#endif
-	// autoRate = 110933: PSG internal rate
+		Chip(count_++, clock, rate, 110933)	// autoRate = 110933: FM internal rate
 	{
 		funcSetRate(rate);
 
@@ -38,10 +35,11 @@ namespace chip
 		UINT8 AYFlags = 0;		// None
 		internalRate_[FM] = device_start_ym2608(id_, clock, AYDisable, AYFlags, reinterpret_cast<int*>(&internalRate_[PSG]));
 
-		setRateRatio();
-
+		// Init resampler
 		#ifdef SINC_INTERPOLATION
-		initSincTables(maxTime);
+		initResampler(maxDuration);
+		#else
+		initResampler();
 		#endif
 
 		setVolume(0, 0);
@@ -90,10 +88,6 @@ namespace chip
 		return ym2608_read_port_r(id_, 1);
 	}
 
-	#ifdef SINC_INTERPOLATION
-	
-	#endif
-
 	// TODO: Volume settings
 	void OPNA::setVolume(float dBFM, float dBPSG)
 	{
@@ -111,38 +105,33 @@ namespace chip
 	void OPNA::mix(int16* stream, size_t nSamples)
 	{
 		std::lock_guard<std::mutex> lg(mutex_);
+		sample **bufFM, **bufPSG;
 
 		// Set FM buffer
 		if (internalRate_[FM] == rate_) {
 			ym2608_stream_update(id_, buffer_[FM], nSamples);
+			bufFM = buffer_[FM];
 		}
 		else {
-			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatio_[FM]);
-			ym2608_stream_update(id_, tmpBuf_, intrSize);
-			#ifdef SINC_INTERPOLATION
-			sincInterpolate(tmpBuf_, buffer_[FM], nSamples, intrSize, sincTable_[FM], rateRatio_[FM]);
-			#else
-			linearInterpolate(tmpBuf_, buffer_[FM], nSamples, intrSize, rateRatio_[FM]);
-			#endif
+			size_t intrSize = resampler_[FM].calculateInternalSampleSize(nSamples);
+			ym2608_stream_update(id_, buffer_[FM], intrSize);
+			bufFM = resampler_[FM].interpolate(buffer_[FM], nSamples, intrSize);
 		}
 
 		// Set PSG buffer
 		if (internalRate_[PSG] == rate_) {
 			ym2608_stream_update_ay(id_, buffer_[PSG], nSamples);
+			bufPSG = buffer_[PSG];
 		}
 		else {
-			size_t intrSize = calculateInternalSampleSize(nSamples, rateRatio_[PSG]);
-			ym2608_stream_update_ay(id_, tmpBuf_, intrSize);
-			#ifdef SINC_INTERPOLATION
-			sincInterpolate(tmpBuf_, buffer_[PSG], nSamples, intrSize, sincTable_[PSG], rateRatio_[PSG]);
-			#else
-			linearInterpolate(tmpBuf_, buffer_[PSG], nSamples, intrSize, rateRatio_[PSG]);
-			#endif
+			size_t intrSize = resampler_[PSG].calculateInternalSampleSize(nSamples);
+			ym2608_stream_update_ay(id_, buffer_[PSG], intrSize);
+			bufPSG = resampler_[PSG].interpolate(buffer_[PSG], nSamples, intrSize);
 		}
 
 		for (size_t i = 0; i < nSamples; ++i) {
 			for (int pan = LEFT; pan <= RIGHT; ++pan) {
-				*stream++ = static_cast<int16>(volumeRatio_[FM] * buffer_[FM][pan][i] + volumeRatio_[PSG] * buffer_[PSG][pan][i]);
+				*stream++ = static_cast<int16>(volumeRatio_[FM] * bufFM[pan][i] + volumeRatio_[PSG] * bufPSG[pan][i]);
 			}
 		}
 	}

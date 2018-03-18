@@ -10,7 +10,7 @@ namespace chip
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
 		#ifdef SINC_INTERPOLATION
-		OPNA(uint32 clock, uint32 rate, size_t maxTime);
+		OPNA(uint32 clock, uint32 rate, size_t maxDuration);
 		#else
 		OPNA(uint32 clock, uint32 rate);
 		#endif

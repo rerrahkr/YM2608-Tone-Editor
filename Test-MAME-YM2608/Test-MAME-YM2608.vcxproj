@@ -122,10 +122,13 @@
     <ClCompile Include="chips\mame\ymdeltat.c" />
     <ClCompile Include="chips\opna.cpp" />
     <ClCompile Include="audio_stream.cpp" />
+    <ClCompile Include="chips\resampler.cpp" />
     <ClCompile Include="test_mame_ym2608.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chips\chip.hpp" />
+    <ClInclude Include="chips\chip_def.hpp" />
+    <ClInclude Include="chips\chip_misc.h" />
     <ClInclude Include="chips\mame\2608intf.h" />
     <ClInclude Include="chips\mame\emu2149.h" />
     <ClInclude Include="chips\mame\emutypes.h" />
@@ -133,7 +136,7 @@
     <ClInclude Include="chips\mame\mamedef.h" />
     <ClInclude Include="chips\mame\ymdeltat.h" />
     <ClInclude Include="chips\opna.hpp" />
-    <ClInclude Include="common.hpp" />
+    <ClInclude Include="chips\resampler.hpp" />
     <ClInclude Include="audio_stream.hpp" />
     <ClInclude Include="types.h" />
   </ItemGroup>

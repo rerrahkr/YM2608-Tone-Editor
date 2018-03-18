@@ -51,6 +51,9 @@
     <ClCompile Include="chips\chip.cpp">
       <Filter>Chips</Filter>
     </ClCompile>
+    <ClCompile Include="chips\resampler.cpp">
+      <Filter>Chips</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="types.h">
@@ -77,13 +80,19 @@
     <ClInclude Include="chips\mame\emu2149.h">
       <Filter>Chips\MAME\PSG</Filter>
     </ClInclude>
-    <ClInclude Include="common.hpp">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="audio_stream.hpp">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="chips\chip.hpp">
+      <Filter>Chips</Filter>
+    </ClInclude>
+    <ClInclude Include="chips\resampler.hpp">
+      <Filter>Chips</Filter>
+    </ClInclude>
+    <ClInclude Include="chips\chip_misc.h">
+      <Filter>Chips</Filter>
+    </ClInclude>
+    <ClInclude Include="chips\chip_def.hpp">
       <Filter>Chips</Filter>
     </ClInclude>
   </ItemGroup>
