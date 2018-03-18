@@ -1,4 +1,5 @@
 #include "chip.hpp"
+#include "chip_misc.h"
 
 #ifdef  __cplusplus
 extern "C"
@@ -17,28 +18,58 @@ extern "C"
 
 namespace chip
 {
-	const size_t Chip::SMPL_BUFSIZE_ = 0x10000;
-	#ifdef SINC_INTERPOLATION
-	const float Chip::F_PI_ = 3.14159265f;
-	const int Chip::SINC_OFFSET_ = 16;
-	#endif
+	//const int Chip::MAX_AMP_ = 32767;	// half-max of int16
 
-	#ifdef SINC_INTERPOLATION
-	Chip::Chip(uint32 clock, uint32 rate, size_t maxTime)
-	#else
-	Chip::Chip(uint32 clock, uint32 rate)
-	#endif
+	Chip::Chip(uint32 id, uint32 clock, uint32 rate, uint32 autoRate) :
+		id_(id),
+		rate_(1),	// Dummy set
+		autoRate_(autoRate)
 	{
-		for (int i = 0; i < 2; ++i) {
-			tmpBuf_[i] = new stream_sample_t[SMPL_BUFSIZE_];
+		for (int pan = LEFT; pan <= RIGHT; ++pan) {
+			for (auto& buf : buffer_) {
+				buf[pan] = new stream_sample_t[SMPL_BUF_SIZE_];
+			}
 		}
 	}
 
 	Chip::~Chip()
 	{
-		for (int i = 0; i < 2; ++i) {
-			delete[] tmpBuf_[i];
+		for (int pan = LEFT; pan <= RIGHT; ++pan) {
+			for (auto& buf : buffer_) {
+				delete[] buf[pan];
+			}
 		}
+	}
+
+	#ifdef SINC_INTERPOLATION
+	void Chip::initResampler(size_t maxDuration)
+	#else
+	void Chip::initResampler()
+	#endif
+	{
+		for (int snd = 0; snd < 2; ++snd) {
+			#ifdef SINC_INTERPOLATION
+			resampler_[snd].init(internalRate_[snd], rate_, maxDuration);
+			#else
+			resampler_[snd].init(internalRate_[snd], rate_);
+			#endif
+		}
+	}
+
+	void Chip::setRate(uint32 rate)
+	{
+		std::lock_guard<std::mutex> lg(mutex_);
+
+		funcSetRate(rate);
+
+		for (auto& rsmp : resampler_) {
+			rsmp.setDestRate(rate);
+		}
+	}
+
+	void Chip::funcSetRate(uint32 rate)
+	{
+		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : autoRate_);
 	}
 
 	uint32 Chip::getRate() const
@@ -47,59 +78,10 @@ namespace chip
 	}
 
 	#ifdef SINC_INTERPOLATION
-	void Chip::funcInitSincTables(std::vector<float>& table, size_t maxSamples, size_t intrSize, float rateRatio)
+	void Chip::setMaxDuration(size_t maxDuration)
 	{
-		size_t offsetx2 = SINC_OFFSET_ << 1;
-		table.resize(maxSamples * offsetx2);
-
-		for (size_t j = 0; j < maxSamples; ++j) {
-			size_t seg = j * offsetx2;
-			float rcurn = j * rateRatio;
-			int curn = static_cast<int>(rcurn);
-			int k = curn - SINC_OFFSET_;
-			if (k < 0) k = 0;
-			int end = curn + SINC_OFFSET_;
-			if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
-			for (; k < end; ++k) {
-				table[seg + SINC_OFFSET_ + (k - curn)] = sinc(F_PI_ * (rcurn - k));
-			}
-		}
-	}
-
-	void Chip::sincInterpolate(sample** src, sample** dest, size_t nSamples, size_t intrSize, std::vector<float>& table, float rateRatio)
-	{
-		size_t offsetx2 = SINC_OFFSET_ << 1;
-		for (size_t i = 0; i < 2; ++i) {
-			for (size_t j = 0; j < nSamples; ++j) {
-				size_t seg = j * offsetx2;
-				int curn = static_cast<int>(j * rateRatio);
-				int k = curn - SINC_OFFSET_;
-				if (k < 0) k = 0;
-				int end = curn + SINC_OFFSET_;
-				if (static_cast<size_t>(end) > intrSize) end = static_cast<int>(intrSize);
-				sample samp = 0;
-				for (; k < end; ++k) {
-					samp += static_cast<sample>(src[i][k] * table[seg + SINC_OFFSET_ + (k - curn)]);
-				}
-				dest[i][j] = samp;
-			}
-		}
-	}
-	#else
-    void Chip::linearInterpolate(sample** src, sample** dest, size_t nSamples, float rateRatio)
-	{
-		for (size_t i = 0; i < 2; ++i) {
-			for (size_t j = 0; j < nSamples; ++j) {
-				float curnf = j * rateRatio;
-				int curni = static_cast<int>(curnf);
-				float sub = curnf - curni;
-				if (sub) {	// Linear interpolation
-					dest[i][j] = static_cast<sample>(src[i][curni] + (src[i][curni + 1] - src[i][curni]) * sub);
-				}
-				else /* if (sub == 0) */ {
-					dest[i][j] = src[i][curni];
-				}
-			}
+		for (int snd = 0; snd < 2; ++snd) {
+			resampler_[snd].setMaxDuration(maxDuration);
 		}
 	}
 	#endif
