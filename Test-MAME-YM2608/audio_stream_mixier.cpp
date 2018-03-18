@@ -1,7 +1,7 @@
 #include "audio_stream_mixier.hpp"
 #include <algorithm>
 
-AudioStreamMixier::AudioStreamMixier(chip::OPNA& chip, uint32 rate, uint32 duration, QObject* parent) :
+AudioStreamMixier::AudioStreamMixier(chip::Chip& chip, uint32 rate, uint32 duration, QObject* parent) :
     QIODevice(parent),
     chip_(chip),
     rate_(rate),
