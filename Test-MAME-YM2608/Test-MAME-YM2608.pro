@@ -39,7 +39,8 @@ SOURCES += \
     widgets/labeled_slider.cpp \
     widgets/operator_sliders.cpp \
     parameter_state.cpp \
-    chips/chip.cpp
+    chips/chip.cpp \
+    chips/resampler.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -50,14 +51,16 @@ HEADERS += \
     chips/mame/mamedef.h \
     chips/mame/ymdeltat.h \
     chips/opna.hpp \
-    common.hpp \
     types.h \
     audio_stream.hpp \
     audio_stream_mixier.hpp \
     widgets/labeled_slider.h \
     widgets/operator_sliders.h \
     parameter_state.hpp \
-    chips/chip.hpp
+    chips/chip.hpp \
+    chips/chip_def.hpp \
+    chips/chip_misc.h \
+    chips/resampler.hpp
 
 FORMS += \
         mainwindow.ui \

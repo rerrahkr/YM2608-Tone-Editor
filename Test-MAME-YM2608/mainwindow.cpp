@@ -2,11 +2,16 @@
 #include "ui_mainwindow.h"
 #include <QKeyEvent>
 #include <algorithm>
+#include "chips/chip_def.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    #ifdef SINC_INTERPOLATION
+    chip_(3993600 * 2, 0, 40),
+    #else
     chip_(3993600 * 2, 0),
+    #endif
     audio_(chip_, chip_.getRate(), 40),
     octaveFM_(3),
     octavePSG_(3),
