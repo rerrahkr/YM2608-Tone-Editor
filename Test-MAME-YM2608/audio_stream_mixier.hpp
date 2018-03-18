@@ -3,12 +3,12 @@
 #include <QObject>
 #include <QIODevice>
 #include "types.h"
-#include "chips/opna.hpp"
+#include "chips/chip.hpp"
 
 class AudioStreamMixier : public QIODevice
 {
 public:
-    AudioStreamMixier(chip::OPNA& chip, uint32 rate, uint32 duration, QObject* parent = nullptr);
+    AudioStreamMixier(chip::Chip& chip, uint32 rate, uint32 duration, QObject* parent = nullptr);
     ~AudioStreamMixier();
 
     void start();
@@ -22,7 +22,7 @@ public:
     qint64 writeData(const char *data, qint64 len) override;
 
 private:
-    chip::OPNA& chip_;
+    chip::Chip& chip_;
     size_t rate_;
     size_t duration_;
     qint64 bufferSampleSize_;

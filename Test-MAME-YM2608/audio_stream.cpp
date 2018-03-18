@@ -1,7 +1,7 @@
 #include "audio_stream.hpp"
 #include <QSysInfo>
 
-AudioStream::AudioStream(chip::OPNA& chip, uint32 rate, uint32 duration) :
+AudioStream::AudioStream(chip::Chip& chip, uint32 rate, uint32 duration) :
     chip_(chip)
 {
     format_.setByteOrder(QAudioFormat::Endian(QSysInfo::ByteOrder));
