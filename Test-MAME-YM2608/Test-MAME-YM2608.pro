@@ -42,7 +42,8 @@ SOURCES += \
     chips/chip.cpp \
     chips/resampler.cpp \
     tone_file.cpp \
-    namedialog.cpp
+    namedialog.cpp \
+    widgets/custom_slider.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -65,7 +66,8 @@ HEADERS += \
     chips/resampler.hpp \
     tone.hpp \
     tone_file.hpp \
-    namedialog.h
+    namedialog.h \
+    widgets/custom_slider.h
 
 FORMS += \
         mainwindow.ui \

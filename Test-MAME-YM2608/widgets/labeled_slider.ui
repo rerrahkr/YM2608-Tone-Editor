@@ -34,7 +34,7 @@
     </widget>
    </item>
    <item row="0" column="0" alignment="Qt::AlignHCenter">
-    <widget class="QSlider" name="verticalSlider">
+    <widget class="CustomSlider" name="verticalSlider">
      <property name="styleSheet">
       <string notr="true">QSlider::groove:vertical {
 	width: 4px;
@@ -59,6 +59,9 @@ QSlider::add-page:vertical {
 	border-radius: 2px;
 }</string>
      </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -66,6 +69,13 @@ QSlider::add-page:vertical {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomSlider</class>
+   <extends>QSlider</extends>
+   <header>widgets/custom_slider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
