@@ -1,8 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QKeyEvent>
+#include <QFileDialog>
+#include <QMessageBox>
 #include <algorithm>
+#include <fstream>
 #include "chips/chip_def.hpp"
+#include "tone_file.hpp"
+#include "namedialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,7 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     octaveFM_(3),
     octavePSG_(3),
     pressedKeyNameFM_("FM: "),
-    pressedKeyNamePSG_("PSG: ")
+    pressedKeyNamePSG_("PSG: "),
+    isEdit_(false)
 {
     ui->setupUi(this);
 
@@ -35,106 +41,30 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->op3Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
     connect(ui->op4Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
 
+    sliders_[0] = ui->op1Sliders;
+    sliders_[1] = ui->op2Sliders;
+    sliders_[2] = ui->op3Sliders;
+    sliders_[3] = ui->op4Sliders;
 
-    ui->op1Sliders->setOperatorNumber(1);
-    ui->op2Sliders->setOperatorNumber(2);
-    ui->op3Sliders->setOperatorNumber(3);
-    ui->op4Sliders->setOperatorNumber(4);
-
-    {
-        voice_.name = "detune";
-        voice_.AL = 5;
-        voice_.FB = 5;
-        voice_.op[0].AR = 31;
-        voice_.op[0].DR = 5;
-        voice_.op[0].SR = 0;
-        voice_.op[0].RR = 7;
-        voice_.op[0].SL = 12;
-        voice_.op[0].TL = 22;
-        voice_.op[0].KS = 0;
-        voice_.op[0].ML = 0;
-        voice_.op[0].DT = 0;
-        voice_.op[0].AM = 0;
-        voice_.op[1].AR = 31;
-        voice_.op[1].DR = 5;
-        voice_.op[1].SR = 0;
-        voice_.op[1].RR = 7;
-        voice_.op[1].SL = 6;
-        voice_.op[1].TL = 12;
-        voice_.op[1].KS = 0;
-        voice_.op[1].ML = 2;
-        voice_.op[1].DT = 3;
-        voice_.op[1].AM = 0;
-        voice_.op[2].AR = 31;
-        voice_.op[2].DR = 5;
-        voice_.op[2].SR = 0;
-        voice_.op[2].RR = 7;
-        voice_.op[2].SL = 7;
-        voice_.op[2].TL = 21;
-        voice_.op[2].KS = 0;
-        voice_.op[2].ML = 3;
-        voice_.op[2].DT = 0;
-        voice_.op[2].AM = 0;
-        voice_.op[3].AR = 31;
-        voice_.op[3].DR = 0;
-        voice_.op[3].SR = 0;
-        voice_.op[3].RR = 7;
-        voice_.op[3].SL = 0;
-        voice_.op[3].TL = 0;
-        voice_.op[3].KS = 0;
-        voice_.op[3].ML = 0;
-        voice_.op[3].DT = 0;
-        voice_.op[3].AM = 0;
+    for (int i = 0; i < 4; ++i) {
+        sliders_[i]->setOperatorNumber(i + 1);
     }
 
+    tone_ = std::make_unique<Tone>();
     {
-        ui->alSlider->setValue(voice_.AL);
-        ui->fbSlider->setValue(voice_.FB);
-        ui->op1Sliders->setParameterValue(ParameterState::AR, voice_.op[0].AR);
-        ui->op1Sliders->setParameterValue(ParameterState::DR, voice_.op[0].DR);
-        ui->op1Sliders->setParameterValue(ParameterState::SR, voice_.op[0].SR);
-        ui->op1Sliders->setParameterValue(ParameterState::RR, voice_.op[0].RR);
-        ui->op1Sliders->setParameterValue(ParameterState::SL, voice_.op[0].SL);
-        ui->op1Sliders->setParameterValue(ParameterState::TL, voice_.op[0].TL);
-        ui->op1Sliders->setParameterValue(ParameterState::KS, voice_.op[0].KS);
-        ui->op1Sliders->setParameterValue(ParameterState::ML, voice_.op[0].ML);
-        ui->op1Sliders->setParameterValue(ParameterState::DT, voice_.op[0].DT);
-        ui->op1Sliders->setParameterValue(ParameterState::AM, voice_.op[0].AM);
-        ui->op2Sliders->setParameterValue(ParameterState::AR, voice_.op[1].AR);
-        ui->op2Sliders->setParameterValue(ParameterState::DR, voice_.op[1].DR);
-        ui->op2Sliders->setParameterValue(ParameterState::SR, voice_.op[1].SR);
-        ui->op2Sliders->setParameterValue(ParameterState::RR, voice_.op[1].RR);
-        ui->op2Sliders->setParameterValue(ParameterState::SL, voice_.op[1].SL);
-        ui->op2Sliders->setParameterValue(ParameterState::TL, voice_.op[1].TL);
-        ui->op2Sliders->setParameterValue(ParameterState::KS, voice_.op[1].KS);
-        ui->op2Sliders->setParameterValue(ParameterState::ML, voice_.op[1].ML);
-        ui->op2Sliders->setParameterValue(ParameterState::DT, voice_.op[1].DT);
-        ui->op2Sliders->setParameterValue(ParameterState::AM, voice_.op[1].AM);
-        ui->op3Sliders->setParameterValue(ParameterState::AR, voice_.op[2].AR);
-        ui->op3Sliders->setParameterValue(ParameterState::DR, voice_.op[2].DR);
-        ui->op3Sliders->setParameterValue(ParameterState::SR, voice_.op[2].SR);
-        ui->op3Sliders->setParameterValue(ParameterState::RR, voice_.op[2].RR);
-        ui->op3Sliders->setParameterValue(ParameterState::SL, voice_.op[2].SL);
-        ui->op3Sliders->setParameterValue(ParameterState::TL, voice_.op[2].TL);
-        ui->op3Sliders->setParameterValue(ParameterState::KS, voice_.op[2].KS);
-        ui->op3Sliders->setParameterValue(ParameterState::ML, voice_.op[2].ML);
-        ui->op3Sliders->setParameterValue(ParameterState::DT, voice_.op[2].DT);
-        ui->op3Sliders->setParameterValue(ParameterState::AM, voice_.op[2].AM);
-        ui->op4Sliders->setParameterValue(ParameterState::AR, voice_.op[3].AR);
-        ui->op4Sliders->setParameterValue(ParameterState::DR, voice_.op[3].DR);
-        ui->op4Sliders->setParameterValue(ParameterState::SR, voice_.op[3].SR);
-        ui->op4Sliders->setParameterValue(ParameterState::RR, voice_.op[3].RR);
-        ui->op4Sliders->setParameterValue(ParameterState::SL, voice_.op[3].SL);
-        ui->op4Sliders->setParameterValue(ParameterState::TL, voice_.op[3].TL);
-        ui->op4Sliders->setParameterValue(ParameterState::KS, voice_.op[3].KS);
-        ui->op4Sliders->setParameterValue(ParameterState::ML, voice_.op[3].ML);
-        ui->op4Sliders->setParameterValue(ParameterState::DT, voice_.op[3].DT);
-        ui->op4Sliders->setParameterValue(ParameterState::AM, voice_.op[3].AM);
+        tone_->name = "name";
+        tone_->path = "./";
+        tone_->AL = 4;
+        for (int i = 0; i < 4; ++i) {
+            tone_->op[i].AR = 31;
+            tone_->op[i].RR = 7;
+            if (i % 2 == 0) tone_->op[i].TL = 32;
+        }
     }
 
     chip_.setRegister(0x29, 0x80);	// Init interrupt
     InitPan();
-    SetFMVoice(voice_, 1);
+    SetFMTone(1);
 
     std::fill_n(jamKeyOnTableFM_, 17, false);
     std::fill_n(jamKeyOnTablePSG_, 17, false);
@@ -192,7 +122,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         chip_.reset();
         chip_.setRegister(0x29, 0x80);	// Init interrupt
         InitPan();
-        SetFMVoice(voice_, 1);
+        SetFMTone(1);
         break;
     case Qt::Key_Escape:    close();                            break;
     default:                                                    break;
@@ -246,7 +176,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat && !jamKeyOnTableFM_[jamKeyNumber]) {
-        SetFMTone(1, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+        SetFMKey(1, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetFMKeyOn(1);
         jamKeyOnTableFM_[jamKeyNumber] = true;
 
@@ -259,7 +189,7 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
 void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat && !jamKeyOnTablePSG_[jamKeyNumber]) {
-        SetPSGTone(1, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+        SetPSGKey(1, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         chip_.setRegister(0x08, 0x0f);
         chip_.setRegister(0x07, 0x7e);
         jamKeyOnTablePSG_[jamKeyNumber] = true;
@@ -294,7 +224,7 @@ void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
 }
 
 
-void MainWindow::SetFMVoice(struct Voice voice, int channel)
+void MainWindow::SetFMTone(int channel)
 {
     uint32 bch;	// Bank and channel offset
     switch (channel) {
@@ -312,8 +242,8 @@ void MainWindow::SetFMVoice(struct Voice voice, int channel)
 
     uint32 data;
 
-    data = voice.FB << 3;
-    data += voice.AL;
+    data = tone_->FB << 3;
+    data += tone_->AL;
     chip_.setRegister(0xb0 + bch, data);
 
     for (int i = 0; i < 4; i++) {
@@ -325,28 +255,47 @@ void MainWindow::SetFMVoice(struct Voice voice, int channel)
         case 3: offset = 12; break;
         }
 
-        data = voice.op[i].DT << 4;
-        data |= voice.op[i].ML;
+        data = tone_->op[i].DT << 4;
+        data |= tone_->op[i].ML;
         chip_.setRegister(0x30 + bch + offset, data);
 
-        data = voice.op[i].TL;
+        data = tone_->op[i].TL;
         chip_.setRegister(0x40 + bch + offset, data);
 
-        data = voice.op[i].KS << 6;
-        data |= voice.op[i].AR;
+        data = tone_->op[i].KS << 6;
+        data |= tone_->op[i].AR;
         chip_.setRegister(0x50 + bch + offset, data);
 
-        data = voice.op[i].AM << 7;
-        data |= voice.op[i].DR;
+        data = tone_->op[i].AM << 7;
+        data |= tone_->op[i].DR;
         chip_.setRegister(0x60 + bch + offset, data);
 
-        data = voice.op[i].SR;
+        data = tone_->op[i].SR;
         chip_.setRegister(0x70 + bch + offset, data);
 
-        data = voice.op[i].SL << 4;
-        data |= voice.op[i].RR;
+        data = tone_->op[i].SL << 4;
+        data |= tone_->op[i].RR;
         chip_.setRegister(0x80 + bch + offset, data);
     }
+
+    ui->nameLabel->setText(QString::fromStdString(tone_->name));
+    ui->alSlider->setValue(tone_->AL);
+    ui->fbSlider->setValue(tone_->FB);
+    for (int i = 0; i< 4; ++i) {
+        sliders_[i]->setParameterValue(ParameterState::AR, tone_->op[i].AR);
+        sliders_[i]->setParameterValue(ParameterState::DR, tone_->op[i].DR);
+        sliders_[i]->setParameterValue(ParameterState::SR, tone_->op[i].SR);
+        sliders_[i]->setParameterValue(ParameterState::RR, tone_->op[i].RR);
+        sliders_[i]->setParameterValue(ParameterState::SL, tone_->op[i].SL);
+        sliders_[i]->setParameterValue(ParameterState::TL, tone_->op[i].TL);
+        sliders_[i]->setParameterValue(ParameterState::KS, tone_->op[i].KS);
+        sliders_[i]->setParameterValue(ParameterState::ML, tone_->op[i].ML);
+        sliders_[i]->setParameterValue(ParameterState::DT, tone_->op[i].DT);
+        sliders_[i]->setParameterValue(ParameterState::AM, tone_->op[i].AM);
+    }
+
+    isEdit_ = false;
+    setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
 }
 
 void MainWindow::SetFMKeyOn(int channel)
@@ -379,7 +328,7 @@ void MainWindow::SetFMKeyOff(int channel)
     chip_.setRegister(0x28, (slot << 4) | ch);
 }
 
-void MainWindow::SetFMTone(int channel, uint32 octave, uint32 keynum)
+void MainWindow::SetFMKey(int channel, uint32 octave, uint32 keynum)
 {
     uint32 bch;	// Bank and channel offset
     switch (channel) {
@@ -406,7 +355,7 @@ void MainWindow::SetFMTone(int channel, uint32 octave, uint32 keynum)
     chip_.setRegister(0xa0 + bch, data);
 }
 
-void MainWindow::SetPSGTone(int channel, uint32 octave, uint32 keynum)
+void MainWindow::SetPSGKey(int channel, uint32 octave, uint32 keynum)
 {
     uint32 offset = 2 * (channel - 1);
 
@@ -450,24 +399,48 @@ QString MainWindow::keyNumberToNameString(uint32 jamKeyNumber)
     }
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (isEdit_) {
+       QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+       switch (mbox.exec()) {
+       case QMessageBox::Yes:
+           if (saveTone()) break;
+           else event->ignore(); break;
+       case QMessageBox::No: break;
+       default: event->ignore(); break;
+       }
+    }
+}
+
 void MainWindow::onALChanged(int value)
 {
-    voice_.AL = value;
-    uint32 reg = (voice_.FB << 3) | voice_.AL;
+    tone_->AL = value;
+    uint32 reg = (tone_->FB << 3) | tone_->AL;
     chip_.setRegister(0xb0, reg);
+
+    if (!isEdit_) {
+        isEdit_ = true;
+        setWindowTitle(windowTitle() + "*");
+    }
 }
 
 void MainWindow::onFBChanged(int value)
 {
-    voice_.FB = value;
-    uint32 reg = (voice_.FB << 3) | voice_.AL;
+    tone_->FB = value;
+    uint32 reg = (tone_->FB << 3) | tone_->AL;
     chip_.setRegister(0xb0, reg);
+
+    if (!isEdit_) {
+        isEdit_ = true;
+        setWindowTitle(windowTitle() + "*");
+    }
 }
 
 void MainWindow::onParameterChanged(int op, const ParameterState& state)
 {
     uint32 value = state.getValue();
-    MainWindow::Operator& slot = voice_.op[op - 1];
+    Operator& slot = tone_->op[op - 1];
 
     uint32 opOffset;
     switch (op) {
@@ -532,5 +505,91 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
         break;
     default:
         return;
+    }
+
+    if (!isEdit_) {
+        isEdit_ = true;
+        setWindowTitle(windowTitle() + "*");
+    }
+}
+
+
+void MainWindow::on_actionOpen_O_triggered()
+{
+    if (isEdit_) {
+       QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+       switch (mbox.exec()) {
+       case QMessageBox::Yes:
+           if (saveTone()) break;
+           else return;
+       case QMessageBox::No: break;
+       default: return;
+       }
+    }
+
+    QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), "FM tone file (*.fmt)");
+    if (!file.isNull()) {
+        tone_ = ToneFile::read(file.toStdString());
+        SetFMTone(1);
+    }
+}
+
+void MainWindow::on_actionSave_S_triggered()
+{
+    saveTone();
+}
+
+void MainWindow::on_actionExit_E_triggered()
+{
+    close();
+}
+
+void MainWindow::on_actionSave_As_triggered()
+{
+    saveToneAs();
+}
+
+bool MainWindow::saveTone()
+{
+    bool isExist;
+    {
+        std::ifstream check(tone_->path, std::ios::in | std::ios::binary);
+        isExist = check.is_open();
+    }
+
+    if (isExist) {
+        ToneFile::write(tone_->path, tone_.get());
+        isEdit_ = false;
+        setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
+    }
+    else {
+        return saveToneAs();
+    }
+
+    return true;
+}
+
+bool MainWindow::saveToneAs()
+{
+    QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), "FM tone file (*.fmt)");
+    if (file.isNull()) return false;
+
+    tone_->path = file.toStdString();
+    ToneFile::write(tone_->path, tone_.get());
+
+    isEdit_ = false;
+    setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
+
+    return true;
+}
+
+void MainWindow::on_nameButton_clicked()
+{
+    NameDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        ui->nameLabel->setText(dialog.toneName());
+        tone_->name = dialog.toneName().toStdString();
+        if (!isEdit_) isEdit_ = true;
+        setWindowTitle("YM2608 Tone Editor - " + dialog.toneName() + "*");
     }
 }
