@@ -3,10 +3,14 @@
 
 #include <QMainWindow>
 #include <QString>
+#include <QCloseEvent>
+#include <memory>
 #include "types.h"
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
 #include "parameter_state.hpp"
+#include "tone.hpp"
+#include "widgets/operator_sliders.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,38 +33,20 @@ private:
     chip::OPNA chip_;
     AudioStream audio_;
 
-    struct Operator {
-        uint8 AR;
-        uint8 DR;
-        uint8 SR;
-        uint8 RR;
-        uint8 SL;
-        uint8 TL;
-        uint8 KS;
-        uint8 ML;
-        uint8 DT;
-        uint8 AM;
-    };
-
-    struct Voice {
-        std::string name;
-        uint8 AL;
-        uint8 FB;
-        Operator op[4];
-    };
-
-    Voice voice_;
+    std::unique_ptr<Tone> tone_;
 
     int octaveFM_, octavePSG_;
     bool jamKeyOnTableFM_[17], jamKeyOnTablePSG_[17];
     QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
+    OperatorSliders* sliders_[4];
+    bool isEdit_;
 
-    void SetFMVoice(struct Voice voice, int channel);
+    void SetFMTone(int channel);
     void SetFMKeyOn(int channel);
     void SetFMKeyOff(int channel);
-    void SetFMTone(int channel, uint32 octave, uint32 keynum);
-    void SetPSGTone(int channel, uint32 octave, uint32 keynum);
+    void SetFMKey(int channel, uint32 octave, uint32 keynum);
+    void SetPSGKey(int channel, uint32 octave, uint32 keynum);
     void InitPan();
 
     void JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat);
@@ -69,6 +55,8 @@ private:
     void JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat);
 
     QString keyNumberToNameString(uint32 jamKeyNumber);
+
+    void closeEvent(QCloseEvent* event) override;
 
     const uint32 fm_tune_tbl[12] = {
         0x026a,	// C
@@ -104,6 +92,15 @@ private slots:
     void onALChanged(int value);
     void onFBChanged(int value);
     void onParameterChanged(int op, const ParameterState& state);
+    void on_actionOpen_O_triggered();
+    void on_actionSave_S_triggered();
+    void on_actionExit_E_triggered();
+    void on_actionSave_As_triggered();
+    void on_nameButton_clicked();
+
+private:
+    bool saveTone();
+    bool saveToneAs();
 };
 
 #endif // MAINWINDOW_H

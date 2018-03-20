@@ -40,7 +40,9 @@ SOURCES += \
     widgets/operator_sliders.cpp \
     parameter_state.cpp \
     chips/chip.cpp \
-    chips/resampler.cpp
+    chips/resampler.cpp \
+    tone_file.cpp \
+    namedialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -60,9 +62,13 @@ HEADERS += \
     chips/chip.hpp \
     chips/chip_def.hpp \
     chips/chip_misc.h \
-    chips/resampler.hpp
+    chips/resampler.hpp \
+    tone.hpp \
+    tone_file.hpp \
+    namedialog.h
 
 FORMS += \
         mainwindow.ui \
     widgets/labeled_slider.ui \
-    widgets/operator_sliders.ui
+    widgets/operator_sliders.ui \
+    namedialog.ui
