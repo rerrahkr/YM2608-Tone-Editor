@@ -43,7 +43,9 @@ SOURCES += \
     chips/resampler.cpp \
     tone_file.cpp \
     namedialog.cpp \
-    widgets/custom_slider.cpp
+    widgets/custom_slider.cpp \
+    tone_converter.cpp \
+    tonetextdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -67,10 +69,13 @@ HEADERS += \
     tone.hpp \
     tone_file.hpp \
     namedialog.h \
-    widgets/custom_slider.h
+    widgets/custom_slider.h \
+    tone_converter.hpp \
+    tonetextdialog.h
 
 FORMS += \
         mainwindow.ui \
     widgets/labeled_slider.ui \
     widgets/operator_sliders.ui \
-    namedialog.ui
+    namedialog.ui \
+    tonetextdialog.ui

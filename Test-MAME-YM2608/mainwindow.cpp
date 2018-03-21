@@ -68,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     std::fill_n(jamKeyOnTableFM_, 17, false);
     std::fill_n(jamKeyOnTablePSG_, 17, false);
+
+    converter_.loadFormat("format.conf");
 }
 
 MainWindow::~MainWindow()
@@ -591,5 +593,17 @@ void MainWindow::on_nameButton_clicked()
         tone_->name = dialog.toneName().toStdString();
         if (!isEdit_) isEdit_ = true;
         setWindowTitle("YM2608 Tone Editor - " + dialog.toneName() + "*");
+    }
+}
+
+void MainWindow::on_actionConvert_To_Text_C_triggered()
+{
+    QString str = QString::fromStdString(converter_.convert(tone_.get()));
+    textDialog_.setText(str);
+    if (textDialog_.isHidden()) {
+        textDialog_.show();
+    }
+    else {
+        textDialog_.activateWindow();
     }
 }

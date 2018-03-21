@@ -4,13 +4,14 @@
 #include <QMainWindow>
 #include <QString>
 #include <QCloseEvent>
-#include <memory>
 #include "types.h"
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
 #include "parameter_state.hpp"
 #include "tone.hpp"
 #include "widgets/operator_sliders.h"
+#include "tone_converter.hpp"
+#include "tonetextdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +42,9 @@ private:
 
     OperatorSliders* sliders_[4];
     bool isEdit_;
+
+    ToneConverter converter_;
+    ToneTextDialog textDialog_;
 
     void SetFMTone(int channel);
     void SetFMKeyOn(int channel);
@@ -97,6 +101,7 @@ private slots:
     void on_actionExit_E_triggered();
     void on_actionSave_As_triggered();
     void on_nameButton_clicked();
+    void on_actionConvert_To_Text_C_triggered();
 
 private:
     bool saveTone();
