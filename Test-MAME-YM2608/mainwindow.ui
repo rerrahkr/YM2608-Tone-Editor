@@ -146,7 +146,9 @@
     <addaction name="separator"/>
     <addaction name="actionConvert_To_Text_C"/>
     <addaction name="separator"/>
-    <addaction name="actionExit_E"/>
+    <addaction name="actionSetup_E"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit_X"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -161,9 +163,9 @@
     <string>Save(&amp;S)...</string>
    </property>
   </action>
-  <action name="actionExit_E">
+  <action name="actionExit_X">
    <property name="text">
-    <string>Exit(&amp;E)</string>
+    <string>Exit(&amp;X)</string>
    </property>
   </action>
   <action name="actionSave_As">
@@ -174,6 +176,11 @@
   <action name="actionConvert_To_Text_C">
    <property name="text">
     <string>Convert To Text(&amp;C)...</string>
+   </property>
+  </action>
+  <action name="actionSetup_E">
+   <property name="text">
+    <string>Setup(&amp;E)...</string>
    </property>
   </action>
  </widget>

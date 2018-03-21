@@ -45,7 +45,9 @@ SOURCES += \
     namedialog.cpp \
     widgets/custom_slider.cpp \
     tone_converter.cpp \
-    tonetextdialog.cpp
+    tonetextdialog.cpp \
+    setupdialog.cpp \
+    settings.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -71,11 +73,14 @@ HEADERS += \
     namedialog.h \
     widgets/custom_slider.h \
     tone_converter.hpp \
-    tonetextdialog.h
+    tonetextdialog.h \
+    setupdialog.h \
+    settings.hpp
 
 FORMS += \
         mainwindow.ui \
     widgets/labeled_slider.ui \
     widgets/operator_sliders.ui \
     namedialog.ui \
-    tonetextdialog.ui
+    tonetextdialog.ui \
+    setupdialog.ui
