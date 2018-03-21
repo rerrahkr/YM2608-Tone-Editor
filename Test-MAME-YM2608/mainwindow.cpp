@@ -8,14 +8,16 @@
 #include "chips/chip_def.hpp"
 #include "tone_file.hpp"
 #include "namedialog.h"
+#include "setupdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
+    settings_(),
     #ifdef SINC_INTERPOLATION
-    chip_(3993600 * 2, 0, 40),
+    chip_(3993600 * 2, settings_.getRate(), settings_.getDuration()),
     #else
-    chip_(3993600 * 2, 0),
+    chip_(3993600 * 2, settings_.getRate()),
     #endif
     audio_(chip_, chip_.getRate(), 40),
     octaveFM_(3),
@@ -541,7 +543,7 @@ void MainWindow::on_actionSave_S_triggered()
     saveTone();
 }
 
-void MainWindow::on_actionExit_E_triggered()
+void MainWindow::on_actionExit_X_triggered()
 {
     close();
 }
@@ -605,5 +607,21 @@ void MainWindow::on_actionConvert_To_Text_C_triggered()
     }
     else {
         textDialog_.activateWindow();
+    }
+}
+
+void MainWindow::on_actionSetup_E_triggered()
+{
+    SetupDialog dialog(settings_, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        settings_.setDuration(dialog.duration());
+        settings_.setRate(dialog.rate());
+
+        audio_.setDuration(settings_.getDuration());
+        #ifdef SINC_INTERPOLATION
+        chip_.setDuration(settings_.getDuration());
+        #endif
+        audio_.setRate(settings_.getRate());
+        chip_.setRate(settings_.getRate());
     }
 }

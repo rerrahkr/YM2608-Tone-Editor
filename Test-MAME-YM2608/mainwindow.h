@@ -12,6 +12,7 @@
 #include "widgets/operator_sliders.h"
 #include "tone_converter.hpp"
 #include "tonetextdialog.h"
+#include "settings.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,9 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+
+    Settings settings_;
+
     chip::OPNA chip_;
     AudioStream audio_;
 
@@ -98,10 +102,11 @@ private slots:
     void onParameterChanged(int op, const ParameterState& state);
     void on_actionOpen_O_triggered();
     void on_actionSave_S_triggered();
-    void on_actionExit_E_triggered();
+    void on_actionExit_X_triggered();
     void on_actionSave_As_triggered();
     void on_nameButton_clicked();
     void on_actionConvert_To_Text_C_triggered();
+    void on_actionSetup_E_triggered();
 
 private:
     bool saveTone();
