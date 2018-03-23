@@ -1,14 +1,25 @@
 #include "audio_stream_mixier.hpp"
 #include <algorithm>
 
+const size_t AudioStreamMixier::NTSC_ = 60;
+const size_t AudioStreamMixier::PAL_ = 50;
+
 AudioStreamMixier::AudioStreamMixier(chip::Chip& chip, uint32 rate, uint32 duration, QObject* parent) :
     QIODevice(parent),
     chip_(chip),
     rate_(rate),
     duration_(duration),
     bufferSampleSize_(rate * duration / 1000),
-    tickIntrCountNumer_((rate * 5) >> 2),
-    tickIntrCount_(0),
+    tickRate_(NTSC_),
+    tickIntrCount_(rate / tickRate_),
+    tickIntrCountRest_(0),
+    isPlaySong_(false),
+    specificTicksPerStep_(0),
+    executingTicksPerStep_(0),
+    tickCount_(0),
+    tempo_(0),
+    strictTicksPerStepByBpm_(0),
+    tickDifSum_(0),
     isFirstRead_(true)
 {
 }
@@ -38,7 +49,7 @@ void AudioStreamMixier::setRate(uint32 rate)
 {
     rate_ = rate;
     setBufferSampleSize(rate, duration_);
-    tickIntrCountNumer_ = (rate * 5) >> 2;
+    tickIntrCount_ = rate / tickRate_;
 }
 
 void AudioStreamMixier::setDuration(uint32 duration)
@@ -67,16 +78,36 @@ qint64 AudioStreamMixier::readData(char* data, qint64 maxlen)
 
     size_t count;
     while (requiredCount) {
-        if (!tickIntrCount_) {	// Read data
-            // Read pattern data in here
-            // 1 step = 6 ticks = 1/16 note
-            int bpm = 120;
-            tickIntrCount_ = tickIntrCountNumer_ / bpm;
+        if (!tickIntrCountRest_) {	// in tick point
+            tickIntrCountRest_ = tickIntrCount_;    // Set distance to next tick
+
+            if (isPlaySong_) {
+                if (executingTicksPerStep_) {   //  Read by tick
+                    // Dummy
+                }
+                else {  // Read by step (first tick in step)
+
+                    // Dummy set reading speed
+                    specificTicksPerStep_ = 6;
+                    tempo_ = 150;
+
+                    // Calculate executing ticks in step
+                    {
+                        strictTicksPerStepByBpm_ = 10.0 * tickRate_ * specificTicksPerStep_ / (tempo_ << 2);
+                        tickDifSum_ += strictTicksPerStepByBpm_ - static_cast<float>(specificTicksPerStep_);
+                        int castedTickDifSum = static_cast<int>(tickDifSum_);
+                        executingTicksPerStep_ = specificTicksPerStep_ + castedTickDifSum;
+                        tickDifSum_ -= castedTickDifSum;
+                    }
+                }
+
+                --executingTicksPerStep_;   // Mix by 1 tick
+            }
         }
 
-        count = std::min(tickIntrCount_, requiredCount);
+        count = std::min(tickIntrCountRest_, requiredCount);
         requiredCount -= count;
-        tickIntrCount_ -= count;
+        tickIntrCountRest_ -= count;
 
         chip_.mix(destPtr, count);
 
