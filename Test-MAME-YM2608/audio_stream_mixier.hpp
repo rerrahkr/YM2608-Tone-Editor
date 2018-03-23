@@ -26,9 +26,23 @@ private:
     size_t rate_;
     size_t duration_;
     qint64 bufferSampleSize_;
-    size_t tickIntrCountNumer_;
+
+    size_t tickRate_;
     size_t tickIntrCount_;
+    size_t tickIntrCountRest_;
+
+    bool isPlaySong_;
+    size_t specificTicksPerStep_;
+    size_t executingTicksPerStep_;
+    size_t tickCount_;
+    size_t tempo_;
+    float strictTicksPerStepByBpm_;
+    float tickDifSum_;
+
     bool isFirstRead_;
+
+    static const size_t NTSC_;
+    static const size_t PAL_;
 
     void setBufferSampleSize(uint32 rate, uint32 duration);
 };
