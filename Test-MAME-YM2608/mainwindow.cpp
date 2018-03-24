@@ -65,11 +65,11 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     chip_.setRegister(0x29, 0x80);	// Init interrupt
+    chip_.setRegister(0x07, 0xff);  // PSG mix
     InitPan();
-    SetFMTone(1);
-
-    std::fill_n(jamKeyOnTableFM_, 17, false);
-    std::fill_n(jamKeyOnTablePSG_, 17, false);
+    for (int i = 1; i <= 6; ++i) {
+        SetFMTone(i);
+    }
 
     converter_.loadFormat("format.conf");
 }
@@ -125,8 +125,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F12:   // Reset sound
         chip_.reset();
         chip_.setRegister(0x29, 0x80);	// Init interrupt
+        chip_.setRegister(0x07, 0xff);  // PSG mix
         InitPan();
-        SetFMTone(1);
+        for (int i = 1; i <= 6; ++i) {
+            SetFMTone(i);
+        }
         break;
     case Qt::Key_Escape:    close();                            break;
     default:                                                    break;
@@ -179,10 +182,39 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
 {
-    if (!isRepeat && !jamKeyOnTableFM_[jamKeyNumber]) {
-        SetFMKey(1, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
-        SetFMKeyOn(1);
-        jamKeyOnTableFM_[jamKeyNumber] = true;
+    if (!isRepeat) {
+        int ch = 1;
+
+        if (jamKeyOnVectorFM_.size()) {
+            // Search playable channel
+            uint32 flags = 0x00;
+            for (auto&& it : jamKeyOnVectorFM_) {
+                flags |= (it >> 8);
+            }
+
+            for (; ch <= 6; ++ch) {
+                if (!(flags & 0x01)) break;
+                flags >>= 1;
+            }
+
+            if (ch > 6) {   // In using all channel
+                uint32 delFlag = jamKeyOnVectorFM_.front() >> 8;
+                int delCh = 1;
+                for (; delCh <= 6; ++delCh) {
+                    if (delFlag & 0x01) break;
+                    delFlag >>= 1;
+                }
+                SetFMKeyOff(delCh);
+                jamKeyOnVectorFM_.erase(jamKeyOnVectorFM_.begin());
+                ch = delCh;
+            }
+        }
+
+        // Set key on
+        SetFMKey(ch, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+        SetFMKeyOn(ch);
+        uint32 value = (1 << (ch + 7)) | (octaveFM_ * 12 + jamKeyNumber);
+        jamKeyOnVectorFM_.push_back(value);
 
         pressedKeyNameFM_ = "FM: " + keyNumberToNameString(jamKeyNumber);
         pressedKeyNameFM_ += QString::number(octaveFM_ + jamKeyNumber / 12);
@@ -192,11 +224,39 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
 
 void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
 {
-    if (!isRepeat && !jamKeyOnTablePSG_[jamKeyNumber]) {
-        SetPSGKey(1, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
-        chip_.setRegister(0x08, 0x0f);
-        chip_.setRegister(0x07, 0x7e);
-        jamKeyOnTablePSG_[jamKeyNumber] = true;
+    if (!isRepeat) {
+        int ch = 1;
+
+        if (jamKeyOnVectorPSG_.size()) {
+            // Search playable channel
+            uint32 flags = 0x00;
+            for (auto&& it : jamKeyOnVectorPSG_) {
+                flags |= (it >> 8);
+            }
+
+            for (; ch <= 3; ++ch) {
+                if (!(flags & 0x01)) break;
+                flags >>= 1;
+            }
+
+            if (ch > 3) {   // In using all channel
+                uint32 delFlag = jamKeyOnVectorPSG_.front() >> 8;
+                int delCh = 1;
+                for (; delCh <= 3; ++delCh) {
+                    if (delFlag & 0x01) break;
+                    delFlag >>= 1;
+                }
+                SetPSGKeyOff(delCh);
+                jamKeyOnVectorPSG_.erase(jamKeyOnVectorPSG_.begin());
+                ch = delCh;
+            }
+        }
+
+        // Set key on
+        SetPSGKey(ch, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+        SetPSGKeyOn(ch);
+        uint32 value = (1 << (ch + 7)) | (octavePSG_ * 12 + jamKeyNumber);
+        jamKeyOnVectorPSG_.push_back(value);
 
         pressedKeyNamePSG_ = "PSG: " + keyNumberToNameString(jamKeyNumber);
         pressedKeyNamePSG_ += QString::number(octavePSG_ + jamKeyNumber / 12);
@@ -206,24 +266,48 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
 
 void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
 {
-    if (!isRepeat && jamKeyOnTableFM_[jamKeyNumber]) {
-        SetFMKeyOff(1);
-        jamKeyOnTableFM_[jamKeyNumber] = false;
+    if (!isRepeat) {
+        uint32 value = octaveFM_ * 12 + jamKeyNumber;
+        for (size_t i = 0; i < jamKeyOnVectorFM_.size(); ++i) {
+            if ((jamKeyOnVectorFM_[i] & 0x0ff) == value) {
+                uint32 flag = jamKeyOnVectorFM_[i] >> 8;
+                int ch = 1;
+                for (; ch <= 6; ++ch) {
+                    if (flag & 0x01) break;
+                    flag >>= 1;
+                }
 
-        pressedKeyNameFM_ = "FM: ";
-        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
+                SetFMKeyOff(ch);
+                jamKeyOnVectorFM_.erase(jamKeyOnVectorFM_.begin() + i);
+
+                pressedKeyNameFM_ = "FM: ";
+                ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
+                break;
+            }
+        }
     }
 }
 
 void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
 {
-    if (!isRepeat && jamKeyOnTablePSG_[jamKeyNumber]) {
-        chip_.setRegister(0x08, 0x00);
-        chip_.setRegister(0x07, 0x7f);
-        jamKeyOnTablePSG_[jamKeyNumber] = false;
+    if (!isRepeat) {
+        uint32 value = octavePSG_ * 12 + jamKeyNumber;
+        for (size_t i = 0; i < jamKeyOnVectorPSG_.size(); ++i) {
+            if ((jamKeyOnVectorPSG_[i] & 0x0ff) == value) {
+                uint32 flag = jamKeyOnVectorPSG_[i] >> 8;
+                int ch = 1;
+                for (; ch <= 3; ++ch) {
+                    if (flag & 0x01) break;
+                    flag >>= 1;
+                }
+                SetPSGKeyOff(ch);
+                jamKeyOnVectorPSG_.erase(jamKeyOnVectorPSG_.begin() + i);
 
-        pressedKeyNamePSG_ = "PSG: ";
-        ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
+                pressedKeyNamePSG_ = "PSG: ";
+                ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
+                break;
+            }
+        }
     }
 }
 
@@ -317,6 +401,15 @@ void MainWindow::SetFMKeyOn(int channel)
     chip_.setRegister(0x28, (slot << 4) | ch);
 }
 
+void MainWindow::SetPSGKeyOn(int channel)
+{
+    int chOffset = channel - 1;
+    chip_.setRegister(0x08 + chOffset, 0x0f);
+    uint32 reg = chip_.getRegister(0x07);
+    reg &= ~(0x01 << chOffset);
+    chip_.setRegister(0x07, reg);
+}
+
 void MainWindow::SetFMKeyOff(int channel)
 {
     uint32 slot = 0x00;
@@ -330,6 +423,16 @@ void MainWindow::SetFMKeyOff(int channel)
     case 6: ch = 0x06; break;
     }
     chip_.setRegister(0x28, (slot << 4) | ch);
+}
+
+void MainWindow::SetPSGKeyOff(int channel)
+{
+    int chOffset = channel - 1;
+    chip_.setRegister(0x08 + chOffset, 0x00);
+    chip_.setRegister(0x08 + chOffset, 0x0f);
+    uint32 reg = chip_.getRegister(0x07);
+    reg |= (0x01 << chOffset);
+    chip_.setRegister(0x07, reg);
 }
 
 void MainWindow::SetFMKey(int channel, uint32 octave, uint32 keynum)
@@ -419,9 +522,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::onALChanged(int value)
 {
-    tone_->AL = value;
-    uint32 reg = (tone_->FB << 3) | tone_->AL;
-    chip_.setRegister(0xb0, reg);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            uint32 chOffset = 0x100 * i + j;
+            tone_->AL = value;
+            uint32 reg = (tone_->FB << 3) | tone_->AL;
+            chip_.setRegister(0xb0 + chOffset, reg);
+        }
+    }
 
     if (!isEdit_) {
         isEdit_ = true;
@@ -431,9 +539,14 @@ void MainWindow::onALChanged(int value)
 
 void MainWindow::onFBChanged(int value)
 {
-    tone_->FB = value;
-    uint32 reg = (tone_->FB << 3) | tone_->AL;
-    chip_.setRegister(0xb0, reg);
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            uint32 chOffset = 0x100 * i + j;
+            tone_->FB = value;
+            uint32 reg = (tone_->FB << 3) | tone_->AL;
+            chip_.setRegister(0xb0 + chOffset, reg);
+        }
+    }
 
     if (!isEdit_) {
         isEdit_ = true;
@@ -455,60 +568,65 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
     default: opOffset = 0;   break;
     }
 
-    uint32 reg;
-    switch (state.getParametor()) {
-    case ParameterState::AR:
-        slot.AR = value;
-        reg = (slot.KS << 6) | slot.AR;
-        chip_.setRegister(0x50 + opOffset, reg);
-        break;
-    case ParameterState::DR:
-        slot.DR = value;
-        reg = (slot.AM << 7) | slot.DR;
-        chip_.setRegister(0x60 + opOffset, reg);
-        break;
-    case ParameterState::SR:
-        slot.SR = value;
-        reg = slot.SR;
-        chip_.setRegister(0x70 + opOffset, reg);
-        break;
-    case ParameterState::RR:
-        slot.RR = value;
-        reg = (slot.SL << 4) | slot.RR;
-        chip_.setRegister(0x80 + opOffset, reg);
-        break;
-    case ParameterState::SL:
-        slot.SL = value;
-        reg = (slot.SL << 4) | slot.RR;
-        chip_.setRegister(0x80 + opOffset, reg);
-        break;
-    case ParameterState::TL:
-        slot.TL = value;
-        reg = slot.TL;
-        chip_.setRegister(0x40 + opOffset, reg);
-        break;
-    case ParameterState::KS:
-        slot.KS = value;
-        reg = (slot.KS << 6) | slot.AR;
-        chip_.setRegister(0x50 + opOffset, reg);
-        break;
-    case ParameterState::ML:
-        slot.ML = value;
-        reg = (slot.DT << 4) | slot.ML;
-        chip_.setRegister(0x30 + opOffset, reg);
-        break;
-    case ParameterState::DT:
-        slot.DT = value;
-        reg = (slot.DT << 4) | slot.ML;
-        chip_.setRegister(0x30 + opOffset, reg);
-        break;
-    case ParameterState::AM:
-        slot.AM = value;
-        reg = (slot.AM << 7) | slot.DR;
-        chip_.setRegister(0x60 + opOffset, reg);
-        break;
-    default:
-        return;
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            uint32 chOffset = 0x100 * i + j;
+            uint32 reg;
+            switch (state.getParametor()) {
+            case ParameterState::AR:
+                slot.AR = value;
+                reg = (slot.KS << 6) | slot.AR;
+                chip_.setRegister(0x50 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::DR:
+                slot.DR = value;
+                reg = (slot.AM << 7) | slot.DR;
+                chip_.setRegister(0x60 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::SR:
+                slot.SR = value;
+                reg = slot.SR;
+                chip_.setRegister(0x70 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::RR:
+                slot.RR = value;
+                reg = (slot.SL << 4) | slot.RR;
+                chip_.setRegister(0x80 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::SL:
+                slot.SL = value;
+                reg = (slot.SL << 4) | slot.RR;
+                chip_.setRegister(0x80 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::TL:
+                slot.TL = value;
+                reg = slot.TL;
+                chip_.setRegister(0x40 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::KS:
+                slot.KS = value;
+                reg = (slot.KS << 6) | slot.AR;
+                chip_.setRegister(0x50 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::ML:
+                slot.ML = value;
+                reg = (slot.DT << 4) | slot.ML;
+                chip_.setRegister(0x30 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::DT:
+                slot.DT = value;
+                reg = (slot.DT << 4) | slot.ML;
+                chip_.setRegister(0x30 + chOffset + opOffset, reg);
+                break;
+            case ParameterState::AM:
+                slot.AM = value;
+                reg = (slot.AM << 7) | slot.DR;
+                chip_.setRegister(0x60 + chOffset + opOffset, reg);
+                break;
+            default:
+                return;
+            }
+        }
     }
 
     if (!isEdit_) {
@@ -534,7 +652,9 @@ void MainWindow::on_actionOpen_O_triggered()
     QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), "FM tone file (*.fmt)");
     if (!file.isNull()) {
         tone_ = ToneFile::read(file.toStdString());
-        SetFMTone(1);
+        for (int i = 1; i <= 6; ++i) {
+            SetFMTone(i);
+        }
     }
 }
 
