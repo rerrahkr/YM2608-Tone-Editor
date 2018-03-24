@@ -1,4 +1,5 @@
 #include "custom_slider.h"
+#include <QDebug>
 
 CustomSlider::CustomSlider(QWidget *parent) : QSlider(parent) {}
 
@@ -8,7 +9,12 @@ void CustomSlider::mousePressEvent(QMouseEvent *ev)
 {
     if (ev->button() == Qt::LeftButton)
     {
-        setValue(minimum() + (maximum() - minimum()) * (height() - ev->y()) / height());
+        if (orientation() == Qt::Vertical) {
+            setValue(minimum() + (maximum() - minimum()) * (height() - ev->y()) / height());
+        }
+        else /* horizontal */ {
+            setValue(maximum() - (maximum() - minimum()) * (width() - ev->x()) / width());
+        }
     }
     QSlider::mousePressEvent(ev);
 }
