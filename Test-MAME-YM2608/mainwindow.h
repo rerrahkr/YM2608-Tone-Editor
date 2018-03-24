@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <vector>
 #include <QMainWindow>
 #include <QString>
 #include <QCloseEvent>
@@ -41,7 +42,7 @@ private:
     std::unique_ptr<Tone> tone_;
 
     int octaveFM_, octavePSG_;
-    bool jamKeyOnTableFM_[17], jamKeyOnTablePSG_[17];
+    std::vector<uint32> jamKeyOnVectorFM_, jamKeyOnVectorPSG_;
     QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
     OperatorSliders* sliders_[4];
@@ -52,7 +53,9 @@ private:
 
     void SetFMTone(int channel);
     void SetFMKeyOn(int channel);
+    void SetPSGKeyOn(int channel);
     void SetFMKeyOff(int channel);
+    void SetPSGKeyOff(int channel);
     void SetFMKey(int channel, uint32 octave, uint32 keynum);
     void SetPSGKey(int channel, uint32 octave, uint32 keynum);
     void InitPan();

@@ -98,8 +98,8 @@ namespace chip
 
 		/*VolumeRatio_[FM] = maxAmplitude_ / defaultFMAmplitude_ * std::pow(10, fmdB / 20);
 		VolumeRatio_[PSG] = maxAmplitude_ / defaultPSGAmplitude_ * std::pow(10, psgdB / 20);*/
-		volumeRatio_[FM] = 1;
-		volumeRatio_[PSG] = 1;
+        volumeRatio_[FM] = 0.2;
+        volumeRatio_[PSG] = 0.2;
 	}
 
 	void OPNA::mix(int16* stream, size_t nSamples)
