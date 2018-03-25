@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     chip_.setRegister(0x29, 0x80);	// Init interrupt
     chip_.setRegister(0x07, 0xff);  // PSG mix
+    chip_.setRegister(0x11, 0x3f);  // Drum total volume
     InitPan();
     for (int i = 1; i <= 6; ++i) {
         SetFMTone(i);
@@ -122,10 +123,35 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     case Qt::Key_F2:		if (octaveFM_ < 7)	++octaveFM_;	break;
     case Qt::Key_F3:		if (octavePSG_ > 1)	--octavePSG_;   break;
     case Qt::Key_F4:        if (octavePSG_ < 6)	++octavePSG_;	break;
+    case Qt::Key_F5:    // Bass drum
+        chip_.setRegister(0x18, 0xdf);
+        chip_.setRegister(0x10, 0x01);
+        break;
+    case Qt::Key_F6:    // Snare drum
+        chip_.setRegister(0x19, 0xdf);
+        chip_.setRegister(0x10, 0x02);
+        break;
+    case Qt::Key_F7:    // Top cymbal
+        chip_.setRegister(0x1a, 0xdf);
+        chip_.setRegister(0x10, 0x04);
+        break;
+    case Qt::Key_F8:    // Hi hat
+        chip_.setRegister(0x1b, 0xdf);
+        chip_.setRegister(0x10, 0x08);
+        break;
+    case Qt::Key_F9:    // Tomtom
+        chip_.setRegister(0x1c, 0xdf);
+        chip_.setRegister(0x10, 0x10);
+        break;
+    case Qt::Key_F10:    // Rim shot
+        chip_.setRegister(0x1d, 0xdf);
+        chip_.setRegister(0x10, 0x20);
+        break;
     case Qt::Key_F12:   // Reset sound
         chip_.reset();
         chip_.setRegister(0x29, 0x80);	// Init interrupt
         chip_.setRegister(0x07, 0xff);  // PSG mix
+        chip_.setRegister(0x11, 0x3f);  // Drum total volume
         InitPan();
         for (int i = 1; i <= 6; ++i) {
             SetFMTone(i);
