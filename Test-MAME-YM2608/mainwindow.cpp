@@ -455,7 +455,6 @@ void MainWindow::SetPSGKeyOff(int channel)
 {
     int chOffset = channel - 1;
     chip_.setRegister(0x08 + chOffset, 0x00);
-    chip_.setRegister(0x08 + chOffset, 0x0f);
     uint32 reg = chip_.getRegister(0x07);
     reg |= (0x01 << chOffset);
     chip_.setRegister(0x07, reg);
