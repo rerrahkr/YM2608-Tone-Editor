@@ -42,7 +42,7 @@ private:
     std::unique_ptr<Tone> tone_;
 
     int octaveFM_, octavePSG_;
-    std::vector<uint32> jamKeyOnVectorFM_, jamKeyOnVectorPSG_;
+    std::vector<uint32> jamKeyOnTableFM_, jamKeyOnTablePSG_;
     QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
     OperatorSliders* sliders_[4];

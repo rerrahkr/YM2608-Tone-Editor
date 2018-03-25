@@ -156,6 +156,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         for (int i = 1; i <= 6; ++i) {
             SetFMTone(i);
         }
+		// Clear key on table
+		jamKeyOnTableFM_.clear();
+		jamKeyOnTablePSG_.clear();
         break;
     case Qt::Key_Escape:    close();                            break;
     default:                                                    break;
@@ -211,10 +214,10 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
     if (!isRepeat) {
         int ch = 1;
 
-        if (jamKeyOnVectorFM_.size()) {
+		if (jamKeyOnTableFM_.size()) {
             // Search playable channel
             uint32 flags = 0x00;
-            for (auto&& it : jamKeyOnVectorFM_) {
+			for (auto&& it : jamKeyOnTableFM_) {
                 flags |= (it >> 8);
             }
 
@@ -224,14 +227,14 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
             }
 
             if (ch > 6) {   // In using all channel
-                uint32 delFlag = jamKeyOnVectorFM_.front() >> 8;
+				uint32 delFlag = jamKeyOnTableFM_.front() >> 8;
                 int delCh = 1;
                 for (; delCh <= 6; ++delCh) {
                     if (delFlag & 0x01) break;
                     delFlag >>= 1;
                 }
                 SetFMKeyOff(delCh);
-                jamKeyOnVectorFM_.erase(jamKeyOnVectorFM_.begin());
+				jamKeyOnTableFM_.erase(jamKeyOnTableFM_.begin());
                 ch = delCh;
             }
         }
@@ -240,7 +243,7 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
         SetFMKey(ch, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetFMKeyOn(ch);
         uint32 value = (1 << (ch + 7)) | (octaveFM_ * 12 + jamKeyNumber);
-        jamKeyOnVectorFM_.push_back(value);
+		jamKeyOnTableFM_.push_back(value);
 
         pressedKeyNameFM_ = "FM: " + keyNumberToNameString(jamKeyNumber);
         pressedKeyNameFM_ += QString::number(octaveFM_ + jamKeyNumber / 12);
@@ -253,10 +256,10 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
     if (!isRepeat) {
         int ch = 1;
 
-        if (jamKeyOnVectorPSG_.size()) {
+		if (jamKeyOnTablePSG_.size()) {
             // Search playable channel
             uint32 flags = 0x00;
-            for (auto&& it : jamKeyOnVectorPSG_) {
+			for (auto&& it : jamKeyOnTablePSG_) {
                 flags |= (it >> 8);
             }
 
@@ -266,14 +269,14 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
             }
 
             if (ch > 3) {   // In using all channel
-                uint32 delFlag = jamKeyOnVectorPSG_.front() >> 8;
+				uint32 delFlag = jamKeyOnTablePSG_.front() >> 8;
                 int delCh = 1;
                 for (; delCh <= 3; ++delCh) {
                     if (delFlag & 0x01) break;
                     delFlag >>= 1;
                 }
                 SetPSGKeyOff(delCh);
-                jamKeyOnVectorPSG_.erase(jamKeyOnVectorPSG_.begin());
+				jamKeyOnTablePSG_.erase(jamKeyOnTablePSG_.begin());
                 ch = delCh;
             }
         }
@@ -282,7 +285,7 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
         SetPSGKey(ch, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetPSGKeyOn(ch);
         uint32 value = (1 << (ch + 7)) | (octavePSG_ * 12 + jamKeyNumber);
-        jamKeyOnVectorPSG_.push_back(value);
+		jamKeyOnTablePSG_.push_back(value);
 
         pressedKeyNamePSG_ = "PSG: " + keyNumberToNameString(jamKeyNumber);
         pressedKeyNamePSG_ += QString::number(octavePSG_ + jamKeyNumber / 12);
@@ -294,9 +297,9 @@ void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
         uint32 value = octaveFM_ * 12 + jamKeyNumber;
-        for (size_t i = 0; i < jamKeyOnVectorFM_.size(); ++i) {
-            if ((jamKeyOnVectorFM_[i] & 0x0ff) == value) {
-                uint32 flag = jamKeyOnVectorFM_[i] >> 8;
+		for (size_t i = 0; i < jamKeyOnTableFM_.size(); ++i) {
+			if ((jamKeyOnTableFM_[i] & 0x0ff) == value) {
+				uint32 flag = jamKeyOnTableFM_[i] >> 8;
                 int ch = 1;
                 for (; ch <= 6; ++ch) {
                     if (flag & 0x01) break;
@@ -304,7 +307,7 @@ void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
                 }
 
                 SetFMKeyOff(ch);
-                jamKeyOnVectorFM_.erase(jamKeyOnVectorFM_.begin() + i);
+				jamKeyOnTableFM_.erase(jamKeyOnTableFM_.begin() + i);
 
                 pressedKeyNameFM_ = "FM: ";
                 ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
@@ -318,16 +321,16 @@ void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
         uint32 value = octavePSG_ * 12 + jamKeyNumber;
-        for (size_t i = 0; i < jamKeyOnVectorPSG_.size(); ++i) {
-            if ((jamKeyOnVectorPSG_[i] & 0x0ff) == value) {
-                uint32 flag = jamKeyOnVectorPSG_[i] >> 8;
+		for (size_t i = 0; i < jamKeyOnTablePSG_.size(); ++i) {
+			if ((jamKeyOnTablePSG_[i] & 0x0ff) == value) {
+				uint32 flag = jamKeyOnTablePSG_[i] >> 8;
                 int ch = 1;
                 for (; ch <= 3; ++ch) {
                     if (flag & 0x01) break;
                     flag >>= 1;
                 }
                 SetPSGKeyOff(ch);
-                jamKeyOnVectorPSG_.erase(jamKeyOnVectorPSG_.begin() + i);
+				jamKeyOnTablePSG_.erase(jamKeyOnTablePSG_.begin() + i);
 
                 pressedKeyNamePSG_ = "PSG: ";
                 ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
