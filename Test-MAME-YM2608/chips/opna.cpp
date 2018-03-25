@@ -98,8 +98,8 @@ namespace chip
 
 		/*VolumeRatio_[FM] = maxAmplitude_ / defaultFMAmplitude_ * std::pow(10, fmdB / 20);
 		VolumeRatio_[PSG] = maxAmplitude_ / defaultPSGAmplitude_ * std::pow(10, psgdB / 20);*/
-        volumeRatio_[FM] = 0.2;
-        volumeRatio_[PSG] = 0.2;
+		volumeRatio_[FM] = 0.25;
+		volumeRatio_[PSG] = 0.25;
 	}
 
 	void OPNA::mix(int16* stream, size_t nSamples)
@@ -128,10 +128,10 @@ namespace chip
 			ym2608_stream_update_ay(id_, buffer_[PSG], intrSize);
 			bufPSG = resampler_[PSG].interpolate(buffer_[PSG], nSamples, intrSize);
 		}
-
 		for (size_t i = 0; i < nSamples; ++i) {
 			for (int pan = LEFT; pan <= RIGHT; ++pan) {
-				*stream++ = static_cast<int16>(volumeRatio_[FM] * bufFM[pan][i] + volumeRatio_[PSG] * bufPSG[pan][i]);
+				float s = volumeRatio_[FM] * bufFM[pan][i] + volumeRatio_[PSG] * bufPSG[pan][i];
+				*stream++ = static_cast<int16>(clamp(s, -32768.0f, 32767.0f));
 			}
 		}
 	}
