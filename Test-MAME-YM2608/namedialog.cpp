@@ -6,6 +6,10 @@ NameDialog::NameDialog(QWidget *parent) :
     ui(new Ui::NameDialog)
 {
     ui->setupUi(this);
+
+	setFixedSize(size());
+	setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 }
 
 NameDialog::~NameDialog()

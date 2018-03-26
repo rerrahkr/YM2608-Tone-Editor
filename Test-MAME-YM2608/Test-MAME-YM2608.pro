@@ -8,7 +8,7 @@ QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Test-MAME-YM2608
+TARGET = YM2608ToneEditor
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -47,7 +47,8 @@ SOURCES += \
     tone_converter.cpp \
     tonetextdialog.cpp \
     setupdialog.cpp \
-    settings.cpp
+    settings.cpp \
+    aboutdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -75,7 +76,8 @@ HEADERS += \
     tone_converter.hpp \
     tonetextdialog.h \
     setupdialog.h \
-    settings.hpp
+    settings.hpp \
+    aboutdialog.h
 
 FORMS += \
         mainwindow.ui \
@@ -83,4 +85,5 @@ FORMS += \
     widgets/operator_sliders.ui \
     namedialog.ui \
     tonetextdialog.ui \
-    setupdialog.ui
+    setupdialog.ui \
+    aboutdialog.ui

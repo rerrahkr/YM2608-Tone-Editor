@@ -9,6 +9,7 @@
 #include "tone_file.hpp"
 #include "namedialog.h"
 #include "setupdialog.h"
+#include "aboutdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -772,4 +773,10 @@ void MainWindow::on_actionSetup_E_triggered()
         audio_.setRate(settings_.getRate());
         chip_.setRate(settings_.getRate());
     }
+}
+
+void MainWindow::on_actionAbout_A_triggered()
+{
+		AboutDialog dialog;
+		dialog.exec();
 }
