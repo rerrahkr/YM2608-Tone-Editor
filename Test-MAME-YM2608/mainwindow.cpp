@@ -678,7 +678,7 @@ void MainWindow::on_actionOpen_O_triggered()
        }
     }
 
-    QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), "FM tone file (*.fmt)");
+	QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), "FM tone file (*.tone)");
     if (!file.isNull()) {
         tone_ = ToneFile::read(file.toStdString());
         for (int i = 1; i <= 6; ++i) {
@@ -724,7 +724,7 @@ bool MainWindow::saveTone()
 
 bool MainWindow::saveToneAs()
 {
-    QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), "FM tone file (*.fmt)");
+	QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), "FM tone file (*.tone)");
     if (file.isNull()) return false;
 
     tone_->path = file.toStdString();
