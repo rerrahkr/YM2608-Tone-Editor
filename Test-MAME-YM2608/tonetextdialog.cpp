@@ -6,6 +6,8 @@ ToneTextDialog::ToneTextDialog(QWidget *parent) :
     ui(new Ui::ToneTextDialog)
 {
     ui->setupUi(this);
+
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 }
 
 void ToneTextDialog::setText(QString text)

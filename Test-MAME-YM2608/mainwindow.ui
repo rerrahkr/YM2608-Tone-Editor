@@ -150,7 +150,14 @@
     <addaction name="separator"/>
     <addaction name="actionExit_X"/>
    </widget>
+   <widget class="QMenu" name="menuHelp_H">
+    <property name="title">
+     <string>Help(&amp;H)</string>
+    </property>
+    <addaction name="actionAbout_A"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuHelp_H"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen_O">
@@ -181,6 +188,11 @@
   <action name="actionSetup_E">
    <property name="text">
     <string>Setup(&amp;E)...</string>
+   </property>
+  </action>
+  <action name="actionAbout_A">
+   <property name="text">
+    <string>About(&amp;A)...</string>
    </property>
   </action>
  </widget>

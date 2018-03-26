@@ -9,6 +9,10 @@ SetupDialog::SetupDialog(Settings& settings, QWidget *parent) :
 {
     ui->setupUi(this);
 
+	setFixedSize(size());
+	setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+
     rateMap_[ui->buttonGroup->id(ui->radioButton44100)] = 44100;
     rateMap_[ui->buttonGroup->id(ui->radioButton48000)] = 48000;
     rateMap_[ui->buttonGroup->id(ui->radioButton110933)] = 110933;

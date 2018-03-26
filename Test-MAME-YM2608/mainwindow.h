@@ -110,6 +110,7 @@ private slots:
     void on_nameButton_clicked();
     void on_actionConvert_To_Text_C_triggered();
     void on_actionSetup_E_triggered();
+	void on_actionAbout_A_triggered();
 
 private:
     bool saveTone();
