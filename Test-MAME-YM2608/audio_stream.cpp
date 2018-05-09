@@ -1,7 +1,7 @@
 #include "audio_stream.hpp"
 #include <QSysInfo>
 
-AudioStream::AudioStream(chip::Chip& chip, uint32 rate, uint32 duration) :
+AudioStream::AudioStream(chip::Chip& chip, uint32_t rate, uint32_t duration) :
     chip_(chip)
 {
     format_.setByteOrder(QAudioFormat::Endian(QSysInfo::ByteOrder));
@@ -21,7 +21,7 @@ AudioStream::~AudioStream()
     stop();
 }
 
-void AudioStream::setRate(uint32 rate)
+void AudioStream::setRate(uint32_t rate)
 {
     stop();
     format_.setSampleRate(rate);
@@ -30,7 +30,7 @@ void AudioStream::setRate(uint32 rate)
     start();
 }
 
-void AudioStream::setDuration(uint32 duration)
+void AudioStream::setDuration(uint32_t duration)
 {
     stop();
     mixer_->setDuration(duration);

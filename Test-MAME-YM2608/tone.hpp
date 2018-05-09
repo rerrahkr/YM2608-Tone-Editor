@@ -1,25 +1,25 @@
 #pragma once
 
 #include <string>
-#include "types.h"
+#include <cstdint>
 
 struct Operator {
-    uint8 AR;
-    uint8 DR;
-    uint8 SR;
-    uint8 RR;
-    uint8 SL;
-    uint8 TL;
-    uint8 KS;
-    uint8 ML;
-    uint8 DT;
-    uint8 AM;
+	uint8_t AR;
+	uint8_t DR;
+	uint8_t SR;
+	uint8_t RR;
+	uint8_t SL;
+	uint8_t TL;
+	uint8_t KS;
+	uint8_t ML;
+	uint8_t DT;
+	uint8_t AM;
 };
 
 struct Tone {
     std::string name;
     std::string path;
-    uint8 AL;
-    uint8 FB;
+	uint8_t AL;
+	uint8_t FB;
     Operator op[4];
 };

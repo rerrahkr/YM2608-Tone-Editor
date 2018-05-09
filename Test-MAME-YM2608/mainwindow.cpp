@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <algorithm>
 #include <fstream>
+#include <cstdint>
 #include "chips/chip_def.hpp"
 #include "tone_file.hpp"
 #include "namedialog.h"
@@ -210,14 +211,14 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 }
 
 
-void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
+void MainWindow::JamKeyOnFM(int jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
         int ch = 1;
 
 		if (jamKeyOnTableFM_.size()) {
             // Search playable channel
-            uint32 flags = 0x00;
+			int flags = 0x00;
 			for (auto&& it : jamKeyOnTableFM_) {
                 flags |= (it >> 8);
             }
@@ -228,7 +229,7 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
             }
 
             if (ch > 6) {   // In using all channel
-				uint32 delFlag = jamKeyOnTableFM_.front() >> 8;
+				int delFlag = jamKeyOnTableFM_.front() >> 8;
                 int delCh = 1;
                 for (; delCh <= 6; ++delCh) {
                     if (delFlag & 0x01) break;
@@ -243,7 +244,7 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
         // Set key on
         SetFMKey(ch, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetFMKeyOn(ch);
-        uint32 value = (1 << (ch + 7)) | (octaveFM_ * 12 + jamKeyNumber);
+		int value = (1 << (ch + 7)) | (octaveFM_ * 12 + jamKeyNumber);
 		jamKeyOnTableFM_.push_back(value);
 
         pressedKeyNameFM_ = "FM: " + keyNumberToNameString(jamKeyNumber);
@@ -252,14 +253,14 @@ void MainWindow::JamKeyOnFM(uint32 jamKeyNumber, bool isRepeat)
     }
 }
 
-void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
+void MainWindow::JamKeyOnPSG(int jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
         int ch = 1;
 
 		if (jamKeyOnTablePSG_.size()) {
             // Search playable channel
-            uint32 flags = 0x00;
+			int flags = 0x00;
 			for (auto&& it : jamKeyOnTablePSG_) {
                 flags |= (it >> 8);
             }
@@ -270,7 +271,7 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
             }
 
             if (ch > 3) {   // In using all channel
-				uint32 delFlag = jamKeyOnTablePSG_.front() >> 8;
+				int delFlag = jamKeyOnTablePSG_.front() >> 8;
                 int delCh = 1;
                 for (; delCh <= 3; ++delCh) {
                     if (delFlag & 0x01) break;
@@ -285,7 +286,7 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
         // Set key on
         SetPSGKey(ch, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
         SetPSGKeyOn(ch);
-        uint32 value = (1 << (ch + 7)) | (octavePSG_ * 12 + jamKeyNumber);
+		int value = (1 << (ch + 7)) | (octavePSG_ * 12 + jamKeyNumber);
 		jamKeyOnTablePSG_.push_back(value);
 
         pressedKeyNamePSG_ = "PSG: " + keyNumberToNameString(jamKeyNumber);
@@ -294,13 +295,13 @@ void MainWindow::JamKeyOnPSG(uint32 jamKeyNumber, bool isRepeat)
     }
 }
 
-void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
+void MainWindow::JamKeyOffFM(int jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
-        uint32 value = octaveFM_ * 12 + jamKeyNumber;
+		int value = octaveFM_ * 12 + jamKeyNumber;
 		for (size_t i = 0; i < jamKeyOnTableFM_.size(); ++i) {
 			if ((jamKeyOnTableFM_[i] & 0x0ff) == value) {
-				uint32 flag = jamKeyOnTableFM_[i] >> 8;
+				int flag = jamKeyOnTableFM_[i] >> 8;
                 int ch = 1;
                 for (; ch <= 6; ++ch) {
                     if (flag & 0x01) break;
@@ -318,13 +319,13 @@ void MainWindow::JamKeyOffFM(uint32 jamKeyNumber, bool isRepeat)
     }
 }
 
-void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
+void MainWindow::JamKeyOffPSG(int jamKeyNumber, bool isRepeat)
 {
     if (!isRepeat) {
-        uint32 value = octavePSG_ * 12 + jamKeyNumber;
+		int value = octavePSG_ * 12 + jamKeyNumber;
 		for (size_t i = 0; i < jamKeyOnTablePSG_.size(); ++i) {
 			if ((jamKeyOnTablePSG_[i] & 0x0ff) == value) {
-				uint32 flag = jamKeyOnTablePSG_[i] >> 8;
+				int flag = jamKeyOnTablePSG_[i] >> 8;
                 int ch = 1;
                 for (; ch <= 3; ++ch) {
                     if (flag & 0x01) break;
@@ -344,7 +345,7 @@ void MainWindow::JamKeyOffPSG(uint32 jamKeyNumber, bool isRepeat)
 
 void MainWindow::SetFMTone(int channel)
 {
-    uint32 bch;	// Bank and channel offset
+	uint32_t bch;	// Bank and channel offset
     switch (channel) {
     case 1:
     case 2:
@@ -358,14 +359,14 @@ void MainWindow::SetFMTone(int channel)
         break;
     }
 
-    uint32 data;
+	uint8_t data;
 
     data = tone_->FB << 3;
     data += tone_->AL;
     chip_.setRegister(0xb0 + bch, data);
 
     for (int i = 0; i < 4; i++) {
-        uint32 offset;
+		uint32_t offset;
         switch (i) {
         case 0: offset = 0;  break;
         case 1: offset = 8;  break;
@@ -418,8 +419,8 @@ void MainWindow::SetFMTone(int channel)
 
 void MainWindow::SetFMKeyOn(int channel)
 {
-    uint32 slot = 0x0f;
-    uint32 ch;
+	uint32_t slot = 0x0f;
+	uint32_t ch;
     switch (channel) {
     case 1: ch = 0x00; break;
     case 2: ch = 0x01; break;
@@ -435,15 +436,15 @@ void MainWindow::SetPSGKeyOn(int channel)
 {
     int chOffset = channel - 1;
     chip_.setRegister(0x08 + chOffset, 0x0f);
-    uint32 reg = chip_.getRegister(0x07);
+	uint8_t reg = chip_.getRegister(0x07);
     reg &= ~(0x01 << chOffset);
     chip_.setRegister(0x07, reg);
 }
 
 void MainWindow::SetFMKeyOff(int channel)
 {
-    uint32 slot = 0x00;
-    uint32 ch;
+	uint8_t slot = 0x00;
+	uint8_t ch;
     switch (channel) {
     case 1: ch = 0x00; break;
     case 2: ch = 0x01; break;
@@ -457,16 +458,16 @@ void MainWindow::SetFMKeyOff(int channel)
 
 void MainWindow::SetPSGKeyOff(int channel)
 {
-    int chOffset = channel - 1;
+	uint32_t chOffset = channel - 1;
     chip_.setRegister(0x08 + chOffset, 0x00);
-    uint32 reg = chip_.getRegister(0x07);
+	uint8_t reg = chip_.getRegister(0x07);
     reg |= (0x01 << chOffset);
     chip_.setRegister(0x07, reg);
 }
 
-void MainWindow::SetFMKey(int channel, uint32 octave, uint32 keynum)
+void MainWindow::SetFMKey(int channel, int octave, int keynum)
 {
-    uint32 bch;	// Bank and channel offset
+	uint32_t bch;	// Bank and channel offset
     switch (channel) {
     case 1:
     case 2:
@@ -481,9 +482,9 @@ void MainWindow::SetFMKey(int channel, uint32 octave, uint32 keynum)
     }
 
     // A4(440Hz)
-    uint32 data;
-    uint32 block = octave;	// Octave
-    uint32 fnum = fm_tune_tbl[keynum];
+	uint8_t data;
+	uint32_t block = octave;	// Octave
+	uint32_t fnum = fm_tune_tbl[keynum];
     data = block << 3;
     data = data | (fnum >> 8);
     chip_.setRegister(0xa4 + bch, data);
@@ -491,11 +492,11 @@ void MainWindow::SetFMKey(int channel, uint32 octave, uint32 keynum)
     chip_.setRegister(0xa0 + bch, data);
 }
 
-void MainWindow::SetPSGKey(int channel, uint32 octave, uint32 keynum)
+void MainWindow::SetPSGKey(int channel, int octave, int keynum)
 {
-    uint32 offset = 2 * (channel - 1);
+	uint32_t offset = 2 * (channel - 1);
 
-    uint32 data = psg_tune_tbl[keynum];
+	uint32_t data = psg_tune_tbl[keynum];
     if (octave > 0) {
         data = (data + 1) >> octave;
     }
@@ -511,7 +512,7 @@ void MainWindow::InitPan()
     chip_.setRegister(0xb6, 0xc0);
 }
 
-QString MainWindow::keyNumberToNameString(uint32 jamKeyNumber)
+QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 {
     switch (jamKeyNumber) {
     case 0:
@@ -553,9 +554,9 @@ void MainWindow::onALChanged(int value)
 {
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 3; ++j) {
-            uint32 chOffset = 0x100 * i + j;
+			uint32_t chOffset = 0x100 * i + j;
             tone_->AL = value;
-            uint32 reg = (tone_->FB << 3) | tone_->AL;
+			uint8_t reg = (tone_->FB << 3) | tone_->AL;
             chip_.setRegister(0xb0 + chOffset, reg);
         }
     }
@@ -570,9 +571,9 @@ void MainWindow::onFBChanged(int value)
 {
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 3; ++j) {
-            uint32 chOffset = 0x100 * i + j;
+			uint32_t chOffset = 0x100 * i + j;
             tone_->FB = value;
-            uint32 reg = (tone_->FB << 3) | tone_->AL;
+			uint8_t reg = (tone_->FB << 3) | tone_->AL;
             chip_.setRegister(0xb0 + chOffset, reg);
         }
     }
@@ -585,10 +586,10 @@ void MainWindow::onFBChanged(int value)
 
 void MainWindow::onParameterChanged(int op, const ParameterState& state)
 {
-    uint32 value = state.getValue();
+	uint8_t value = state.getValue();
     Operator& slot = tone_->op[op - 1];
 
-    uint32 opOffset;
+	uint32_t opOffset;
     switch (op) {
     case 1: opOffset = 0x00; break;
     case 2: opOffset = 0x08; break;
@@ -599,8 +600,8 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
 
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 3; ++j) {
-            uint32 chOffset = 0x100 * i + j;
-            uint32 reg;
+			uint32_t chOffset = 0x100 * i + j;
+			uint8_t reg;
             switch (state.getParametor()) {
             case ParameterState::AR:
                 slot.AR = value;

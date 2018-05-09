@@ -10,17 +10,17 @@ namespace chip
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
 		#ifdef SINC_INTERPOLATION
-		OPNA(uint32 clock, uint32 rate, size_t maxDuration);
+		OPNA(int clock, int rate, size_t maxDuration);
 		#else
-		OPNA(uint32 clock, uint32 rate);
+		OPNA(int clock, int rate);
 		#endif
 		~OPNA();
 
 		void reset() override;
-		void setRegister(uint32 offset, uint32 value) override;
-		uint32 getRegister(uint32 offset) const override;
+		void setRegister(uint32_t offset, uint8_t value) override;
+		uint8_t getRegister(uint32_t offset) const override;
 		void setVolume(float dBFM, float dBPSG);	// NOT work
-		void mix(int16* stream, size_t nSamples) override;
+		void mix(int16_t* stream, size_t nSamples) override;
 
 	private:
 		static size_t count_;

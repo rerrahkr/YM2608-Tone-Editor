@@ -25,7 +25,7 @@ private slots:
 
 private:
     Ui::SetupDialog *ui;
-    std::map<int, unsigned int> rateMap_;
+	std::map<int, int> rateMap_;
 };
 
 #endif // SETUPDIALOG_H

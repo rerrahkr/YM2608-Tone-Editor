@@ -20,9 +20,9 @@ namespace chip
 	/*const int OPNA::DEF_AMP_PSG_ = 7250;*/
 
 	#ifdef SINC_INTERPOLATION
-	OPNA::OPNA(uint32 clock, uint32 rate, size_t maxDuration) :
+	OPNA::OPNA(int clock, int rate, size_t maxDuration) :
 	#else
-	OPNA::OPNA(uint32 clock, uint32 rate) :
+	OPNA::OPNA(int clock, int rate) :
 	#endif
 		Chip(count_++, clock, rate, 110933)	// autoRate = 110933: FM internal rate
 	{
@@ -61,7 +61,7 @@ namespace chip
 		device_reset_ym2608(id_);
 	}
 
-	void OPNA::setRegister(uint32 offset, uint32 value)
+	void OPNA::setRegister(uint32_t offset, uint8_t value)
 	{
 		std::lock_guard<std::mutex> lg(mutex_);
 
@@ -76,7 +76,7 @@ namespace chip
 		}
 	}
 
-	uint32 OPNA::getRegister(uint32 offset) const
+	uint8_t OPNA::getRegister(uint32_t offset) const
 	{
 		if (offset & 0x100) {
 			ym2608_control_port_b_w(id_, 2, offset & 0xff);
@@ -102,7 +102,7 @@ namespace chip
 		volumeRatio_[PSG] = 0.25;
 	}
 
-	void OPNA::mix(int16* stream, size_t nSamples)
+	void OPNA::mix(int16_t* stream, size_t nSamples)
 	{
 		std::lock_guard<std::mutex> lg(mutex_);
 		sample **bufFM, **bufPSG;
@@ -131,7 +131,7 @@ namespace chip
 		for (size_t i = 0; i < nSamples; ++i) {
 			for (int pan = LEFT; pan <= RIGHT; ++pan) {
 				float s = volumeRatio_[FM] * bufFM[pan][i] + volumeRatio_[PSG] * bufPSG[pan][i];
-				*stream++ = static_cast<int16>(clamp(s, -32768.0f, 32767.0f));
+				*stream++ = static_cast<int16_t>(clamp(s, -32768.0f, 32767.0f));
 			}
 		}
 	}

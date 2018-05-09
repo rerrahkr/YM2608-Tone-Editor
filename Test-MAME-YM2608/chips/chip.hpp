@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chip_def.hpp"
+#include <cstdint>
 #include <mutex>
 #include "../types.h"
 #include "resampler.hpp"
@@ -12,22 +13,22 @@ namespace chip
 	public:
 		// [rate]
 		// 0 = auto-set mode (set internal chip rate)
-		Chip(uint32 id, uint32 clock, uint32 rate, uint32 autoRate);
+		Chip(int id, int clock, int rate, int autoRate);
 		virtual ~Chip();
 
 		virtual void reset() = 0;
-		virtual void setRegister(uint32 offset, uint32 value) = 0;
-		virtual uint32 getRegister(uint32 offset) const = 0;
+		virtual void setRegister(uint32_t offset, uint8_t value) = 0;
+		virtual uint8_t getRegister(uint32_t offset) const = 0;
 
-		virtual void setRate(uint32 rate);
-		uint32 getRate() const;
+		virtual void setRate(int rate);
+		int getRate() const;
 
 		#ifdef SINC_INTERPOLATION
 		void setMaxDuration(size_t maxDuration);
 		#endif
 		
 		/*virtual void setVolume(float db) = 0;*/
-		virtual void mix(int16* stream, size_t nSamples) = 0;
+		virtual void mix(int16_t* stream, size_t nSamples) = 0;
 
 	protected:
 		const int id_;
@@ -50,6 +51,6 @@ namespace chip
 		void initResampler();
 		#endif
 
-		void funcSetRate(uint32 rate);
+		void funcSetRate(int rate);
 	};
 }

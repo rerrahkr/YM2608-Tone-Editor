@@ -11,11 +11,11 @@ class AudioStream
 {
 public:
     // duration: miliseconds
-    AudioStream(chip::Chip& chip, uint32 rate, uint32 duration);
+	AudioStream(chip::Chip& chip, uint32_t rate, uint32_t duration);
 	~AudioStream();
 
-    void setRate(uint32 rate);
-    void setDuration(uint32 duration);
+	void setRate(uint32_t rate);
+	void setDuration(uint32_t duration);
 
 private:
     chip::Chip& chip_;

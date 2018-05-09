@@ -18,12 +18,12 @@ namespace chip
 		~Resampler();
 
 		#ifdef SINC_INTERPOLATION
-		void init(uint32 srcRate, uint32 destRate, size_t maxDuration);
+		void init(int srcRate, int destRate, size_t maxDuration);
 		#else
-		void init(uint32 srcRate, uint32 destRate);
+		void init(int srcRate, int destRate);
 		#endif
 
-		void setDestRate(uint32 destRate);
+		void setDestRate(int destRate);
 		#ifdef SINC_INTERPOLATION
 		void setMaxDuration(size_t maxDuration);
 		#endif
