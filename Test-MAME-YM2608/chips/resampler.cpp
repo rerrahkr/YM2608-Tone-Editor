@@ -23,9 +23,9 @@ namespace chip
 	}
 
 	#ifdef SINC_INTERPOLATION
-	void Resampler::init(uint32 srcRate, uint32 destRate, size_t maxDuration)
+	void Resampler::init(int srcRate, int destRate, size_t maxDuration)
 	#else
-	void Resampler::init(uint32 srcRate, uint32 destRate)
+	void Resampler::init(int srcRate, int destRate)
 	#endif
 	{
 		srcRate_ = srcRate;
@@ -35,7 +35,7 @@ namespace chip
 		setDestRate(destRate);
 	}
 
-	void Resampler::setDestRate(uint32 destRate)
+	void Resampler::setDestRate(int destRate)
 	{
 		destRate_ = destRate;
 		rateRatio_ = static_cast<float>(srcRate_) / destRate;

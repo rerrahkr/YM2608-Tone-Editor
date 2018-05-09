@@ -9,9 +9,9 @@ Settings::Settings() :
     QSettings settings("settings.ini", QSettings::IniFormat);
 
     if (settings.contains("rate")) {
-        rate_ = settings.value("rate").toUInt();
+		rate_ = settings.value("rate").toInt();
         if (settings.contains("duration")) {
-            duration_ = settings.value("duration").toUInt();
+			duration_ = settings.value("duration").toInt();
         }
     }
 }
@@ -23,22 +23,22 @@ Settings::~Settings()
     settings.setValue("duration", QVariant::fromValue(duration_));
 }
 
-uint32 Settings::getRate() const
+int Settings::getRate() const
 {
     return rate_;
 }
 
-void Settings::setRate(uint32 rate)
+void Settings::setRate(int rate)
 {
     rate_ = rate;
 }
 
-uint32 Settings::getDuration() const
+int Settings::getDuration() const
 {
     return duration_;
 }
 
-void Settings::setDuration(uint32 duration)
+void Settings::setDuration(int duration)
 {
     duration_ = duration;
 }

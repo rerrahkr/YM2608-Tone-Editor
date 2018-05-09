@@ -1,19 +1,17 @@
 #pragma once
 
-#include "types.h"
-
 class Settings
 {
 public:
     Settings();
     ~Settings();
 
-    uint32 getRate() const;
-    void setRate(uint32 rate);
-    uint32 getDuration() const;
-    void setDuration(uint32 duration);
+	int getRate() const;
+	void setRate(int rate);
+	int getDuration() const;
+	void setDuration(int duration);
 
 private:
-    uint32 rate_;
-    uint32 duration_;
+	int rate_;
+	int duration_;
 };

@@ -2,21 +2,21 @@
 
 #include <QObject>
 #include <QIODevice>
-#include "types.h"
+#include <cstdint>
 #include "chips/chip.hpp"
 
 class AudioStreamMixier : public QIODevice
 {
 public:
-    AudioStreamMixier(chip::Chip& chip, uint32 rate, uint32 duration, QObject* parent = nullptr);
+	AudioStreamMixier(chip::Chip& chip, uint32_t rate, uint32_t duration, QObject* parent = nullptr);
     ~AudioStreamMixier();
 
     void start();
     void stop();
     bool hasRun();
 
-    void setRate(uint32 rate);
-    void setDuration(uint32 duration);
+	void setRate(uint32_t rate);
+	void setDuration(uint32_t duration);
 
     qint64 readData(char *data, qint64 maxlen) override;
     qint64 writeData(const char *data, qint64 len) override;
@@ -44,5 +44,5 @@ private:
     static const size_t NTSC_;
     static const size_t PAL_;
 
-    void setBufferSampleSize(uint32 rate, uint32 duration);
+	void setBufferSampleSize(uint32_t rate, uint32_t duration);
 };

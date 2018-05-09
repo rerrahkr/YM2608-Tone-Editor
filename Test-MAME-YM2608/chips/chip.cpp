@@ -20,7 +20,7 @@ namespace chip
 {
 	//const int Chip::MAX_AMP_ = 32767;	// half-max of int16
 
-	Chip::Chip(uint32 id, uint32 clock, uint32 rate, uint32 autoRate) :
+	Chip::Chip(int id, int clock, int rate, int autoRate) :
 		id_(id),
 		rate_(1),	// Dummy set
 		autoRate_(autoRate)
@@ -56,7 +56,7 @@ namespace chip
 		}
 	}
 
-	void Chip::setRate(uint32 rate)
+	void Chip::setRate(int rate)
 	{
 		std::lock_guard<std::mutex> lg(mutex_);
 
@@ -67,12 +67,12 @@ namespace chip
 		}
 	}
 
-	void Chip::funcSetRate(uint32 rate)
+	void Chip::funcSetRate(int rate)
 	{
 		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : autoRate_);
 	}
 
-	uint32 Chip::getRate() const
+	int Chip::getRate() const
 	{
 		return rate_;
 	}

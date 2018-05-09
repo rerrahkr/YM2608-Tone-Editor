@@ -1,28 +1,29 @@
 #ifndef __MAMEDEF_H__
 #define __MAMEDEF_H__
 
+#include <stdint.h>
 #include "../../types.h"
 
 // typedefs to use MAME's (U)INTxx types (copied from MAME\src\ods\odscomm.h)
 /* 8-bit values */
 //typedef unsigned char						UINT8;
 //typedef signed char 						INT8;
-typedef uint8						UINT8;
-typedef int8 						INT8;
+typedef uint8_t						UINT8;
+typedef int8_t 						INT8;
 
 
 /* 16-bit values */
 //typedef unsigned short						UINT16;
 //typedef signed short						INT16;
-typedef uint16						UINT16;
-typedef int16						INT16;
+typedef uint16_t					UINT16;
+typedef int16_t						INT16;
 
 /* 32-bit values */
 #ifndef _WINDOWS_H
 //typedef unsigned int						UINT32;
 //typedef signed int							INT32;
-typedef uint32						UINT32;
-typedef int32						INT32;
+typedef uint32_t					UINT32;
+typedef int32_t						INT32;
 #endif
 
 /* 64-bit values */

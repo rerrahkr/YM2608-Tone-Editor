@@ -4,7 +4,7 @@
 const size_t AudioStreamMixier::NTSC_ = 60;
 const size_t AudioStreamMixier::PAL_ = 50;
 
-AudioStreamMixier::AudioStreamMixier(chip::Chip& chip, uint32 rate, uint32 duration, QObject* parent) :
+AudioStreamMixier::AudioStreamMixier(chip::Chip& chip, uint32_t rate, uint32_t duration, QObject* parent) :
     QIODevice(parent),
     chip_(chip),
     rate_(rate),
@@ -45,20 +45,20 @@ bool AudioStreamMixier::hasRun()
     return isOpen();
 }
 
-void AudioStreamMixier::setRate(uint32 rate)
+void AudioStreamMixier::setRate(uint32_t rate)
 {
     rate_ = rate;
     setBufferSampleSize(rate, duration_);
     tickIntrCount_ = rate / tickRate_;
 }
 
-void AudioStreamMixier::setDuration(uint32 duration)
+void AudioStreamMixier::setDuration(uint32_t duration)
 {
     duration_ = duration;
     setBufferSampleSize(rate_, duration);
 }
 
-void  AudioStreamMixier::setBufferSampleSize(uint32 rate, uint32 duration)
+void  AudioStreamMixier::setBufferSampleSize(uint32_t rate, uint32_t duration)
 {
     bufferSampleSize_ = rate * duration / 1000;
 }
@@ -74,7 +74,7 @@ qint64 AudioStreamMixier::readData(char* data, qint64 maxlen)
         generatedCount = std::min(bufferSampleSize_, (maxlen >> 2));
     }
     size_t requiredCount = static_cast<size_t>(generatedCount);
-    int16* destPtr = reinterpret_cast<int16*>(data);
+	int16_t* destPtr = reinterpret_cast<int16_t*>(data);
 
     size_t count;
     while (requiredCount) {
