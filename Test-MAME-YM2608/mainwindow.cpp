@@ -705,8 +705,8 @@ void MainWindow::on_actionSave_As_triggered()
 
 bool MainWindow::saveTone()
 {
-    bool isExist;
-    {
+    bool isExist = false;
+    if (tone_->path != "./") {
         std::ifstream check(tone_->path, std::ios::in | std::ios::binary);
         isExist = check.is_open();
     }
@@ -727,6 +727,7 @@ bool MainWindow::saveToneAs()
 {
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), "FM tone file (*.tone)");
     if (file.isNull()) return false;
+    if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
     tone_->path = file.toStdString();
     ToneFile::write(tone_->path, tone_.get());
