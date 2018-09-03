@@ -1,9 +1,9 @@
 # YM2608 Tone Editor
 This is a tone editor of YM2608 FM synthesis chip (OPNA).  
-It enables to load and save tone data, and convert parameters to text.
+It enables to load and save tone data, read tone parameters from text and convert parameters to text.
 
 It will create two settings files automatically at the first run.
-* format.conf - specify text format of tone parameters
+* format.conf - specify text format to convert tone parameters
 * settings.ini - application settings (DO NOT EDIT)
 
 ### Keyboard
@@ -20,9 +20,10 @@ Z X CV B N M, . /
 F1, F2 is FM octave up/down, and F3, F4 is PSG octave up/down.  
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
-### Text conversion
+### Convert to text
 It enables to convert tone data to text formatted by format.conf. It is a text file containing some parameter macros.  
 This app parses it and replaces macros with tone parameters. It means that you can customize text output by editing format.conf.  
+You can edit the format in "Setup" -> "Output".  
 To copy tone parameters text, open "Convert to text" dialog ("File" -> "Convert To Text").
 
 #### Macro syntax
@@ -67,3 +68,8 @@ The app converts tone data to text like this:
 '@  31,  0,  4,  7,  0,  0,  0,  2,  0,  0
 '@   4,  5
 ```
+
+### Read from text
+It also enable to read tone data from text.  
+When you paste the tone data text in "Read text" dialog ("File" -> "Read Text"), this app reads digits from the text and set to tone parameters in the order specified by "Setup" -> "Input".  
+Note: This app reads digits in the order of appearance. This means that it also reads digits included in comments like tone name. Please remove the comments before reading.

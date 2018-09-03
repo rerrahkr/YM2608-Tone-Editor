@@ -43,12 +43,13 @@ SOURCES += \
     chips/resampler.cpp \
     tone_file.cpp \
     namedialog.cpp \
-    widgets/custom_slider.cpp \
     tone_converter.cpp \
     tonetextdialog.cpp \
     setupdialog.cpp \
     settings.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    sliderstyle.cpp \
+    readtextdialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -72,12 +73,13 @@ HEADERS += \
     tone.hpp \
     tone_file.hpp \
     namedialog.h \
-    widgets/custom_slider.h \
     tone_converter.hpp \
     tonetextdialog.h \
     setupdialog.h \
     settings.hpp \
-    aboutdialog.h
+    aboutdialog.h \
+    sliderstyle.hpp \
+    readtextdialog.hpp
 
 FORMS += \
         mainwindow.ui \
@@ -86,4 +88,5 @@ FORMS += \
     namedialog.ui \
     tonetextdialog.ui \
     setupdialog.ui \
-    aboutdialog.ui
+    aboutdialog.ui \
+    readtextdialog.ui

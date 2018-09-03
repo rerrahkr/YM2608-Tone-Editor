@@ -13,7 +13,7 @@ AudioStreamMixier::AudioStreamMixier(chip::Chip& chip, uint32_t rate, uint32_t d
     tickRate_(NTSC_),
     tickIntrCount_(rate / tickRate_),
     tickIntrCountRest_(0),
-    isPlaySong_(false),
+	isPlaySong_(false),
     specificTicksPerStep_(0),
     executingTicksPerStep_(0),
     tickCount_(0),
