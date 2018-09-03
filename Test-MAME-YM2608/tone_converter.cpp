@@ -6,6 +6,14 @@
 
 ToneConverter::ToneConverter() {}
 
+ToneConverter::~ToneConverter()
+{
+	std::ofstream ofs("format.conf", std::ios::out);
+	if (ofs) {
+		ofs << format_;
+	}
+}
+
 void ToneConverter::loadFormat(std::string path)
 {
     std::ifstream ifs(path, std::ios::in);
@@ -25,32 +33,42 @@ void ToneConverter::loadFormat(std::string path)
     }
 }
 
-std::string ToneConverter::convert(const Tone* tone)
+std::string ToneConverter::toneToText(const Tone* tone)
 {
     std::string out = format_;
-    out = replace(out, R"(%\{NO:(\d+)\})", 0);
-    out = replace(out, R"(%\{AL:(\d+)\})", tone->AL);
-    out = replace(out, R"(%\{FB:(\d+)\})", tone->FB);
-    out = replace(out, R"(%\{NAME\})", tone->name);
+	out = replaceMacroWithData(out, R"(%\{NO:(\d+)\})", 0);
+	out = replaceMacroWithData(out, R"(%\{AL:(\d+)\})", tone->AL);
+	out = replaceMacroWithData(out, R"(%\{FB:(\d+)\})", tone->FB);
+	out = replaceMacroWithData(out, R"(%\{NAME\})", tone->name);
     for (int i = 0; i < 4; ++i) {
         const Operator& op = tone->op[i];
         std::string num = std::to_string(i + 1);
-        out = replace(out, R"(%\{AR)" + num + R"(:(\d+)\})", op.AR);
-        out = replace(out, R"(%\{DR)" + num + R"(:(\d+)\})", op.DR);
-        out = replace(out, R"(%\{SR)" + num + R"(:(\d+)\})", op.SR);
-        out = replace(out, R"(%\{RR)" + num + R"(:(\d+)\})", op.RR);
-        out = replace(out, R"(%\{SL)" + num + R"(:(\d+)\})", op.SL);
-        out = replace(out, R"(%\{TL)" + num + R"(:(\d+)\})", op.TL);
-        out = replace(out, R"(%\{KS)" + num + R"(:(\d+)\})", op.KS);
-        out = replace(out, R"(%\{ML)" + num + R"(:(\d+)\})", op.ML);
-        out = replace(out, R"(%\{DT)" + num + R"(:(\d+)\})", op.DT);
-        out = replace(out, R"(%\{AM)" + num + R"(:(\d+)\})", op.AM);
+		out = replaceMacroWithData(out, R"(%\{AR)" + num + R"(:(\d+)\})", op.AR);
+		out = replaceMacroWithData(out, R"(%\{DR)" + num + R"(:(\d+)\})", op.DR);
+		out = replaceMacroWithData(out, R"(%\{SR)" + num + R"(:(\d+)\})", op.SR);
+		out = replaceMacroWithData(out, R"(%\{RR)" + num + R"(:(\d+)\})", op.RR);
+		out = replaceMacroWithData(out, R"(%\{SL)" + num + R"(:(\d+)\})", op.SL);
+		out = replaceMacroWithData(out, R"(%\{TL)" + num + R"(:(\d+)\})", op.TL);
+		out = replaceMacroWithData(out, R"(%\{KS)" + num + R"(:(\d+)\})", op.KS);
+		out = replaceMacroWithData(out, R"(%\{ML)" + num + R"(:(\d+)\})", op.ML);
+		out = replaceMacroWithData(out, R"(%\{DT)" + num + R"(:(\d+)\})", op.DT);
+		out = replaceMacroWithData(out, R"(%\{AM)" + num + R"(:(\d+)\})", op.AM);
     }
 
     return out;
 }
 
-std::string ToneConverter::replace(std::string src, const std::string regex, const int value)
+std::string ToneConverter::getOutputFormat() const
+{
+	return format_;
+}
+
+void ToneConverter::setOutputFormat(std::string str)
+{
+	format_ = str;
+}
+
+std::string ToneConverter::replaceMacroWithData(std::string src, const std::string regex, const int value)
 {
     std::regex re(regex);
     std::smatch matches;
@@ -58,7 +76,7 @@ std::string ToneConverter::replace(std::string src, const std::string regex, con
     Manip manip;
 
     while (std::regex_search(src, matches, re)) {
-        parse(matches[1].str(), manip);
+		parseMacro(matches[1].str(), manip);
         if (manip.isFill0) {
             ss << std::setw(manip.setw) << std::setfill('0') << value;
         }
@@ -75,12 +93,12 @@ std::string ToneConverter::replace(std::string src, const std::string regex, con
     return src;
 }
 
-std::string ToneConverter::replace(std::string src, const std::string regex, const std::string str)
+std::string ToneConverter::replaceMacroWithData(std::string src, const std::string regex, const std::string str)
 {
     return std::regex_replace(src, std::regex(regex), str);
 }
 
-void ToneConverter::parse(std::string src, Manip &manip)
+void ToneConverter::parseMacro(std::string src, Manip &manip)
 {
     if (src.size() > 1 && src[0] == '0') {
         manip.isFill0 = true;
@@ -91,4 +109,91 @@ void ToneConverter::parse(std::string src, Manip &manip)
     }
 
     manip.setw = std::stoi(src);
+}
+
+std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, std::vector<int> order)
+{
+	text = std::regex_replace(text, std::regex(R"(\D+)"), ",");
+	if (text.front() == ',') text.erase(text.begin());
+	if (text.back() == ',') text.erase(--text.end());
+
+	if (text.empty()) return std::unique_ptr<Tone>();
+
+	std::stringstream ss(text);
+	std::string tmp;
+	std::vector<std::string> vec;
+	while (std::getline(ss, tmp, ',')) {
+		vec.push_back(tmp);
+	}
+	if (vec.size() >= order.size()) {
+		std::unique_ptr<Tone> tone = std::make_unique<Tone>();
+		for (size_t i = 0; i < order.size(); ++i) {
+			int v = std::stoi(vec[i]);
+			switch (order[i]) {
+			case 0:	// Skip tone number
+				break;
+			case 1:
+				if (v < 8) tone->AL = v;
+				else return std::unique_ptr<Tone>();
+				break;
+			case 2:
+				if (v < 8) tone->FB = v;
+				else return std::unique_ptr<Tone>();
+				break;
+			default:
+			{
+				int t = order[i] - 3;
+				int o = t / 10;
+				switch (t % 10) {
+				case 0:
+					if (v < 32) tone->op[o].AR = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 1:
+					if (v < 32) tone->op[o].DR = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 2:
+					if (v < 32) tone->op[o].SR = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 3:
+					if (v < 16) tone->op[o].RR = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 4:
+					if (v < 16) tone->op[o].SL = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 5:
+					if (v < 127) tone->op[o].TL = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 6:
+					if (v < 4) tone->op[o].KS = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 7:
+					if (v < 16) tone->op[o].ML = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 8:
+					if (v < 8) tone->op[o].DT = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				case 9:
+					if (v < 2) tone->op[o].AM = v;
+					else return std::unique_ptr<Tone>();
+					break;
+				}
+				break;
+			}
+			}
+		}
+		tone->name = "";
+		return tone;
+	}
+	else {
+		return std::unique_ptr<Tone>();
+	}
 }

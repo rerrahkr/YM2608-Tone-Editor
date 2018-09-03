@@ -39,7 +39,7 @@
     </widget>
    </item>
    <item row="0" column="0" alignment="Qt::AlignHCenter">
-    <widget class="CustomSlider" name="verticalSlider">
+    <widget class="QSlider" name="verticalSlider">
      <property name="styleSheet">
       <string notr="true">QSlider::groove:vertical {
 	width: 4px;
@@ -74,13 +74,6 @@ QSlider::add-page:vertical {
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CustomSlider</class>
-   <extends>QSlider</extends>
-   <header>widgets/custom_slider.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

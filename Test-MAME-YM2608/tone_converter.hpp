@@ -1,14 +1,20 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 #include "tone.hpp"
 
 class ToneConverter
 {
 public:
     ToneConverter();
+	~ToneConverter();
     void loadFormat(std::string path);
-    std::string convert(const Tone* tone);
+	std::string toneToText(const Tone* tone);
+	std::string getOutputFormat() const;
+	void setOutputFormat(std::string str);
+	std::unique_ptr<Tone> textToTone(std::string text, std::vector<int> order);
 
 private:
     std::string format_;
@@ -24,7 +30,7 @@ private:
         }
     };
 
-    std::string replace(std::string src, const std::string regex, const int value);
-    std::string replace(std::string src, const std::string regex, const std::string str);
-    void parse(std::string src, Manip& manip);
+	std::string replaceMacroWithData(std::string src, const std::string regex, const int value);
+	std::string replaceMacroWithData(std::string src, const std::string regex, const std::string str);
+	void parseMacro(std::string src, Manip& manip);
 };

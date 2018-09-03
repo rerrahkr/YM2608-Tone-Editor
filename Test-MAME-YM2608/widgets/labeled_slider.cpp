@@ -1,5 +1,6 @@
 #include "labeled_slider.h"
 #include "ui_labeled_slider.h"
+#include "sliderstyle.hpp"
 
 LabeledSlider::LabeledSlider(QWidget *parent, const QString str) :
     QFrame(parent),
@@ -8,6 +9,7 @@ LabeledSlider::LabeledSlider(QWidget *parent, const QString str) :
 {
     ui->setupUi(this);
     ui->label->setText(str_ + QString::number(ui->verticalSlider->value()));
+	ui->verticalSlider->setStyle(new SliderStyle());
 }
 
 LabeledSlider::~LabeledSlider()

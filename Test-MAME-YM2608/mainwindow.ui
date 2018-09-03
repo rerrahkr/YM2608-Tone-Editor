@@ -133,7 +133,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -145,6 +145,7 @@
     <addaction name="actionSave_As"/>
     <addaction name="separator"/>
     <addaction name="actionConvert_To_Text_C"/>
+    <addaction name="actionRead_Text_R"/>
     <addaction name="separator"/>
     <addaction name="actionSetup_E"/>
     <addaction name="separator"/>
@@ -193,6 +194,11 @@
   <action name="actionAbout_A">
    <property name="text">
     <string>About(&amp;A)...</string>
+   </property>
+  </action>
+  <action name="actionRead_Text_R">
+   <property name="text">
+    <string>Read Text(&amp;R)...</string>
    </property>
   </action>
  </widget>

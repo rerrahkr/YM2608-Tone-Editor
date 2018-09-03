@@ -6,11 +6,13 @@
 #include <algorithm>
 #include <fstream>
 #include <cstdint>
+#include <utility>
 #include "chips/chip_def.hpp"
 #include "tone_file.hpp"
 #include "namedialog.h"
 #include "setupdialog.h"
 #include "aboutdialog.h"
+#include "readtextdialog.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -25,8 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     octaveFM_(3),
     octavePSG_(3),
     pressedKeyNameFM_("FM: "),
-    pressedKeyNamePSG_("PSG: "),
-    isEdit_(false)
+	pressedKeyNamePSG_("PSG: ")
 {
     ui->setupUi(this);
 
@@ -413,8 +414,8 @@ void MainWindow::SetFMTone(int channel)
         sliders_[i]->setParameterValue(ParameterState::AM, tone_->op[i].AM);
     }
 
-    isEdit_ = false;
-    setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
+	setWindowModified(false);
+	setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 }
 
 void MainWindow::SetFMKeyOn(int channel)
@@ -498,7 +499,7 @@ void MainWindow::SetPSGKey(int channel, int octave, int keynum)
 
 	uint32_t data = psg_tune_tbl[keynum];
     if (octave > 0) {
-        data = (data + 1) >> octave;
+		data = (data + 1) >> octave;
     }
 
     chip_.setRegister(0x00 + offset, data & 0xff);
@@ -538,7 +539,7 @@ QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if (isEdit_) {
+	if (isWindowModified()) {
        QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
        switch (mbox.exec()) {
        case QMessageBox::Yes:
@@ -561,10 +562,7 @@ void MainWindow::onALChanged(int value)
         }
     }
 
-    if (!isEdit_) {
-        isEdit_ = true;
-        setWindowTitle(windowTitle() + "*");
-    }
+	setWindowModified(true);
 }
 
 void MainWindow::onFBChanged(int value)
@@ -578,10 +576,7 @@ void MainWindow::onFBChanged(int value)
         }
     }
 
-    if (!isEdit_) {
-        isEdit_ = true;
-        setWindowTitle(windowTitle() + "*");
-    }
+	setWindowModified(true);
 }
 
 void MainWindow::onParameterChanged(int op, const ParameterState& state)
@@ -659,16 +654,13 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
         }
     }
 
-    if (!isEdit_) {
-        isEdit_ = true;
-        setWindowTitle(windowTitle() + "*");
-    }
+	setWindowModified(true);
 }
 
 
 void MainWindow::on_actionOpen_O_triggered()
 {
-    if (isEdit_) {
+	if (isWindowModified()) {
        QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
        switch (mbox.exec()) {
        case QMessageBox::Yes:
@@ -713,8 +705,8 @@ bool MainWindow::saveTone()
 
     if (isExist) {
         ToneFile::write(tone_->path, tone_.get());
-        isEdit_ = false;
-        setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
+		setWindowModified(false);
+		setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
     }
     else {
         return saveToneAs();
@@ -732,8 +724,8 @@ bool MainWindow::saveToneAs()
     tone_->path = file.toStdString();
     ToneFile::write(tone_->path, tone_.get());
 
-    isEdit_ = false;
-    setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name));
+	setWindowModified(false);
+	setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 
     return true;
 }
@@ -744,14 +736,14 @@ void MainWindow::on_nameButton_clicked()
     if (dialog.exec() == QDialog::Accepted) {
         ui->nameLabel->setText(dialog.toneName());
         tone_->name = dialog.toneName().toStdString();
-        if (!isEdit_) isEdit_ = true;
-        setWindowTitle("YM2608 Tone Editor - " + dialog.toneName() + "*");
+		setWindowModified(true);
+		setWindowTitle("YM2608 Tone Editor - " + dialog.toneName() + "[*]");
     }
 }
 
 void MainWindow::on_actionConvert_To_Text_C_triggered()
 {
-    QString str = QString::fromStdString(converter_.convert(tone_.get()));
+	QString str = QString::fromStdString(converter_.toneToText(tone_.get()));
     textDialog_.setText(str);
     if (textDialog_.isHidden()) {
         textDialog_.show();
@@ -763,9 +755,11 @@ void MainWindow::on_actionConvert_To_Text_C_triggered()
 
 void MainWindow::on_actionSetup_E_triggered()
 {
-    SetupDialog dialog(settings_, this);
+	SetupDialog dialog(settings_, converter_, this);
     if (dialog.exec() == QDialog::Accepted) {
-        settings_.setDuration(dialog.duration());
+		converter_.setOutputFormat(dialog.outputFormat().toStdString());
+		settings_.setinputOrder(dialog.inputOrder());
+		settings_.setDuration(dialog.duration());
         settings_.setRate(dialog.rate());
 
         audio_.setDuration(settings_.getDuration());
@@ -779,6 +773,27 @@ void MainWindow::on_actionSetup_E_triggered()
 
 void MainWindow::on_actionAbout_A_triggered()
 {
-		AboutDialog dialog;
-		dialog.exec();
+	AboutDialog dialog;
+	dialog.exec();
+}
+
+void MainWindow::on_actionRead_Text_R_triggered()
+{
+	ReadTextDialog dialog(this);
+	if (dialog.exec() == QDialog::Accepted) {
+		if (std::unique_ptr<Tone> tone = converter_.textToTone(
+					dialog.text().toStdString(),
+					settings_.getInputOrder()
+					)) {
+			tone_ = std::move(tone);
+			for (int i = 1; i <= 6; ++i) {
+				SetFMTone(i);
+			}
+			setWindowModified(true);
+			setWindowTitle("YM2608 Tone Editor - [*]");
+		}
+		else {
+			QMessageBox::critical(this, "Error", "Failed to read tone data from text.");
+		}
+	}
 }

@@ -23,8 +23,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+	explicit MainWindow(QWidget *parent = nullptr);
+	~MainWindow() override;
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -45,7 +45,6 @@ private:
     QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
     OperatorSliders* sliders_[4];
-    bool isEdit_;
 
     ToneConverter converter_;
     ToneTextDialog textDialog_;
@@ -69,18 +68,18 @@ private:
     void closeEvent(QCloseEvent* event) override;
 
 	const int fm_tune_tbl[12] = {
-        0x026a,	// C
-        0x028f,	// C#
-        0x02b6,	// D
-        0x02df,	// D#
-        0x030b,	// E
-        0x0339,	// F
-        0x036a,	// F#
-        0x039e,	// G
-        0x03d5,	// G#
-        0x0410,	// A
-        0x044e,	// A#
-        0x048f	// B
+		0x026a,	// C
+		0x028f,	// C#
+		0x02b6,	// D
+		0x02df,	// D#
+		0x030b,	// E
+		0x0339,	// F
+		0x036a,	// F#
+		0x039e,	// G
+		0x03d5,	// G#
+		0x0410,	// A
+		0x044e,	// A#
+		0x048f	// B
     };
 
 	const int psg_tune_tbl[12] = {
@@ -110,6 +109,8 @@ private slots:
     void on_actionConvert_To_Text_C_triggered();
     void on_actionSetup_E_triggered();
 	void on_actionAbout_A_triggered();
+
+	void on_actionRead_Text_R_triggered();
 
 private:
     bool saveTone();
