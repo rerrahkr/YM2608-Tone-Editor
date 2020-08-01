@@ -104,9 +104,9 @@
            </widget>
           </item>
           <item alignment="Qt::AlignHCenter">
-           <widget class="QRadioButton" name="radioButton110933">
+           <widget class="QRadioButton" name="radioButton55466">
             <property name="text">
-             <string>110933Hz</string>
+             <string>55466Hz</string>
             </property>
             <property name="checked">
              <bool>true</bool>

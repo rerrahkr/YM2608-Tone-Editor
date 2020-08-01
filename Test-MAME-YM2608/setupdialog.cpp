@@ -15,7 +15,7 @@ SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converte
 	// Stream
     rateMap_[ui->buttonGroup->id(ui->radioButton44100)] = 44100;
     rateMap_[ui->buttonGroup->id(ui->radioButton48000)] = 48000;
-    rateMap_[ui->buttonGroup->id(ui->radioButton110933)] = 110933;
+    rateMap_[ui->buttonGroup->id(ui->radioButton55466)] = 55466;
 
     ui->horizontalSlider->setValue(settings.getDuration());
 	ui->horizontalSlider->setStyle(new SliderStyle());
