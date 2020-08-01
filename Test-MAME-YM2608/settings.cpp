@@ -2,23 +2,23 @@
 #include <QSettings>
 #include <QVariant>
 #include <QList>
-#include <QMetaType>
+//#include <QMetaType>
 
 Q_DECLARE_METATYPE(QList<int>)
 
 Settings::Settings()
 {
-	qRegisterMetaTypeStreamOperators< QList<int> >("QList<int>");
+//	qRegisterMetaTypeStreamOperators< QList<int> >("QList<int>");
 
     QSettings settings("settings.ini", QSettings::IniFormat);
 
 	rate_ = settings.contains("rate") ? settings.value("rate").toInt() : 110933;
-	duration_ = settings.contains("duration") ? settings.value("duration").toInt() : 40;
-	if (settings.contains("input_order")) {
-		for (auto n : settings.value("input_order").value<QList<int>>())
-		inputOrder_.push_back(n);
-	}
-	else {
+//	duration_ = settings.contains("duration") ? settings.value("duration").toInt() : 40;
+//	if (settings.contains("input_order")) {
+//		for (auto n : settings.value("input_order").value<QList<int>>())
+//		inputOrder_.push_back(n);
+//	}
+//	else {
 		inputOrder_ = {
 			0, 1, 2,
 			3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
@@ -26,7 +26,7 @@ Settings::Settings()
 			23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
 			33, 34, 35, 36, 37, 38, 39, 40, 41, 42
 		};
-	}
+//	}
 }
 
 Settings::~Settings()
@@ -34,10 +34,10 @@ Settings::~Settings()
     QSettings settings("settings.ini", QSettings::IniFormat);
     settings.setValue("rate", QVariant::fromValue(rate_));
     settings.setValue("duration", QVariant::fromValue(duration_));
-	QList<int> l;
-	for (auto n : inputOrder_)
-		l.append(n);
-	settings.setValue("input_order", QVariant::fromValue(l));
+//	QList<int> l;
+//	for (auto n : inputOrder_)
+//		l.append(n);
+//	settings.setValue("input_order", QVariant::fromValue(l));
 }
 
 int Settings::getRate() const

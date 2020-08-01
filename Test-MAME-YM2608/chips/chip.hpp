@@ -1,6 +1,5 @@
 #pragma once
 
-#include "chip_def.hpp"
 #include <cstdint>
 #include <mutex>
 #include "../types.h"
@@ -22,10 +21,6 @@ namespace chip
 
 		virtual void setRate(int rate);
 		int getRate() const;
-
-		#ifdef SINC_INTERPOLATION
-		void setMaxDuration(size_t maxDuration);
-		#endif
 		
 		/*virtual void setVolume(float db) = 0;*/
 		virtual void mix(int16_t* stream, size_t nSamples) = 0;
@@ -45,11 +40,7 @@ namespace chip
 		sample* buffer_[2][2];
 		Resampler resampler_[2];
 
-		#ifdef SINC_INTERPOLATION
-		void initResampler(size_t maxDuration);
-		#else
 		void initResampler();
-		#endif
 
 		void funcSetRate(int rate);
 	};

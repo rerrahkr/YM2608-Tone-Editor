@@ -15,48 +15,48 @@
 #include "settings.hpp"
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow() override;
 
 protected:
-    void keyPressEvent(QKeyEvent* event) override;
-    void keyReleaseEvent(QKeyEvent* event) override;
+	void keyPressEvent(QKeyEvent* event) override;
+	void keyReleaseEvent(QKeyEvent* event) override;
 
 private:
-    Ui::MainWindow *ui;
+	Ui::MainWindow *ui;
 
-    Settings settings_;
+	Settings settings_;
 
-    chip::OPNA chip_;
-    AudioStream audio_;
+	chip::OPNA chip_;
+	AudioStream audio_;
 
-    std::unique_ptr<Tone> tone_;
+	std::unique_ptr<Tone> tone_;
 
-    int octaveFM_, octavePSG_;
+	int octaveFM_, octavePSG_;
 	std::vector<int> jamKeyOnTableFM_, jamKeyOnTablePSG_;
-    QString pressedKeyNameFM_, pressedKeyNamePSG_;
+	QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
-    OperatorSliders* sliders_[4];
+	OperatorSliders* sliders_[4];
 
-    ToneConverter converter_;
-    ToneTextDialog textDialog_;
+	ToneConverter converter_;
+	ToneTextDialog textDialog_;
 
-    void SetFMTone(int channel);
-    void SetFMKeyOn(int channel);
-    void SetPSGKeyOn(int channel);
-    void SetFMKeyOff(int channel);
-    void SetPSGKeyOff(int channel);
+	void SetFMTone(int channel);
+	void SetFMKeyOn(int channel);
+	void SetPSGKeyOn(int channel);
+	void SetFMKeyOff(int channel);
+	void SetPSGKeyOff(int channel);
 	void SetFMKey(int channel, int octave, int keynum);
 	void SetPSGKey(int channel, int octave, int keynum);
-    void InitPan();
+	void InitPan();
 
 	void JamKeyOnFM(int jamKeyNumber, bool isRepeat);
 	void JamKeyOnPSG(int jamKeyNumber, bool isRepeat);
@@ -65,7 +65,7 @@ private:
 
 	QString keyNumberToNameString(int jamKeyNumber);
 
-    void closeEvent(QCloseEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 
 	const int fm_tune_tbl[12] = {
 		0x026a,	// C
@@ -80,41 +80,41 @@ private:
 		0x0410,	// A
 		0x044e,	// A#
 		0x048f	// B
-    };
+	};
 
 	const int psg_tune_tbl[12] = {
-        0x0ee8,	// C
-        0x0e12,	// C#
-        0x0d48,	// D
-        0x0c89,	// D#
-        0x0bd5,	// E
-        0x0b2b,	// F
-        0x0a8a,	// F#
-        0x09f3,	// G
-        0x0964,	// G#
-        0x08dd,	// A
-        0x085e,	// A#
-        0x07e6,	// B
-    };
+		0x0ee8,	// C
+		0x0e12,	// C#
+		0x0d48,	// D
+		0x0c89,	// D#
+		0x0bd5,	// E
+		0x0b2b,	// F
+		0x0a8a,	// F#
+		0x09f3,	// G
+		0x0964,	// G#
+		0x08dd,	// A
+		0x085e,	// A#
+		0x07e6,	// B
+	};
 
 private slots:
-    void onALChanged(int value);
-    void onFBChanged(int value);
-    void onParameterChanged(int op, const ParameterState& state);
-    void on_actionOpen_O_triggered();
-    void on_actionSave_S_triggered();
-    void on_actionExit_X_triggered();
-    void on_actionSave_As_triggered();
-    void on_nameButton_clicked();
-    void on_actionConvert_To_Text_C_triggered();
-    void on_actionSetup_E_triggered();
+	void onALChanged(int value);
+	void onFBChanged(int value);
+	void onParameterChanged(int op, const ParameterState& state);
+	void on_actionOpen_O_triggered();
+	void on_actionSave_S_triggered();
+	void on_actionExit_X_triggered();
+	void on_actionSave_As_triggered();
+	void on_nameButton_clicked();
+	void on_actionConvert_To_Text_C_triggered();
+	void on_actionSetup_E_triggered();
 	void on_actionAbout_A_triggered();
 
 	void on_actionRead_Text_R_triggered();
 
 private:
-    bool saveTone();
-    bool saveToneAs();
+	bool saveTone();
+	bool saveToneAs();
 };
 
 #endif // MAINWINDOW_H
