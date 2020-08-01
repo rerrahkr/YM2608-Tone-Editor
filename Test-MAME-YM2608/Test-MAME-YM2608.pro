@@ -67,7 +67,6 @@ HEADERS += \
     widgets/operator_sliders.h \
     parameter_state.hpp \
     chips/chip.hpp \
-    chips/chip_def.hpp \
     chips/chip_misc.h \
     chips/resampler.hpp \
     tone.hpp \

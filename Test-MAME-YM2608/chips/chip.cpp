@@ -6,11 +6,11 @@ extern "C"
 {
 #endif //  __cplusplus
 
-	#include "mame/mamedef.h"
+#include "mame/mamedef.h"
 
-	UINT8 CHIP_SAMPLING_MODE = 0x00;
-	INT32 CHIP_SAMPLE_RATE;
-	stream_sample_t* DUMMYBUF[] = { nullptr, nullptr };
+UINT8 CHIP_SAMPLING_MODE = 0x00;
+INT32 CHIP_SAMPLE_RATE;
+stream_sample_t* DUMMYBUF[] = { nullptr, nullptr };
 
 #ifdef __cplusplus
 }
@@ -25,6 +25,9 @@ namespace chip
 		rate_(1),	// Dummy set
 		autoRate_(autoRate)
 	{
+		(void)clock;
+		(void)rate;
+
 		for (int pan = LEFT; pan <= RIGHT; ++pan) {
 			for (auto& buf : buffer_) {
 				buf[pan] = new stream_sample_t[SMPL_BUF_SIZE_];
@@ -41,18 +44,10 @@ namespace chip
 		}
 	}
 
-	#ifdef SINC_INTERPOLATION
-	void Chip::initResampler(size_t maxDuration)
-	#else
 	void Chip::initResampler()
-	#endif
 	{
 		for (int snd = 0; snd < 2; ++snd) {
-			#ifdef SINC_INTERPOLATION
-			resampler_[snd].init(internalRate_[snd], rate_, maxDuration);
-			#else
 			resampler_[snd].init(internalRate_[snd], rate_);
-			#endif
 		}
 	}
 
@@ -76,13 +71,4 @@ namespace chip
 	{
 		return rate_;
 	}
-
-	#ifdef SINC_INTERPOLATION
-	void Chip::setMaxDuration(size_t maxDuration)
-	{
-		for (int snd = 0; snd < 2; ++snd) {
-			resampler_[snd].setMaxDuration(maxDuration);
-		}
-	}
-	#endif
 }
