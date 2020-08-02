@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <cstddef>
 
 namespace chip
 {
@@ -11,10 +11,4 @@ namespace chip
 		LEFT = 0,
 		RIGHT = 1,
 	};
-
-    template <typename T>
-    inline const T& clamp(const T& value, const T& low, const T& high)
-    {
-        return std::min(std::max(value, low), high);
-    }
 }

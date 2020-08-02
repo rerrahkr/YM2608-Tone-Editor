@@ -16,7 +16,7 @@ class ReadTextDialog : public QDialog
 public:
 	explicit ReadTextDialog(std::vector<QString> types, QWidget *parent = nullptr);
 	~ReadTextDialog();
-	int type() const;
+	QString type() const;
 	QString text() const;
 
 private:

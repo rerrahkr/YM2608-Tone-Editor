@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <memory>
 #include <QString>
 #include "tone.hpp"
@@ -15,11 +16,8 @@ enum class FmEnvelopeTextType : int
 	AR4, DR4, SR4, RR4, SL4, TL4, KS4, ML4, DT4, AM4
 };
 
-struct FmEnvelopeText
-{
-	std::string name;
-	std::vector<FmEnvelopeTextType> texts;
-};
+using FmInEnvelopeOrders = std::vector<FmEnvelopeTextType>;
+using FmInEnvelopeFormats = std::map<std::string, FmInEnvelopeOrders>;
 
 class ToneConverter
 {
@@ -29,14 +27,14 @@ public:
 	std::string toneToText(const Tone* tone);
 	std::string getOutputFormat() const;
 	void setOutputFormat(std::string str);
-	std::unique_ptr<Tone> textToTone(std::string text, int type);
-	std::vector<FmEnvelopeText> getInputFormats() const;
-	void setInputFormats(std::vector<FmEnvelopeText> list);
+	std::unique_ptr<Tone> textToTone(const QString& text, const QString& type);
+	FmInEnvelopeFormats getInputFormats() const;
+	void setInputFormats(FmInEnvelopeFormats list);
 
 private:
 	static const QString FORMAT_PATH_;
 	std::string outFormat_;
-	std::vector<FmEnvelopeText> inFormats_;
+	FmInEnvelopeFormats inFormats_;
 
 	struct Manip
 	{

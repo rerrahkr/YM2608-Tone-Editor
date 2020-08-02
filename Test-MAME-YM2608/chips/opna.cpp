@@ -1,4 +1,5 @@
 #include "opna.hpp"
+#include <algorithm>
 #include "chip_misc.h"
 
 #ifdef  __cplusplus
@@ -122,7 +123,7 @@ namespace chip
 		for (size_t i = 0; i < nSamples; ++i) {
 			for (int pan = LEFT; pan <= RIGHT; ++pan) {
 				float s = volumeRatio_[FM] * bufFM[pan][i] + volumeRatio_[SSG] * bufPSG[pan][i];
-				*stream++ = static_cast<int16_t>(clamp(s, -32768.0f, 32767.0f));
+				*stream++ = static_cast<int16_t>(std::clamp(s, -32768.0f, 32767.0f));
 			}
 		}
 	}

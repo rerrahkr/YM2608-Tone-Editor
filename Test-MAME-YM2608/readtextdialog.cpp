@@ -17,9 +17,9 @@ ReadTextDialog::~ReadTextDialog()
 	delete ui;
 }
 
-int ReadTextDialog::type() const
+QString ReadTextDialog::type() const
 {
-	return ui->comboBox->currentIndex();
+	return ui->comboBox->currentText();
 }
 
 QString ReadTextDialog::text() const
