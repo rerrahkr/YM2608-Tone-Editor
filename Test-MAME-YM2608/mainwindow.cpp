@@ -12,6 +12,7 @@
 #include "setupdialog.h"
 #include "aboutdialog.h"
 #include "readtextdialog.hpp"
+#include "text_conversion.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -69,8 +70,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	for (int i = 1; i <= 6; ++i) {
 		SetFMTone(i);
 	}
-
-	converter_.loadFormat("format.conf");
 }
 
 MainWindow::~MainWindow()
@@ -753,7 +752,7 @@ void MainWindow::on_actionSetup_E_triggered()
 	SetupDialog dialog(settings_, converter_, this);
 	if (dialog.exec() == QDialog::Accepted) {
 		converter_.setOutputFormat(dialog.outputFormat().toStdString());
-		settings_.setinputOrder(dialog.inputOrder());
+		converter_.setInputFormats(dialog.inputOrders());
 		settings_.setDuration(dialog.duration());
 		settings_.setRate(dialog.rate());
 
@@ -771,21 +770,26 @@ void MainWindow::on_actionAbout_A_triggered()
 
 void MainWindow::on_actionRead_Text_R_triggered()
 {
-	ReadTextDialog dialog(this);
+	std::vector<FmEnvelopeText> orders = converter_.getInputFormats();
+	std::vector<QString> types;
+	types.reserve(orders.size());
+	std::transform(orders.begin(), orders.end(), std::back_inserter(types),
+				   [](const FmEnvelopeText& set) { return utf8ToQString(set.name); });
+	ReadTextDialog dialog(types, this);
 	if (dialog.exec() == QDialog::Accepted) {
-		if (std::unique_ptr<Tone> tone = converter_.textToTone(
-					dialog.text().toStdString(),
-					settings_.getInputOrder()
-					)) {
-			tone_ = std::move(tone);
-			for (int i = 1; i <= 6; ++i) {
-				SetFMTone(i);
+		if (!orders.empty()){
+			if (std::unique_ptr<Tone> tone = converter_.textToTone(
+						dialog.text().toStdString(), dialog.type())) {
+				tone_ = std::move(tone);
+				for (int i = 1; i <= 6; ++i) {
+					SetFMTone(i);
+				}
+				setWindowModified(true);
+				setWindowTitle("YM2608 Tone Editor - [*]");
+				return;
 			}
-			setWindowModified(true);
-			setWindowTitle("YM2608 Tone Editor - [*]");
 		}
-		else {
-			QMessageBox::critical(this, "Error", "Failed to read tone data from text.");
-		}
+		// Error
+		QMessageBox::critical(this, "Error", "Failed to read tone data from text.");
 	}
 }

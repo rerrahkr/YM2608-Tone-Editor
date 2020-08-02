@@ -1,10 +1,14 @@
 # YM2608 Tone Editor
+[![GitHub release](https://img.shields.io/badge/release-v0.2.0-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
+![Platform: windows](https://img.shields.io/badge/platform-windows-lightgrey.svg)
+[![LICENSE](https://img.shields.io/github/license/rerrahkr/YM2608-Tone-Editor.svg)](./LICENSE)
+
 This is a tone editor of YM2608 FM synthesis chip (OPNA).  
 It enables to load and save tone data, read tone parameters from text and convert parameters to text.
 
 It will create two settings files automatically at the first run.
-* format.conf - specify text format to convert tone parameters
-* settings.ini - application settings (DO NOT EDIT)
+* settings.ini - application settings
+* formats.ini - specify text format to convert tone parameters
 
 ### Keyboard
 There are two rows of a piano keyboard:
@@ -21,9 +25,8 @@ F1, F2 is FM octave up/down, and F3, F4 is PSG octave up/down.
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
 ### Convert to text
-It enables to convert tone data to text formatted by format.conf. It is a text file containing some parameter macros.  
-This app parses it and replaces macros with tone parameters. It means that you can customize text output by editing format.conf.  
-You can edit the format in "Setup" -> "Output".  
+It enables to convert tone data to text formatted by "Setup" -> "Output". It is a text file containing some parameter macros.  
+This app parses it and replaces macros with tone parameters. It means that you can customize text output by editing format.  
 To copy tone parameters text, open "Convert to text" dialog ("File" -> "Convert To Text").
 
 #### Macro syntax
@@ -50,7 +53,7 @@ All Macros are described as `%{param name:param format}` except tone name macro 
 * Zero flag. When you write 0 at the beginning of option, it pads 0 to the left of parameter value. When skip this flag, it pads whitespace instead of 0.
 * Field width. In text, the value is printed in the space of specified width.
 
-For example, you write format.conf like this:
+For example, you write format like this:
 ```
 '@ FA  %{NO:03}	   ; %{NAME}
 '@ %{AR1:3},%{DR1:3},%{SR1:3},%{RR1:3},%{SL1:3},%{TL1:3},%{KS1:3},%{ML1:3},%{DT1:3},%{AM1:3}
@@ -73,3 +76,11 @@ The app converts tone data to text like this:
 It also enable to read tone data from text.  
 When you paste the tone data text in "Read text" dialog ("File" -> "Read Text"), this app reads digits from the text and set to tone parameters in the order specified by "Setup" -> "Input".  
 Note: This app reads digits in the order of appearance. This means that it also reads digits included in comments like tone name. Please remove the comments before reading.
+
+## Changelog
+*See [CHANGELOG.md](./CHANGELOG.md).*
+
+## License
+This program and its source code are licensed under the GNU General License Version 2.
+
+*See [LICENSE](./LICENSE) and [list.md](./licenses/list.md) of libraries.*

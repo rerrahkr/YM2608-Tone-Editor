@@ -3,6 +3,8 @@
 #include <QRadioButton>
 #include <QListWidgetItem>
 #include "sliderstyle.hpp"
+#include "fmenvelopeorderdialog.hpp"
+#include "text_conversion.hpp"
 
 SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converter, QWidget *parent)
 	: QDialog(parent),
@@ -26,36 +28,8 @@ SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converte
     }
 
 	// Input
-	for (auto& n : settings.getInputOrder()) {
-		QString name;
-		switch (n) {
-		case 0:		name = "NO";	break;
-		case 1:		name = "AL";	break;
-		case 2:		name = "FB";	break;
-		default:
-		{
-			int t = n - 3;
-			switch (t % 10) {
-			case 0:	name = "AR";	break;
-			case 1:	name = "DR";	break;
-			case 2:	name = "SR";	break;
-			case 3:	name = "RR";	break;
-			case 4:	name = "SL";	break;
-			case 5:	name = "TL";	break;
-			case 6:	name = "KS";	break;
-			case 7:	name = "ML";	break;
-			case 8:	name = "DT";	break;
-			case 9:	name = "AM";	break;
-			}
-			name += QString::number(t / 10 + 1);
-			break;
-		}
-		}
-		auto item = new QListWidgetItem(name);
-		item->setData(Qt::UserRole, n);
-		ui->readOrderListWidget->addItem(item);
-	}
-	ui->readOrderListWidget->setCurrentRow(0);
+	fmEnvelopeTexts_ = converter.getInputFormats();
+	updateEnvelopeSetUi();
 
 	// Output
 	ui->outFormatPlainTextEdit->setPlainText(QString::fromStdString(converter.getOutputFormat()));
@@ -81,13 +55,9 @@ QString SetupDialog::outputFormat()
 	return ui->outFormatPlainTextEdit->toPlainText();
 }
 
-std::vector<int> SetupDialog::inputOrder()
+std::vector<FmEnvelopeText> SetupDialog::inputOrders()
 {
-	std::vector<int> order;
-	for (int i = 0; i < ui->readOrderListWidget->count(); ++i) {
-		order.push_back(ui->readOrderListWidget->item(i)->data(Qt::UserRole).toInt());
-	}
-	return order;
+	return fmEnvelopeTexts_;
 }
 
 void SetupDialog::on_horizontalSlider_valueChanged(int value)
@@ -95,20 +65,62 @@ void SetupDialog::on_horizontalSlider_valueChanged(int value)
     ui->label->setText(QString::number(value) + "ms");
 }
 
-void SetupDialog::on_upToolButton_clicked()
+void SetupDialog::on_addEnvelopeSetPushButton_clicked()
 {
-	int row = ui->readOrderListWidget->currentRow();
-	if (row > 0) {
-		QListWidgetItem* tmp = ui->readOrderListWidget->takeItem(row - 1);
-		ui->readOrderListWidget->insertItem(row, tmp);
+	auto name = QString("Set %1").arg(fmEnvelopeTexts_.size() + 1);
+	fmEnvelopeTexts_.push_back({ name.toUtf8().toStdString(), std::vector<FmEnvelopeTextType>() });
+	updateEnvelopeSetUi();
+	for (int i = ui->envelopeSetListWidget->count() - 1; i >= 0; --i) {
+		if (ui->envelopeSetListWidget->item(i)->text() == name) {
+			ui->envelopeSetListWidget->setCurrentRow(i);
+			break;
+		}
 	}
 }
 
-void SetupDialog::on_downToolButton_clicked()
+void SetupDialog::on_removeEnvelopeSetpushButton_clicked()
 {
-	int row = ui->readOrderListWidget->currentRow();
-	if (row < ui->readOrderListWidget->count() - 1) {
-		QListWidgetItem* tmp = ui->readOrderListWidget->takeItem(row + 1);
-		ui->readOrderListWidget->insertItem(row, tmp);
+	fmEnvelopeTexts_.erase(fmEnvelopeTexts_.begin() + ui->envelopeSetListWidget->currentRow());
+	updateEnvelopeSetUi();
+}
+
+void SetupDialog::on_editEnvelopeSetPushButton_clicked()
+{
+	size_t row = static_cast<size_t>(ui->envelopeSetListWidget->currentRow());
+	FmEnvelopeOrderDialog diag(fmEnvelopeTexts_.at(row).texts);
+	diag.setWindowTitle(diag.windowTitle() + ": " + ui->envelopeSetNameLineEdit->text());
+	if (diag.exec() == QDialog::Accepted) {
+		fmEnvelopeTexts_.at(row).texts = diag.getSet();
 	}
+}
+
+void SetupDialog::on_envelopeSetNameLineEdit_textChanged(const QString &arg1)
+{
+	fmEnvelopeTexts_.at(static_cast<size_t>(ui->envelopeSetListWidget->currentRow())).name = arg1.toStdString();
+	ui->envelopeSetListWidget->currentItem()->setText(arg1);
+}
+
+void SetupDialog::on_envelopeSetListWidget_currentRowChanged(int currentRow)
+{
+	if (currentRow == -1) {
+		ui->editEnvelopeSetPushButton->setEnabled(false);
+		ui->removeEnvelopeSetpushButton->setEnabled(false);
+		ui->envelopeSetNameLineEdit->setEnabled(false);
+	}
+	else {
+		ui->editEnvelopeSetPushButton->setEnabled(true);
+		ui->removeEnvelopeSetpushButton->setEnabled(true);
+		ui->envelopeSetNameLineEdit->setEnabled(true);
+		ui->envelopeSetNameLineEdit->setText(ui->envelopeSetListWidget->item(currentRow)->text());
+	}
+}
+
+void SetupDialog::updateEnvelopeSetUi()
+{
+	std::sort(fmEnvelopeTexts_.begin(), fmEnvelopeTexts_.end(),
+			  [](const FmEnvelopeText& a, const FmEnvelopeText& b) -> bool { return (a.name < b.name); });
+
+	ui->envelopeSetListWidget->clear();
+	for (auto& texts : fmEnvelopeTexts_)
+		ui->envelopeSetListWidget->addItem(utf8ToQString(texts.name));
 }

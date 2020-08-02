@@ -23,16 +23,22 @@ public:
     unsigned int rate();
     unsigned int duration();
 	QString outputFormat();
-	std::vector<int> inputOrder();
+	std::vector<FmEnvelopeText> inputOrders();
 
 private slots:
     void on_horizontalSlider_valueChanged(int value);
-	void on_upToolButton_clicked();
-	void on_downToolButton_clicked();
+
+	void on_addEnvelopeSetPushButton_clicked();
+	void on_removeEnvelopeSetpushButton_clicked();
+	void on_editEnvelopeSetPushButton_clicked();
+	void on_envelopeSetNameLineEdit_textChanged(const QString &arg1);
+	void on_envelopeSetListWidget_currentRowChanged(int currentRow);
+	void updateEnvelopeSetUi();
 
 private:
     Ui::SetupDialog *ui;
 	std::map<int, int> rateMap_;
+	std::vector<FmEnvelopeText> fmEnvelopeTexts_;
 };
 
 #endif // SETUPDIALOG_H

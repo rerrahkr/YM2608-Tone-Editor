@@ -27,6 +27,7 @@ CONFIG += c++14
 
 
 SOURCES += \
+    fmenvelopeorderdialog.cpp \
         main.cpp \
         mainwindow.cpp \
     chips/opna.cpp \
@@ -52,6 +53,7 @@ SOURCES += \
     readtextdialog.cpp
 
 HEADERS += \
+    fmenvelopeorderdialog.hpp \
         mainwindow.h \
     chips/mame/2608intf.h \
     chips/mame/emu2149.h \
@@ -60,6 +62,7 @@ HEADERS += \
     chips/mame/mamedef.h \
     chips/mame/ymdeltat.h \
     chips/opna.hpp \
+    text_conversion.hpp \
     types.h \
     audio_stream.hpp \
     audio_stream_mixier.hpp \
@@ -81,6 +84,7 @@ HEADERS += \
     readtextdialog.hpp
 
 FORMS += \
+    fmenvelopeorderdialog.ui \
         mainwindow.ui \
     widgets/labeled_slider.ui \
     widgets/operator_sliders.ui \
