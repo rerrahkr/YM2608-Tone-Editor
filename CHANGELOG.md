@@ -3,6 +3,7 @@
 ## Unreleased
 ### Changed
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
+- Enable to save multiple text input formats
 
 ### Fixed
 - [#2] - Fixed internal FM sample rate (thanks [@freq-mod])

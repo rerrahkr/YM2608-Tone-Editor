@@ -1,6 +1,7 @@
 #ifndef READTEXTDIALOG_HPP
 #define READTEXTDIALOG_HPP
 
+#include <vector>
 #include <QDialog>
 #include <QString>
 
@@ -13,8 +14,9 @@ class ReadTextDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit ReadTextDialog(QWidget *parent = nullptr);
+	explicit ReadTextDialog(std::vector<QString> types, QWidget *parent = nullptr);
 	~ReadTextDialog();
+	int type() const;
 	QString text() const;
 
 private:

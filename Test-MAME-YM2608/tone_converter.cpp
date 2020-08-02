@@ -1,48 +1,252 @@
 #include "tone_converter.hpp"
-#include <fstream>
 #include <sstream>
 #include <regex>
 #include <iomanip>
+#include <QSettings>
+#include "text_conversion.hpp"
 
-ToneConverter::ToneConverter() {}
+const QString ToneConverter::FORMAT_PATH_ = "formats.ini";
+
+ToneConverter::ToneConverter()
+{
+	inFormats_ = {
+		{
+			"PMD",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL, FmEnvelopeTextType::FB,
+				FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1, FmEnvelopeTextType::SR1,
+				FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1, FmEnvelopeTextType::TL1,
+				FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1, FmEnvelopeTextType::DT1,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
+				FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2,
+				FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2,
+				FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3,
+				FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3,
+				FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3,
+				FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4, FmEnvelopeTextType::SR4,
+				FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4, FmEnvelopeTextType::TL4,
+				FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4, FmEnvelopeTextType::DT4,
+				FmEnvelopeTextType::Skip
+			}
+		},
+		{
+			"FMP",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
+				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
+				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
+				FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2,
+				FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2,
+				FmEnvelopeTextType::DT2, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
+				FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3,
+				FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3,
+				FmEnvelopeTextType::DT3, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
+				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::AL, FmEnvelopeTextType::FB
+			}
+		},
+		{
+			"FMP7",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
+				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
+				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2,
+				FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2,
+				FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2,
+				FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3,
+				FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3,
+				FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
+				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL,
+				FmEnvelopeTextType::FB
+			}
+		},
+		{
+			"VOPM",
+			{
+				// Number
+				FmEnvelopeTextType::Skip,
+				// LFO
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				// CH
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::FB, FmEnvelopeTextType::AL,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip,
+				// Op
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
+				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
+				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
+				FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2,
+				FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2,
+				FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
+				FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3,
+				FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3,
+				FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
+				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip
+			}
+		},
+		{
+			"NRTDRV (VOICE_MODE=0)",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL, FmEnvelopeTextType::FB,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
+				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
+				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2,
+				FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2,
+				FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3,
+				FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3,
+				FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3,
+				FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
+				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip
+			}
+		},
+		{
+			"MXDRV",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
+				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
+				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2,
+				FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2,
+				FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3,
+				FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3,
+				FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3,
+				FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
+				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AL, FmEnvelopeTextType::FB, FmEnvelopeTextType::Skip
+			}
+		},
+		{
+			"MMLDRV",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL, FmEnvelopeTextType::FB,
+				FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1, FmEnvelopeTextType::SR1,
+				FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1, FmEnvelopeTextType::TL1,
+				FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1, FmEnvelopeTextType::DT1,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2,
+				FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2,
+				FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2,
+				FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
+				FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3,
+				FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3,
+				FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4, FmEnvelopeTextType::SR4,
+				FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4, FmEnvelopeTextType::TL4,
+				FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4, FmEnvelopeTextType::DT4,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip
+			}
+		},
+		{
+			"MUCOM88",
+			{
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::FB, FmEnvelopeTextType::AL,
+				FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1, FmEnvelopeTextType::SR1,
+				FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1, FmEnvelopeTextType::TL1,
+				FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1, FmEnvelopeTextType::DT1,
+				FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2,
+				FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2,
+				FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2,
+				FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3,
+				FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3,
+				FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3,
+				FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4, FmEnvelopeTextType::SR4,
+				FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4, FmEnvelopeTextType::TL4,
+				FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4, FmEnvelopeTextType::DT4
+			}
+		}
+	};
+
+	outFormat_ = "@ %{NO:2} %{AL:3} %{FB:3}  =%{NAME}\n"
+				 " %{AR1:3} %{DR1:3} %{SR1:3} %{RR1:3} %{SL1:3} %{TL1:3} %{KS1:3} %{ML1:3} %{DT1:3} %{AM1:3}\n"
+				 " %{AR2:3} %{DR2:3} %{SR2:3} %{RR2:3} %{SL2:3} %{TL2:3} %{KS2:3} %{ML2:3} %{DT2:3} %{AM2:3}\n"
+				 " %{AR3:3} %{DR3:3} %{SR3:3} %{RR3:3} %{SL3:3} %{TL3:3} %{KS3:3} %{ML3:3} %{DT3:3} %{AM3:3}\n"
+				 " %{AR4:3} %{DR4:3} %{SR4:3} %{RR4:3} %{SL4:3} %{TL4:3} %{KS4:3} %{ML4:3} %{DT4:3} %{AM4:3}";
+
+	loadFormats();
+}
 
 ToneConverter::~ToneConverter()
 {
-	std::ofstream ofs("format.conf", std::ios::out);
-	if (ofs) {
-		ofs << format_;
+	QSettings settings(FORMAT_PATH_, QSettings::IniFormat);
+
+	settings.beginGroup("Input");
+	for (const auto& set : inFormats_) {
+		auto& ordrs = set.texts;
+		QString str = std::accumulate(
+						  ordrs.begin() + 1, ordrs.end(),
+						  QString::number(static_cast<int>(ordrs.front())),
+						  [](QString str, FmEnvelopeTextType type) {
+					  return str + "," + QString::number(static_cast<int>(type));
+	});
+		settings.setValue(utf8ToQString(set.name), str);
 	}
+	settings.endGroup();
+
+	settings.beginGroup("Output");
+	settings.setValue("format", utf8ToQString(outFormat_));
+	settings.endGroup();
 }
 
-void ToneConverter::loadFormat(std::string path)
+void ToneConverter::loadFormats()
 {
-    std::ifstream ifs(path, std::ios::in);
-    if (ifs) {
-        format_ = std::string(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
-    }
-    else {
-        format_ = "@ %{NO:2} %{AL:3} %{FB:3}  =%{NAME}\n"
-                  " %{AR1:3} %{DR1:3} %{SR1:3} %{RR1:3} %{SL1:3} %{TL1:3} %{KS1:3} %{ML1:3} %{DT1:3} %{AM1:3}\n"
-                  " %{AR2:3} %{DR2:3} %{SR2:3} %{RR2:3} %{SL2:3} %{TL2:3} %{KS2:3} %{ML2:3} %{DT2:3} %{AM2:3}\n"
-                  " %{AR3:3} %{DR3:3} %{SR3:3} %{RR3:3} %{SL3:3} %{TL3:3} %{KS3:3} %{ML3:3} %{DT3:3} %{AM3:3}\n"
-                  " %{AR4:3} %{DR4:3} %{SR4:3} %{RR4:3} %{SL4:3} %{TL4:3} %{KS4:3} %{ML4:3} %{DT4:3} %{AM4:3}";
-        std::ofstream ofs("format.conf", std::ios::out);
-        if (ofs) {
-            ofs << format_;
-        }
-    }
+	QSettings settings(FORMAT_PATH_, QSettings::IniFormat);
+
+	settings.beginGroup("Input");
+	std::vector<FmEnvelopeText> list;
+	for (const auto& key : settings.childKeys()) {
+		auto strList = settings.value(key).toString().split(",");
+		std::vector<FmEnvelopeTextType> orders;
+		orders.reserve(strList.size());
+		std::transform(strList.begin(), strList.end(), std::back_inserter(orders),
+					   [](const QString& str) { return static_cast<FmEnvelopeTextType>(str.toInt()); });
+		list.push_back({ key.toStdString(), orders });
+	}
+	if (!list.empty()) inFormats_ = std::move(list);
+	settings.endGroup();
+
+	settings.beginGroup("Output");
+	if (settings.contains("format")) {
+		outFormat_ = settings.value("format").toString().toStdString();
+	}
+	settings.endGroup();
 }
 
 std::string ToneConverter::toneToText(const Tone* tone)
 {
-    std::string out = format_;
+	std::string out = outFormat_;
 	out = replaceMacroWithData(out, R"(%\{NO:(\d+)\})", 0);
 	out = replaceMacroWithData(out, R"(%\{AL:(\d+)\})", tone->AL);
 	out = replaceMacroWithData(out, R"(%\{FB:(\d+)\})", tone->FB);
 	out = replaceMacroWithData(out, R"(%\{NAME\})", tone->name);
-    for (int i = 0; i < 4; ++i) {
-        const Operator& op = tone->op[i];
-        std::string num = std::to_string(i + 1);
+	for (int i = 0; i < 4; ++i) {
+		const Operator& op = tone->op[i];
+		std::string num = std::to_string(i + 1);
 		out = replaceMacroWithData(out, R"(%\{AR)" + num + R"(:(\d+)\})", op.AR);
 		out = replaceMacroWithData(out, R"(%\{DR)" + num + R"(:(\d+)\})", op.DR);
 		out = replaceMacroWithData(out, R"(%\{SR)" + num + R"(:(\d+)\})", op.SR);
@@ -53,65 +257,65 @@ std::string ToneConverter::toneToText(const Tone* tone)
 		out = replaceMacroWithData(out, R"(%\{ML)" + num + R"(:(\d+)\})", op.ML);
 		out = replaceMacroWithData(out, R"(%\{DT)" + num + R"(:(\d+)\})", op.DT);
 		out = replaceMacroWithData(out, R"(%\{AM)" + num + R"(:(\d+)\})", op.AM);
-    }
+	}
 
-    return out;
+	return out;
 }
 
 std::string ToneConverter::getOutputFormat() const
 {
-	return format_;
+	return outFormat_;
 }
 
 void ToneConverter::setOutputFormat(std::string str)
 {
-	format_ = str;
+	outFormat_ = str;
 }
 
 std::string ToneConverter::replaceMacroWithData(std::string src, const std::string regex, const int value)
 {
-    std::regex re(regex);
-    std::smatch matches;
-    std::stringstream ss;
-    Manip manip;
+	std::regex re(regex);
+	std::smatch matches;
+	std::stringstream ss;
+	Manip manip;
 
-    while (std::regex_search(src, matches, re)) {
+	while (std::regex_search(src, matches, re)) {
 		parseMacro(matches[1].str(), manip);
-        if (manip.isFill0) {
-            ss << std::setw(manip.setw) << std::setfill('0') << value;
-        }
-        else {
-            ss << std::setw(manip.setw) << value;
-        }
+		if (manip.isFill0) {
+			ss << std::setw(manip.setw) << std::setfill('0') << value;
+		}
+		else {
+			ss << std::setw(manip.setw) << value;
+		}
 
-        src = std::regex_replace(src, re, ss.str(), std::regex_constants::format_first_only);
-        manip.reset();
-        ss.str("");
-        ss.clear(std::stringstream::goodbit);
-    }
+		src = std::regex_replace(src, re, ss.str(), std::regex_constants::format_first_only);
+		manip.reset();
+		ss.str("");
+		ss.clear(std::stringstream::goodbit);
+	}
 
-    return src;
+	return src;
 }
 
 std::string ToneConverter::replaceMacroWithData(std::string src, const std::string regex, const std::string str)
 {
-    return std::regex_replace(src, std::regex(regex), str);
+	return std::regex_replace(src, std::regex(regex), str);
 }
 
 void ToneConverter::parseMacro(std::string src, Manip &manip)
 {
-    if (src.size() > 1 && src[0] == '0') {
-        manip.isFill0 = true;
-        src = src.substr(1);
-    }
-    else {
-        manip.isFill0 = false;
-    }
+	if (src.size() > 1 && src[0] == '0') {
+		manip.isFill0 = true;
+		src = src.substr(1);
+	}
+	else {
+		manip.isFill0 = false;
+	}
 
-    manip.setw = std::stoi(src);
+	manip.setw = std::stoi(src);
 }
 
-std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, std::vector<int> order)
+std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, int type)
 {
 	text = std::regex_replace(text, std::regex(R"(\D+)"), ",");
 	if (text.front() == ',') text.erase(text.begin());
@@ -125,65 +329,97 @@ std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, std::vector<in
 	while (std::getline(ss, tmp, ',')) {
 		vec.push_back(tmp);
 	}
+	std::vector<FmEnvelopeTextType> order = inFormats_.at(type).texts;
 	if (vec.size() >= order.size()) {
 		std::unique_ptr<Tone> tone = std::make_unique<Tone>();
 		for (size_t i = 0; i < order.size(); ++i) {
 			int v = std::stoi(vec[i]);
 			switch (order[i]) {
-			case 0:	// Skip tone number
+			case FmEnvelopeTextType::Skip:	// Skip tone number
 				break;
-			case 1:
+			case FmEnvelopeTextType::AL:
 				if (v < 8) tone->AL = v;
 				else return std::unique_ptr<Tone>();
 				break;
-			case 2:
+			case FmEnvelopeTextType::FB:
 				if (v < 8) tone->FB = v;
 				else return std::unique_ptr<Tone>();
 				break;
 			default:
 			{
-				int t = order[i] - 3;
-				int o = t / 10;
-				switch (t % 10) {
-				case 0:
+				int o = (static_cast<int>(order[i]) - 3) / 10;
+				switch (order[i]) {
+				case FmEnvelopeTextType::AR1:
+				case FmEnvelopeTextType::AR2:
+				case FmEnvelopeTextType::AR3:
+				case FmEnvelopeTextType::AR4:
 					if (v < 32) tone->op[o].AR = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 1:
+				case FmEnvelopeTextType::DR1:
+				case FmEnvelopeTextType::DR2:
+				case FmEnvelopeTextType::DR3:
+				case FmEnvelopeTextType::DR4:
 					if (v < 32) tone->op[o].DR = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 2:
+				case FmEnvelopeTextType::SR1:
+				case FmEnvelopeTextType::SR2:
+				case FmEnvelopeTextType::SR3:
+				case FmEnvelopeTextType::SR4:
 					if (v < 32) tone->op[o].SR = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 3:
+				case FmEnvelopeTextType::RR1:
+				case FmEnvelopeTextType::RR2:
+				case FmEnvelopeTextType::RR3:
+				case FmEnvelopeTextType::RR4:
 					if (v < 16) tone->op[o].RR = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 4:
+				case FmEnvelopeTextType::SL1:
+				case FmEnvelopeTextType::SL2:
+				case FmEnvelopeTextType::SL3:
+				case FmEnvelopeTextType::SL4:
 					if (v < 16) tone->op[o].SL = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 5:
+				case FmEnvelopeTextType::TL1:
+				case FmEnvelopeTextType::TL2:
+				case FmEnvelopeTextType::TL3:
+				case FmEnvelopeTextType::TL4:
 					if (v < 127) tone->op[o].TL = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 6:
+				case FmEnvelopeTextType::KS1:
+				case FmEnvelopeTextType::KS2:
+				case FmEnvelopeTextType::KS3:
+				case FmEnvelopeTextType::KS4:
 					if (v < 4) tone->op[o].KS = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 7:
+				case FmEnvelopeTextType::ML1:
+				case FmEnvelopeTextType::ML2:
+				case FmEnvelopeTextType::ML3:
+				case FmEnvelopeTextType::ML4:
 					if (v < 16) tone->op[o].ML = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 8:
+				case FmEnvelopeTextType::DT1:
+				case FmEnvelopeTextType::DT2:
+				case FmEnvelopeTextType::DT3:
+				case FmEnvelopeTextType::DT4:
 					if (v < 8) tone->op[o].DT = v;
 					else return std::unique_ptr<Tone>();
 					break;
-				case 9:
+				case FmEnvelopeTextType::AM1:
+				case FmEnvelopeTextType::AM2:
+				case FmEnvelopeTextType::AM3:
+				case FmEnvelopeTextType::AM4:
 					if (v < 2) tone->op[o].AM = v;
 					else return std::unique_ptr<Tone>();
+					break;
+				default:
 					break;
 				}
 				break;
@@ -196,4 +432,14 @@ std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, std::vector<in
 	else {
 		return std::unique_ptr<Tone>();
 	}
+}
+
+std::vector<FmEnvelopeText> ToneConverter::getInputFormats() const
+{
+	return inFormats_;
+}
+
+void ToneConverter::setInputFormats(std::vector<FmEnvelopeText> list)
+{
+	inFormats_ = list;
 }
