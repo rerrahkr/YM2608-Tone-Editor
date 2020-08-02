@@ -1,7 +1,7 @@
 #include "fmenvelopeorderdialog.hpp"
 #include "ui_fmenvelopeorderdialog.h"
 
-FmEnvelopeOrderDialog::FmEnvelopeOrderDialog(std::vector<FmEnvelopeTextType> set, QWidget *parent) :
+FmEnvelopeOrderDialog::FmEnvelopeOrderDialog(FmInEnvelopeOrders order, QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::FmEnvelopeOrderDialog)
 {
@@ -9,8 +9,8 @@ FmEnvelopeOrderDialog::FmEnvelopeOrderDialog(std::vector<FmEnvelopeTextType> set
 
 	setWindowFlags(windowFlags() ^ Qt::WindowContextHelpButtonHint);
 
-	for (size_t i = 0; i < set.size(); ++i) {
-		insertRow(static_cast<int>(i), set.at(i));
+	for (size_t i = 0; i < order.size(); ++i) {
+		insertRow(static_cast<int>(i), order.at(i));
 	}
 }
 
@@ -19,15 +19,15 @@ FmEnvelopeOrderDialog::~FmEnvelopeOrderDialog()
 	delete ui;
 }
 
-std::vector<FmEnvelopeTextType> FmEnvelopeOrderDialog::getSet()
+FmInEnvelopeOrders FmEnvelopeOrderDialog::getOrder()
 {
-	std::vector<FmEnvelopeTextType> set;
+	std::vector<FmEnvelopeTextType> order;
 	for (int i = 0; i < ui->treeWidget->topLevelItemCount(); ++i) {
-		set.push_back(static_cast<FmEnvelopeTextType>(
-						  qobject_cast<QComboBox*>(ui->treeWidget->itemWidget(
-													   ui->treeWidget->topLevelItem(i), 1))->currentData().toInt()));
+		order.push_back(static_cast<FmEnvelopeTextType>(
+							qobject_cast<QComboBox*>(ui->treeWidget->itemWidget(
+														 ui->treeWidget->topLevelItem(i), 1))->currentData().toInt()));
 	}
-	return set;
+	return order;
 }
 
 void FmEnvelopeOrderDialog::swapset(int aboveRow, int belowRow)

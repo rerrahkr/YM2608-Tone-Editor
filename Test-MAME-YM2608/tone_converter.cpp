@@ -196,15 +196,15 @@ ToneConverter::~ToneConverter()
 	QSettings settings(FORMAT_PATH_, QSettings::IniFormat);
 
 	settings.beginGroup("Input");
-	for (const auto& set : inFormats_) {
-		auto& ordrs = set.texts;
+	for (const auto& pair : inFormats_) {
+		auto& ordrs = pair.second;
 		QString str = std::accumulate(
 						  ordrs.begin() + 1, ordrs.end(),
 						  QString::number(static_cast<int>(ordrs.front())),
 						  [](QString str, FmEnvelopeTextType type) {
 					  return str + "," + QString::number(static_cast<int>(type));
 	});
-		settings.setValue(utf8ToQString(set.name), str);
+		settings.setValue(utf8ToQString(pair.first), str);
 	}
 	settings.endGroup();
 
@@ -218,16 +218,16 @@ void ToneConverter::loadFormats()
 	QSettings settings(FORMAT_PATH_, QSettings::IniFormat);
 
 	settings.beginGroup("Input");
-	std::vector<FmEnvelopeText> list;
+	FmInEnvelopeFormats map;
 	for (const auto& key : settings.childKeys()) {
 		auto strList = settings.value(key).toString().split(",");
-		std::vector<FmEnvelopeTextType> orders;
+		FmInEnvelopeOrders orders;
 		orders.reserve(strList.size());
 		std::transform(strList.begin(), strList.end(), std::back_inserter(orders),
 					   [](const QString& str) { return static_cast<FmEnvelopeTextType>(str.toInt()); });
-		list.push_back({ key.toStdString(), orders });
+		map[key.toStdString()] = orders;
 	}
-	if (!list.empty()) inFormats_ = std::move(list);
+	if (!map.empty()) inFormats_ = std::move(map);
 	settings.endGroup();
 
 	settings.beginGroup("Output");
@@ -315,21 +315,21 @@ void ToneConverter::parseMacro(std::string src, Manip &manip)
 	manip.setw = std::stoi(src);
 }
 
-std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, int type)
+std::unique_ptr<Tone> ToneConverter::textToTone(const QString& text, const QString& type)
 {
-	text = std::regex_replace(text, std::regex(R"(\D+)"), ",");
-	if (text.front() == ',') text.erase(text.begin());
-	if (text.back() == ',') text.erase(--text.end());
+	std::string stdText = std::regex_replace(text.toUtf8().toStdString(), std::regex(R"(\D+)"), ",");
+	if (stdText.front() == ',') stdText.erase(stdText.begin());
+	if (stdText.back() == ',') stdText.erase(--stdText.end());
 
-	if (text.empty()) return std::unique_ptr<Tone>();
+	if (stdText.empty()) return std::unique_ptr<Tone>();
 
-	std::stringstream ss(text);
+	std::stringstream ss(stdText);
 	std::string tmp;
 	std::vector<std::string> vec;
 	while (std::getline(ss, tmp, ',')) {
 		vec.push_back(tmp);
 	}
-	std::vector<FmEnvelopeTextType> order = inFormats_.at(type).texts;
+	FmInEnvelopeOrders order = inFormats_.at(type.toUtf8().toStdString());
 	if (vec.size() >= order.size()) {
 		std::unique_ptr<Tone> tone = std::make_unique<Tone>();
 		for (size_t i = 0; i < order.size(); ++i) {
@@ -434,12 +434,12 @@ std::unique_ptr<Tone> ToneConverter::textToTone(std::string text, int type)
 	}
 }
 
-std::vector<FmEnvelopeText> ToneConverter::getInputFormats() const
+FmInEnvelopeFormats ToneConverter::getInputFormats() const
 {
 	return inFormats_;
 }
 
-void ToneConverter::setInputFormats(std::vector<FmEnvelopeText> list)
+void ToneConverter::setInputFormats(FmInEnvelopeFormats list)
 {
 	inFormats_ = list;
 }

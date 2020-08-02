@@ -9,36 +9,43 @@
 #include "tone_converter.hpp"
 
 namespace Ui {
-class SetupDialog;
+	class SetupDialog;
 }
 
 class SetupDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	SetupDialog(const Settings& settings, const ToneConverter& converter, QWidget *parent = nullptr);
 	~SetupDialog() override;
 
-    unsigned int rate();
-    unsigned int duration();
+	unsigned int rate();
+	unsigned int duration();
 	QString outputFormat();
-	std::vector<FmEnvelopeText> inputOrders();
+	FmInEnvelopeFormats inputFormats();
 
 private slots:
-    void on_horizontalSlider_valueChanged(int value);
+	void on_horizontalSlider_valueChanged(int value);
 
-	void on_addEnvelopeSetPushButton_clicked();
-	void on_removeEnvelopeSetpushButton_clicked();
-	void on_editEnvelopeSetPushButton_clicked();
-	void on_envelopeSetNameLineEdit_textChanged(const QString &arg1);
-	void on_envelopeSetListWidget_currentRowChanged(int currentRow);
-	void updateEnvelopeSetUi();
+	void updateInEnvelopeSetUi();
+	void on_addInEnvelopeSetPushButton_clicked();
+	void on_removeInEnvelopeSetPushButton_clicked();
+	void on_inEnvelopeSetNameLineEdit_textChanged(const QString &arg1);
+	void on_editInEnvelopeSetPushButton_clicked();
+	void on_inEnvelopeSetListWidget_currentRowChanged(int currentRow);
+
+	void updateOutEnvelopeSetUi();
+	void on_addOutEnvelopeSetPushButton_clicked();
+	void on_removeOutEnvelopeSetpushButton_clicked();
+	void on_outEnvelopeSetNameLineEdit_textChanged(const QString &arg1);
+	void on_editOutEnvelopeSetPushButton_clicked();
+	void on_outEnvelopeSetListWidget_currentRowChanged(int currentRow);
 
 private:
-    Ui::SetupDialog *ui;
+	Ui::SetupDialog *ui;
 	std::map<int, int> rateMap_;
-	std::vector<FmEnvelopeText> fmEnvelopeTexts_;
+	FmInEnvelopeFormats fmInEnvFormats_;
 };
 
 #endif // SETUPDIALOG_H

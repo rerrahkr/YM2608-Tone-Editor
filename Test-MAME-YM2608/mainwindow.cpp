@@ -752,7 +752,7 @@ void MainWindow::on_actionSetup_E_triggered()
 	SetupDialog dialog(settings_, converter_, this);
 	if (dialog.exec() == QDialog::Accepted) {
 		converter_.setOutputFormat(dialog.outputFormat().toStdString());
-		converter_.setInputFormats(dialog.inputOrders());
+		converter_.setInputFormats(dialog.inputFormats());
 		settings_.setDuration(dialog.duration());
 		settings_.setRate(dialog.rate());
 
@@ -770,16 +770,15 @@ void MainWindow::on_actionAbout_A_triggered()
 
 void MainWindow::on_actionRead_Text_R_triggered()
 {
-	std::vector<FmEnvelopeText> orders = converter_.getInputFormats();
+	FmInEnvelopeFormats formats = converter_.getInputFormats();
 	std::vector<QString> types;
-	types.reserve(orders.size());
-	std::transform(orders.begin(), orders.end(), std::back_inserter(types),
-				   [](const FmEnvelopeText& set) { return utf8ToQString(set.name); });
+	types.reserve(formats.size());
+	std::transform(formats.begin(), formats.end(), std::back_inserter(types),
+				   [](const auto& set) { return utf8ToQString(set.first); });
 	ReadTextDialog dialog(types, this);
 	if (dialog.exec() == QDialog::Accepted) {
-		if (!orders.empty()){
-			if (std::unique_ptr<Tone> tone = converter_.textToTone(
-						dialog.text().toStdString(), dialog.type())) {
+		if (!formats.empty()){
+			if (std::unique_ptr<Tone> tone = converter_.textToTone(dialog.text(), dialog.type())) {
 				tone_ = std::move(tone);
 				for (int i = 1; i <= 6; ++i) {
 					SetFMTone(i);

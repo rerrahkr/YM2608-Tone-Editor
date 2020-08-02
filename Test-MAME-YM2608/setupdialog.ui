@@ -127,17 +127,17 @@
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0" rowspan="3">
-        <widget class="QListWidget" name="envelopeSetListWidget"/>
+        <widget class="QListWidget" name="inEnvelopeSetListWidget"/>
        </item>
        <item row="1" column="1">
-        <widget class="QPushButton" name="addEnvelopeSetPushButton">
+        <widget class="QPushButton" name="addInEnvelopeSetPushButton">
          <property name="text">
           <string>Add</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QPushButton" name="removeEnvelopeSetpushButton">
+        <widget class="QPushButton" name="removeInEnvelopeSetPushButton">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -147,14 +147,14 @@
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLineEdit" name="envelopeSetNameLineEdit">
+        <widget class="QLineEdit" name="inEnvelopeSetNameLineEdit">
          <property name="enabled">
           <bool>false</bool>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QPushButton" name="editEnvelopeSetPushButton">
+        <widget class="QPushButton" name="editInEnvelopeSetPushButton">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -183,13 +183,53 @@
        <string>Output</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QPlainTextEdit" name="outFormatPlainTextEdit"/>
+       <item row="0" column="0" rowspan="3">
+        <widget class="QListWidget" name="outEnvelopeSetListWidget"/>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="0" column="1">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>143</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="addOutEnvelopeSetPushButton">
          <property name="text">
-          <string>Output format:</string>
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="removeOutEnvelopeSetpushButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLineEdit" name="outEnvelopeSetNameLineEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QPushButton" name="editOutEnvelopeSetPushButton">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Edit</string>
          </property>
         </widget>
        </item>
@@ -209,6 +249,23 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>horizontalSlider</tabstop>
+  <tabstop>radioButton44100</tabstop>
+  <tabstop>radioButton48000</tabstop>
+  <tabstop>radioButton55466</tabstop>
+  <tabstop>inEnvelopeSetListWidget</tabstop>
+  <tabstop>addInEnvelopeSetPushButton</tabstop>
+  <tabstop>removeInEnvelopeSetPushButton</tabstop>
+  <tabstop>inEnvelopeSetNameLineEdit</tabstop>
+  <tabstop>editInEnvelopeSetPushButton</tabstop>
+  <tabstop>outEnvelopeSetListWidget</tabstop>
+  <tabstop>addOutEnvelopeSetPushButton</tabstop>
+  <tabstop>removeOutEnvelopeSetpushButton</tabstop>
+  <tabstop>outEnvelopeSetNameLineEdit</tabstop>
+  <tabstop>editOutEnvelopeSetPushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -218,8 +275,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>254</x>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -234,8 +291,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>322</x>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

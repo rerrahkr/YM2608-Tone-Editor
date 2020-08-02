@@ -15,9 +15,9 @@ class FmEnvelopeOrderDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit FmEnvelopeOrderDialog(std::vector<FmEnvelopeTextType> set, QWidget *parent = nullptr);
+	explicit FmEnvelopeOrderDialog(FmInEnvelopeOrders order, QWidget *parent = nullptr);
 	~FmEnvelopeOrderDialog();
-	std::vector<FmEnvelopeTextType> getSet();
+	FmInEnvelopeOrders getOrder();
 
 private slots:
 	void on_upToolButton_clicked();
