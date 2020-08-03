@@ -29,6 +29,8 @@ public:
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
 	void keyReleaseEvent(QKeyEvent* event) override;
+	void dragEnterEvent(QDragEnterEvent* event) override;
+	void dropEvent(QDropEvent* event) override;
 
 private:
 	Ui::MainWindow *ui;
@@ -99,6 +101,8 @@ private:
 		0x085e,	// A#
 		0x07e6,	// B
 	};
+
+	void loadSingleTone(const QString& file);
 
 private slots:
 	void onALChanged(int value);
