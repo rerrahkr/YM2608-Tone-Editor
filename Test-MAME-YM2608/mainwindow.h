@@ -11,7 +11,6 @@
 #include "tone.hpp"
 #include "widgets/operator_sliders.h"
 #include "tone_converter.hpp"
-#include "tonetextdialog.h"
 #include "settings.hpp"
 
 namespace Ui {
@@ -47,7 +46,6 @@ private:
 	OperatorSliders* sliders_[4];
 
 	ToneConverter converter_;
-	ToneTextDialog textDialog_;
 
 	void SetFMTone(int channel);
 	void SetFMKeyOn(int channel);

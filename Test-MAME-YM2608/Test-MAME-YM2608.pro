@@ -27,6 +27,7 @@ CONFIG += c++17
 
 
 SOURCES += \
+    fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -53,6 +54,7 @@ SOURCES += \
     readtextdialog.cpp
 
 HEADERS += \
+    fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
         mainwindow.h \
     chips/mame/2608intf.h \
@@ -84,6 +86,7 @@ HEADERS += \
     readtextdialog.hpp
 
 FORMS += \
+    fmenvelopeformatdialog.ui \
     fmenvelopeorderdialog.ui \
         mainwindow.ui \
     widgets/labeled_slider.ui \

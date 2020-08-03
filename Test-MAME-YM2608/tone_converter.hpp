@@ -19,21 +19,23 @@ enum class FmEnvelopeTextType : int
 using FmInEnvelopeOrders = std::vector<FmEnvelopeTextType>;
 using FmInEnvelopeFormats = std::map<std::string, FmInEnvelopeOrders>;
 
+using FmOutEnvelopeFormats = std::map<std::string, std::string>;
+
 class ToneConverter
 {
 public:
 	ToneConverter();
 	~ToneConverter();
-	std::string toneToText(const Tone* tone);
-	std::string getOutputFormat() const;
-	void setOutputFormat(std::string str);
-	std::unique_ptr<Tone> textToTone(const QString& text, const QString& type);
+	QString toneToText(const Tone& tone, const QString& type) const;
+	FmOutEnvelopeFormats getOutputFormats() const;
+	void setOutputFormats(FmOutEnvelopeFormats list);
+	std::unique_ptr<Tone> textToTone(const QString& text, const QString& type) const;
 	FmInEnvelopeFormats getInputFormats() const;
 	void setInputFormats(FmInEnvelopeFormats list);
 
 private:
 	static const QString FORMAT_PATH_;
-	std::string outFormat_;
+	FmOutEnvelopeFormats outFormats_;
 	FmInEnvelopeFormats inFormats_;
 
 	struct Manip
@@ -48,7 +50,7 @@ private:
 	};
 
 	void loadFormats();
-	std::string replaceMacroWithData(std::string src, const std::string regex, const int value);
-	std::string replaceMacroWithData(std::string src, const std::string regex, const std::string str);
-	void parseMacro(std::string src, Manip& manip);
+	std::string replaceMacroWithData(std::string src, const std::string regex, const int value) const;
+	std::string replaceMacroWithData(std::string src, const std::string regex, const std::string str) const;
+	void parseMacro(std::string src, Manip& manip) const;
 };

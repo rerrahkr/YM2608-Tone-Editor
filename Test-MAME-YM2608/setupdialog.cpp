@@ -4,6 +4,7 @@
 #include <QListWidgetItem>
 #include "sliderstyle.hpp"
 #include "fmenvelopeorderdialog.hpp"
+#include "fmenvelopeformatdialog.hpp"
 #include "text_conversion.hpp"
 
 SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converter, QWidget *parent)
@@ -32,7 +33,7 @@ SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converte
 	updateInEnvelopeSetUi();
 
 	// Output
-	//	ui->outFormatPlainTextEdit->setPlainText(QString::fromStdString(converter.getOutputFormat()));
+	fmOutEnvFormats_ = converter.getOutputFormats();
 	updateOutEnvelopeSetUi();
 }
 
@@ -51,9 +52,9 @@ unsigned int SetupDialog::rate()
 	return rateMap_[ui->buttonGroup->checkedId()];
 }
 
-QString SetupDialog::outputFormat()
+FmOutEnvelopeFormats SetupDialog::outputFormats()
 {
-	return "";//ui->outFormatPlainTextEdit->toPlainText();
+	return fmOutEnvFormats_;
 }
 
 FmInEnvelopeFormats SetupDialog::inputFormats()
@@ -75,7 +76,7 @@ void SetupDialog::updateInEnvelopeSetUi()
 
 void SetupDialog::on_addInEnvelopeSetPushButton_clicked()
 {
-	auto name = QString("Set %1").arg(fmInEnvFormats_.size() + 1);
+	auto name = QString("Format %1").arg(fmInEnvFormats_.size() + 1);
 	fmInEnvFormats_[name.toUtf8().toStdString()] = FmInEnvelopeOrders();
 	updateInEnvelopeSetUi();
 	for (int i = ui->inEnvelopeSetListWidget->count() - 1; i >= 0; --i) {
@@ -122,30 +123,54 @@ void SetupDialog::on_inEnvelopeSetListWidget_currentRowChanged(int currentRow)
 
 void SetupDialog::updateOutEnvelopeSetUi()
 {
-
+	ui->outEnvelopeSetListWidget->clear();
+	for (auto& pair : fmOutEnvFormats_)
+		ui->outEnvelopeSetListWidget->addItem(utf8ToQString(pair.first));
 }
 
 void SetupDialog::on_addOutEnvelopeSetPushButton_clicked()
 {
-
+	auto name = QString("Format %1").arg(fmOutEnvFormats_.size() + 1);
+	fmOutEnvFormats_[name.toUtf8().toStdString()] = "";
+	updateOutEnvelopeSetUi();
+	for (int i = ui->outEnvelopeSetListWidget->count() - 1; i >= 0; --i) {
+		if (ui->outEnvelopeSetListWidget->item(i)->text() == name) {
+			ui->outEnvelopeSetListWidget->setCurrentRow(i);
+			break;
+		}
+	}
 }
 
-void SetupDialog::on_removeOutEnvelopeSetpushButton_clicked()
+void SetupDialog::on_removeOutEnvelopeSetPushButton_clicked()
 {
-
+	fmOutEnvFormats_.erase(ui->outEnvelopeSetListWidget->currentItem()->text().toUtf8().toStdString());
+	updateOutEnvelopeSetUi();
 }
 
 void SetupDialog::on_outEnvelopeSetNameLineEdit_textChanged(const QString &arg1)
 {
-
+	auto node = fmOutEnvFormats_.extract(ui->outEnvelopeSetListWidget->currentItem()->text().toUtf8().toStdString());
+	node.key() = arg1.toUtf8().toStdString();
+	fmOutEnvFormats_.insert(std::move(node));
+	ui->outEnvelopeSetListWidget->currentItem()->setText(arg1);
 }
 
 void SetupDialog::on_editOutEnvelopeSetPushButton_clicked()
 {
-
+	QString name = ui->outEnvelopeSetListWidget->currentItem()->text();
+	FmEnvelopeFormatDialog diag(utf8ToQString(fmOutEnvFormats_[name.toUtf8().toStdString()]));
+	diag.setWindowTitle(diag.windowTitle() + ": " + name);
+	if (diag.exec() == QDialog::Accepted) {
+		fmOutEnvFormats_[name.toUtf8().toStdString()] = diag.getText().toUtf8().toStdString();
+	}
 }
 
 void SetupDialog::on_outEnvelopeSetListWidget_currentRowChanged(int currentRow)
 {
-
+	bool cond = currentRow != -1;
+	ui->editOutEnvelopeSetPushButton->setEnabled(cond);
+	ui->removeOutEnvelopeSetPushButton->setEnabled(cond);
+	ui->outEnvelopeSetNameLineEdit->setEnabled(cond);
+	if (cond)
+		ui->outEnvelopeSetNameLineEdit->setText(ui->outEnvelopeSetListWidget->item(currentRow)->text());
 }
