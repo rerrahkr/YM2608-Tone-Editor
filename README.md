@@ -12,16 +12,18 @@ It will create two settings files automatically at the first run.
 
 ### Keyboard
 There are two rows of a piano keyboard:
+
 ```
-  PSG keyboard
+   High octave
  2 3  5 6 7  9 0
 Q W ER T Y UI O P
 
-  FM keyboard
+   Low octave
  S D  G H J  L ;
 Z X CV B N M, . /
 ```
-F1, F2 is FM octave up/down, and F3, F4 is PSG octave up/down.  
+
+F1, F2 is octave up/down, and F3 toggles FM/PSG.  
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
 ### Convert to text

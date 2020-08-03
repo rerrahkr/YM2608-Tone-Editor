@@ -1,9 +1,13 @@
 # Changelog
 
 ## Unreleased
+### Added
+- FM/PSG switch key
+
 ### Changed
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
 - Enable to save multiple text input/output formats
+- Integrate FM/PSG octave keys
 
 ### Fixed
 - [#2] - Fixed internal FM sample rate (thanks [@freq-mod])
