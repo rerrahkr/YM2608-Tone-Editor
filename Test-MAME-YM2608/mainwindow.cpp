@@ -1,19 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QKeyEvent>
-#include <QFileDialog>
-#include <QMessageBox>
 #include <algorithm>
 #include <fstream>
 #include <cstdint>
 #include <utility>
-#include "tone_file.hpp"
+#include <QKeyEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QMimeData>
 #include "namedialog.h"
 #include "setupdialog.h"
 #include "aboutdialog.h"
 #include "readtextdialog.hpp"
 #include "text_conversion.hpp"
 #include "tonetextdialog.h"
+#include "io/file_io.hpp"
 
 const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
 	{ Qt::Key_Z, 0 },
@@ -198,6 +199,35 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 	}
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+	auto mime = event->mimeData();
+	if (mime->hasUrls() && mime->urls().length() == 1) {
+		switch (FileIo::getInstance().detectFileType(mime->urls().first().toLocalFile())) {
+		case FileIo::FileType::Unknown:
+			break;
+		default:
+			event->acceptProposedAction();
+			break;
+		}
+	}
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+	QString file = event->mimeData()->urls().first().toLocalFile();
+
+	switch (FileIo::getInstance().detectFileType(file)) {
+	case FileIo::FileType::SingleTone:
+		loadSingleTone(file);
+		break;
+	case FileIo::FileType::ToneBank:
+		// TODO
+		break;
+	default:
+		break;
+	}
+}
 
 void MainWindow::JamKeyOnFM(int jamKeyNumber, bool isRepeat)
 {
@@ -644,6 +674,15 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
 	setWindowModified(true);
 }
 
+void MainWindow::loadSingleTone(const QString& file)
+{
+	if (Tone* t = FileIo::getInstance().loadSingleToneFrom(file)) {
+		tone_.reset(t);
+		for (int i = 1; i <= 6; ++i) {
+			SetFMTone(i);
+		}
+	}
+}
 
 void MainWindow::on_actionOpen_O_triggered()
 {
@@ -658,12 +697,12 @@ void MainWindow::on_actionOpen_O_triggered()
 		}
 	}
 
-	QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), "FM tone file (*.tone)");
+	QStringList filters {
+		"FM tone file (*.tone)"
+	};
+	QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), filters.join(";;"));
 	if (!file.isNull()) {
-		tone_ = ToneFile::read(file.toStdString());
-		for (int i = 1; i <= 6; ++i) {
-			SetFMTone(i);
-		}
+		loadSingleTone(file);
 	}
 }
 
@@ -691,7 +730,7 @@ bool MainWindow::saveTone()
 	}
 
 	if (isExist) {
-		ToneFile::write(tone_->path, tone_.get());
+		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone_->path), *tone_);
 		setWindowModified(false);
 		setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 	}
@@ -704,12 +743,15 @@ bool MainWindow::saveTone()
 
 bool MainWindow::saveToneAs()
 {
-	QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), "FM tone file (*.tone)");
+	QStringList filters {
+		"FM tone file (*.tone)"
+	};
+	QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), filters.join(";;"));
 	if (file.isNull()) return false;
 	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
 	tone_->path = file.toStdString();
-	ToneFile::write(tone_->path, tone_.get());
+	FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone_->path), *tone_);
 
 	setWindowModified(false);
 	setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");

@@ -8,6 +8,7 @@
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
 - Enable to save multiple text input/output formats
 - Integrate FM/PSG octave keys
+- Accept dragging and dropping file
 
 ### Fixed
 - [#2] - Fixed internal FM sample rate (thanks [@freq-mod])
@@ -32,7 +33,7 @@
 - Fix tone file name in save dialog
 - Fix form design
 
-## v0.1.0 - Mar 27 2018
+## v0.1.0 (2018/03/27)
 ### Added
 - Initial release
 

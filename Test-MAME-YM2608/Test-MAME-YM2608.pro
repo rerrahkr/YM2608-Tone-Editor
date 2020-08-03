@@ -29,6 +29,9 @@ CONFIG += c++17
 SOURCES += \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
+    io/binary_container.cpp \
+    io/file_io.cpp \
+    io/original_tone_io.cpp \
         main.cpp \
         mainwindow.cpp \
     chips/opna.cpp \
@@ -43,7 +46,6 @@ SOURCES += \
     parameter_state.cpp \
     chips/chip.cpp \
     chips/resampler.cpp \
-    tone_file.cpp \
     namedialog.cpp \
     tone_converter.cpp \
     tonetextdialog.cpp \
@@ -56,6 +58,9 @@ SOURCES += \
 HEADERS += \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
+    io/binary_container.hpp \
+    io/file_io.hpp \
+    io/original_tone_io.hpp \
         mainwindow.h \
     chips/mame/2608intf.h \
     chips/mame/emu2149.h \
@@ -75,7 +80,6 @@ HEADERS += \
     chips/chip_misc.h \
     chips/resampler.hpp \
     tone.hpp \
-    tone_file.hpp \
     namedialog.h \
     tone_converter.hpp \
     tonetextdialog.h \
