@@ -207,7 +207,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QPushButton" name="removeOutEnvelopeSetpushButton">
+        <widget class="QPushButton" name="removeOutEnvelopeSetPushButton">
          <property name="enabled">
           <bool>false</bool>
          </property>
@@ -262,7 +262,7 @@
   <tabstop>editInEnvelopeSetPushButton</tabstop>
   <tabstop>outEnvelopeSetListWidget</tabstop>
   <tabstop>addOutEnvelopeSetPushButton</tabstop>
-  <tabstop>removeOutEnvelopeSetpushButton</tabstop>
+  <tabstop>removeOutEnvelopeSetPushButton</tabstop>
   <tabstop>outEnvelopeSetNameLineEdit</tabstop>
   <tabstop>editOutEnvelopeSetPushButton</tabstop>
  </tabstops>

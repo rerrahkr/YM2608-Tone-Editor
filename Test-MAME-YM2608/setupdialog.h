@@ -22,7 +22,7 @@ public:
 
 	unsigned int rate();
 	unsigned int duration();
-	QString outputFormat();
+	FmOutEnvelopeFormats outputFormats();
 	FmInEnvelopeFormats inputFormats();
 
 private slots:
@@ -37,7 +37,7 @@ private slots:
 
 	void updateOutEnvelopeSetUi();
 	void on_addOutEnvelopeSetPushButton_clicked();
-	void on_removeOutEnvelopeSetpushButton_clicked();
+	void on_removeOutEnvelopeSetPushButton_clicked();
 	void on_outEnvelopeSetNameLineEdit_textChanged(const QString &arg1);
 	void on_editOutEnvelopeSetPushButton_clicked();
 	void on_outEnvelopeSetListWidget_currentRowChanged(int currentRow);
@@ -46,6 +46,7 @@ private:
 	Ui::SetupDialog *ui;
 	std::map<int, int> rateMap_;
 	FmInEnvelopeFormats fmInEnvFormats_;
+	FmOutEnvelopeFormats fmOutEnvFormats_;
 };
 
 #endif // SETUPDIALOG_H

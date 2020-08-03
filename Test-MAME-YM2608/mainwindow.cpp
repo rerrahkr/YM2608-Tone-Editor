@@ -13,6 +13,7 @@
 #include "aboutdialog.h"
 #include "readtextdialog.hpp"
 #include "text_conversion.hpp"
+#include "tonetextdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -737,21 +738,18 @@ void MainWindow::on_nameButton_clicked()
 
 void MainWindow::on_actionConvert_To_Text_C_triggered()
 {
-	QString str = QString::fromStdString(converter_.toneToText(tone_.get()));
-	textDialog_.setText(str);
-	if (textDialog_.isHidden()) {
-		textDialog_.show();
-	}
-	else {
-		textDialog_.activateWindow();
-	}
+	if (converter_.getOutputFormats().empty())
+		QMessageBox::critical(this, "Error", "No output format is saved.");
+
+	ToneTextDialog diag(*tone_, converter_);
+	diag.exec();
 }
 
 void MainWindow::on_actionSetup_E_triggered()
 {
 	SetupDialog dialog(settings_, converter_, this);
 	if (dialog.exec() == QDialog::Accepted) {
-		converter_.setOutputFormat(dialog.outputFormat().toStdString());
+		converter_.setOutputFormats(dialog.outputFormats());
 		converter_.setInputFormats(dialog.inputFormats());
 		settings_.setDuration(dialog.duration());
 		settings_.setRate(dialog.rate());
