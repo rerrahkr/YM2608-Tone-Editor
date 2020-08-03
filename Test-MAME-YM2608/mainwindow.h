@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <vector>
+#include <unordered_map>
 #include <QMainWindow>
 #include <QString>
 #include <QCloseEvent>
@@ -39,7 +40,7 @@ private:
 
 	std::unique_ptr<Tone> tone_;
 
-	int octaveFM_, octavePSG_;
+	int octave_;
 	std::vector<int> jamKeyOnTableFM_, jamKeyOnTablePSG_;
 	QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
@@ -58,14 +59,18 @@ private:
 
 	void JamKeyOnFM(int jamKeyNumber, bool isRepeat);
 	void JamKeyOnPSG(int jamKeyNumber, bool isRepeat);
+	void(MainWindow::*jamKeyOnFunc_)(int, bool);
 	void JamKeyOffFM(int jamKeyNumber, bool isRepeat);
 	void JamKeyOffPSG(int jamKeyNumber, bool isRepeat);
+	void(MainWindow::*jamKeyOffFunc_)(int, bool);
 
 	QString keyNumberToNameString(int jamKeyNumber);
 
 	void closeEvent(QCloseEvent* event) override;
 
-	const int fm_tune_tbl[12] = {
+	static const std::unordered_map<int, int> NOTE_NUM_MAP_;
+
+	static constexpr int FM_FNUM_TBL_[12] = {
 		0x026a,	// C
 		0x028f,	// C#
 		0x02b6,	// D
@@ -80,7 +85,7 @@ private:
 		0x048f	// B
 	};
 
-	const int psg_tune_tbl[12] = {
+	static constexpr int PSG_PITCH_TBL_[12] = {
 		0x0ee8,	// C
 		0x0e12,	// C#
 		0x0d48,	// D

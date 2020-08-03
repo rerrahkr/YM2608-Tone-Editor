@@ -15,16 +15,54 @@
 #include "text_conversion.hpp"
 #include "tonetextdialog.h"
 
+const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
+	{ Qt::Key_Z, 0 },
+	{ Qt::Key_S, 1 },
+	{ Qt::Key_X, 2 },
+	{ Qt::Key_D, 3 },
+	{ Qt::Key_C, 4 },
+	{ Qt::Key_V, 5 },
+	{ Qt::Key_G, 6 },
+	{ Qt::Key_B, 7 },
+	{ Qt::Key_H, 8 },
+	{ Qt::Key_N, 9 },
+	{ Qt::Key_J, 10 },
+	{ Qt::Key_M, 11 },
+	{ Qt::Key_Comma, 12 },
+	{ Qt::Key_L, 13 },
+	{ Qt::Key_Period, 14 },
+	{ Qt::Key_Semicolon, 15 },
+	{ Qt::Key_Slash, 16 },
+	{ Qt::Key_Q, 12 },
+	{ Qt::Key_2, 13 },
+	{ Qt::Key_W, 14 },
+	{ Qt::Key_3, 15 },
+	{ Qt::Key_E, 16 },
+	{ Qt::Key_R, 17 },
+	{ Qt::Key_5, 18 },
+	{ Qt::Key_T, 19 },
+	{ Qt::Key_6, 20 },
+	{ Qt::Key_Y, 21 },
+	{ Qt::Key_7, 22 },
+	{ Qt::Key_U, 23 },
+	{ Qt::Key_I, 24 },
+	{ Qt::Key_9, 25 },
+	{ Qt::Key_O, 26 },
+	{ Qt::Key_0, 27 },
+	{ Qt::Key_P, 28 },
+};
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	settings_(),
 	chip_(3993600 * 2, settings_.getRate()),
 	audio_(chip_, chip_.getRate(), 40),
-	octaveFM_(3),
-	octavePSG_(3),
+	octave_(4),
 	pressedKeyNameFM_("FM: "),
-	pressedKeyNamePSG_("PSG: ")
+	pressedKeyNamePSG_("PSG: "),
+	jamKeyOnFunc_(&MainWindow::JamKeyOnFM),
+	jamKeyOffFunc_(&MainWindow::JamKeyOffFM)
 {
 	ui->setupUi(this);
 
@@ -81,46 +119,30 @@ MainWindow::~MainWindow()
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 	bool isRepeat = event->isAutoRepeat();
+	auto key = event->key();
+
+	if (NOTE_NUM_MAP_.count(key)) {
+		(this->*jamKeyOnFunc_)(NOTE_NUM_MAP_.at(key), isRepeat);
+		return;
+	}
 
 	switch (event->key()) {
-	case Qt::Key_Z:			JamKeyOnFM(0, isRepeat);            break;
-	case Qt::Key_S:			JamKeyOnFM(1, isRepeat);            break;
-	case Qt::Key_X:			JamKeyOnFM(2, isRepeat);            break;
-	case Qt::Key_D:			JamKeyOnFM(3, isRepeat);            break;
-	case Qt::Key_C:			JamKeyOnFM(4, isRepeat);            break;
-	case Qt::Key_V:			JamKeyOnFM(5, isRepeat);            break;
-	case Qt::Key_G:			JamKeyOnFM(6, isRepeat);            break;
-	case Qt::Key_B:			JamKeyOnFM(7, isRepeat);            break;
-	case Qt::Key_H:			JamKeyOnFM(8, isRepeat);            break;
-	case Qt::Key_N:			JamKeyOnFM(9, isRepeat);            break;
-	case Qt::Key_J:			JamKeyOnFM(10, isRepeat);           break;
-	case Qt::Key_M:			JamKeyOnFM(11, isRepeat);           break;
-	case Qt::Key_Comma:		JamKeyOnFM(12, isRepeat);           break;
-	case Qt::Key_L:			JamKeyOnFM(13, isRepeat);           break;
-	case Qt::Key_Period:	JamKeyOnFM(14, isRepeat);           break;
-	case Qt::Key_Semicolon:	JamKeyOnFM(15, isRepeat);           break;
-	case Qt::Key_Slash:		JamKeyOnFM(16, isRepeat);           break;
-	case Qt::Key_Q:			JamKeyOnPSG(0, isRepeat);           break;
-	case Qt::Key_2:			JamKeyOnPSG(1, isRepeat);           break;
-	case Qt::Key_W:			JamKeyOnPSG(2, isRepeat);           break;
-	case Qt::Key_3:			JamKeyOnPSG(3, isRepeat);           break;
-	case Qt::Key_E:			JamKeyOnPSG(4, isRepeat);           break;
-	case Qt::Key_R:			JamKeyOnPSG(5, isRepeat);           break;
-	case Qt::Key_5:			JamKeyOnPSG(6, isRepeat);           break;
-	case Qt::Key_T:			JamKeyOnPSG(7, isRepeat);           break;
-	case Qt::Key_6:			JamKeyOnPSG(8, isRepeat);           break;
-	case Qt::Key_Y:			JamKeyOnPSG(9, isRepeat);           break;
-	case Qt::Key_7:			JamKeyOnPSG(10, isRepeat);          break;
-	case Qt::Key_U:			JamKeyOnPSG(11, isRepeat);          break;
-	case Qt::Key_I:			JamKeyOnPSG(12, isRepeat);          break;
-	case Qt::Key_9:			JamKeyOnPSG(13, isRepeat);          break;
-	case Qt::Key_O:			JamKeyOnPSG(14, isRepeat);          break;
-	case Qt::Key_0:			JamKeyOnPSG(15, isRepeat);          break;
-	case Qt::Key_P:			JamKeyOnPSG(16, isRepeat);          break;
-	case Qt::Key_F1:		if (octaveFM_ > 1)	--octaveFM_;	break;
-	case Qt::Key_F2:		if (octaveFM_ < 7)	++octaveFM_;	break;
-	case Qt::Key_F3:		if (octavePSG_ > 1)	--octavePSG_;   break;
-	case Qt::Key_F4:        if (octavePSG_ < 6)	++octavePSG_;	break;
+	case Qt::Key_F1:
+		if (octave_ > 1) --octave_;
+		break;
+	case Qt::Key_F2:
+		if (octave_ < 7) ++octave_;
+		break;
+	case Qt::Key_F3:
+		if (jamKeyOnFunc_ == &MainWindow::JamKeyOnFM) {
+			jamKeyOnFunc_ = &MainWindow::JamKeyOnPSG;
+			jamKeyOffFunc_ = &MainWindow::JamKeyOffPSG;
+		}
+		else {
+			jamKeyOnFunc_ = &MainWindow::JamKeyOnFM;
+			jamKeyOffFunc_ = &MainWindow::JamKeyOffFM;
+		}
+		break;
 	case Qt::Key_F5:    // Bass drum
 		chip_.setRegister(0x18, 0xdf);
 		chip_.setRegister(0x10, 0x01);
@@ -158,51 +180,21 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 		jamKeyOnTableFM_.clear();
 		jamKeyOnTablePSG_.clear();
 		break;
-	case Qt::Key_Escape:    close();                            break;
-	default:                                                    break;
+	case Qt::Key_Escape:
+		close();
+		break;
+	default:
+		break;
 	}
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
 	bool isRepeat = event->isAutoRepeat();
+	auto key = event->key();
 
-	switch (event->key()) {
-	case Qt::Key_Z:			JamKeyOffFM(0, isRepeat);	break;
-	case Qt::Key_S:			JamKeyOffFM(1, isRepeat);	break;
-	case Qt::Key_X:			JamKeyOffFM(2, isRepeat);	break;
-	case Qt::Key_D:			JamKeyOffFM(3, isRepeat);	break;
-	case Qt::Key_C:			JamKeyOffFM(4, isRepeat);	break;
-	case Qt::Key_V:			JamKeyOffFM(5, isRepeat);	break;
-	case Qt::Key_G:			JamKeyOffFM(6, isRepeat);	break;
-	case Qt::Key_B:			JamKeyOffFM(7, isRepeat);	break;
-	case Qt::Key_H:			JamKeyOffFM(8, isRepeat);	break;
-	case Qt::Key_N:			JamKeyOffFM(9, isRepeat);	break;
-	case Qt::Key_J:			JamKeyOffFM(10, isRepeat);	break;
-	case Qt::Key_M:			JamKeyOffFM(11, isRepeat);	break;
-	case Qt::Key_Comma:		JamKeyOffFM(12, isRepeat);  break;
-	case Qt::Key_L:			JamKeyOffFM(13, isRepeat);  break;
-	case Qt::Key_Period:	JamKeyOffFM(14, isRepeat);  break;
-	case Qt::Key_Semicolon:	JamKeyOffFM(15, isRepeat);  break;
-	case Qt::Key_Slash:		JamKeyOffFM(16, isRepeat);  break;
-	case Qt::Key_Q:			JamKeyOffPSG(0, isRepeat);  break;
-	case Qt::Key_2:			JamKeyOffPSG(1, isRepeat);  break;
-	case Qt::Key_W:			JamKeyOffPSG(2, isRepeat);  break;
-	case Qt::Key_3:			JamKeyOffPSG(3, isRepeat);  break;
-	case Qt::Key_E:			JamKeyOffPSG(4, isRepeat);  break;
-	case Qt::Key_R:			JamKeyOffPSG(5, isRepeat);  break;
-	case Qt::Key_5:			JamKeyOffPSG(6, isRepeat);  break;
-	case Qt::Key_T:			JamKeyOffPSG(7, isRepeat);  break;
-	case Qt::Key_6:			JamKeyOffPSG(8, isRepeat);  break;
-	case Qt::Key_Y:			JamKeyOffPSG(9, isRepeat);  break;
-	case Qt::Key_7:			JamKeyOffPSG(10, isRepeat); break;
-	case Qt::Key_U:			JamKeyOffPSG(11, isRepeat); break;
-	case Qt::Key_I:			JamKeyOffPSG(12, isRepeat); break;
-	case Qt::Key_9:			JamKeyOffPSG(13, isRepeat); break;
-	case Qt::Key_O:			JamKeyOffPSG(14, isRepeat); break;
-	case Qt::Key_0:			JamKeyOffPSG(15, isRepeat); break;
-	case Qt::Key_P:			JamKeyOffPSG(16, isRepeat); break;
-	default:                                            break;
+	if (NOTE_NUM_MAP_.count(key)) {
+		(this->*jamKeyOffFunc_)(NOTE_NUM_MAP_.at(key), isRepeat);
 	}
 }
 
@@ -238,13 +230,13 @@ void MainWindow::JamKeyOnFM(int jamKeyNumber, bool isRepeat)
 		}
 
 		// Set key on
-		SetFMKey(ch, (octaveFM_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+		SetFMKey(ch, (octave_ + jamKeyNumber / 12), (jamKeyNumber % 12));
 		SetFMKeyOn(ch);
-		int value = (1 << (ch + 7)) | (octaveFM_ * 12 + jamKeyNumber);
+		int value = (1 << (ch + 7)) | (octave_ * 12 + jamKeyNumber);
 		jamKeyOnTableFM_.push_back(value);
 
 		pressedKeyNameFM_ = "FM: " + keyNumberToNameString(jamKeyNumber);
-		pressedKeyNameFM_ += QString::number(octaveFM_ + jamKeyNumber / 12);
+		pressedKeyNameFM_ += QString::number(octave_ + jamKeyNumber / 12);
 		ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
 	}
 }
@@ -280,13 +272,13 @@ void MainWindow::JamKeyOnPSG(int jamKeyNumber, bool isRepeat)
 		}
 
 		// Set key on
-		SetPSGKey(ch, (octavePSG_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+		SetPSGKey(ch, (octave_ + jamKeyNumber / 12), (jamKeyNumber % 12));
 		SetPSGKeyOn(ch);
-		int value = (1 << (ch + 7)) | (octavePSG_ * 12 + jamKeyNumber);
+		int value = (1 << (ch + 7)) | (octave_ * 12 + jamKeyNumber);
 		jamKeyOnTablePSG_.push_back(value);
 
 		pressedKeyNamePSG_ = "PSG: " + keyNumberToNameString(jamKeyNumber);
-		pressedKeyNamePSG_ += QString::number(octavePSG_ + jamKeyNumber / 12);
+		pressedKeyNamePSG_ += QString::number(octave_ + jamKeyNumber / 12);
 		ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
 	}
 }
@@ -294,7 +286,7 @@ void MainWindow::JamKeyOnPSG(int jamKeyNumber, bool isRepeat)
 void MainWindow::JamKeyOffFM(int jamKeyNumber, bool isRepeat)
 {
 	if (!isRepeat) {
-		int value = octaveFM_ * 12 + jamKeyNumber;
+		int value = octave_ * 12 + jamKeyNumber;
 		for (size_t i = 0; i < jamKeyOnTableFM_.size(); ++i) {
 			if ((jamKeyOnTableFM_[i] & 0x0ff) == value) {
 				int flag = jamKeyOnTableFM_[i] >> 8;
@@ -318,7 +310,7 @@ void MainWindow::JamKeyOffFM(int jamKeyNumber, bool isRepeat)
 void MainWindow::JamKeyOffPSG(int jamKeyNumber, bool isRepeat)
 {
 	if (!isRepeat) {
-		int value = octavePSG_ * 12 + jamKeyNumber;
+		int value = octave_ * 12 + jamKeyNumber;
 		for (size_t i = 0; i < jamKeyOnTablePSG_.size(); ++i) {
 			if ((jamKeyOnTablePSG_[i] & 0x0ff) == value) {
 				int flag = jamKeyOnTablePSG_[i] >> 8;
@@ -480,7 +472,7 @@ void MainWindow::SetFMKey(int channel, int octave, int keynum)
 	// A4(440Hz)
 	uint8_t data;
 	uint32_t block = octave;	// Octave
-	uint32_t fnum = fm_tune_tbl[keynum];
+	uint32_t fnum = FM_FNUM_TBL_[keynum];
 	data = block << 3;
 	data = data | (fnum >> 8);
 	chip_.setRegister(0xa4 + bch, data);
@@ -492,7 +484,7 @@ void MainWindow::SetPSGKey(int channel, int octave, int keynum)
 {
 	uint32_t offset = 2 * (channel - 1);
 
-	uint32_t data = psg_tune_tbl[keynum];
+	uint32_t data = PSG_PITCH_TBL_[keynum];
 	if (octave > 0) {
 		data = (data + 1) >> octave;
 	}
