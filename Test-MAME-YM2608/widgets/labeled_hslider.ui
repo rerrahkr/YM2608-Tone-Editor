@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LabeledHSlider</class>
+ <widget class="QWidget" name="LabeledHSlider">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>186</width>
+    <height>58</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QSlider" name="horizontalSlider">
+     <property name="styleSheet">
+      <string notr="true">QSlider::groove:horizontal {
+	height: 4px;
+	background-color: #fefefe;
+	border: 1px solid #c4c4c4;
+	margin: 0 5px;
+	border-radius: 2px;
+}
+
+QSlider::handle:horizontal {
+	width: 12px;
+	/*background-color: #3498db;*/
+	background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3498db, stop:1 #8bb7d9);
+	border: 1px solid #2980b9;
+	margin: -5px -6px;
+	border-radius: 7px;
+}
+
+QSlider::sub-page:horizontal {
+	margin: 1px 6px;
+	background-color: qlineargradient(x1:1, y1:0, x2:0, y2:0, stop:0 #edf9ff, stop:1 #c2e0f4);
+	border-radius: 2px;
+}</string>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

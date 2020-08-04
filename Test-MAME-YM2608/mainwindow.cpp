@@ -75,8 +75,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->alSlider->setMaximum(7);
 	ui->fbSlider->setMaximum(7);
 
-	connect(ui->alSlider, &LabeledSlider::valueChanged, this, &MainWindow::onALChanged);
-	connect(ui->fbSlider, &LabeledSlider::valueChanged, this, &MainWindow::onFBChanged);
+	connect(ui->alSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onALChanged);
+	connect(ui->fbSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onFBChanged);
 	connect(ui->op1Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
 	connect(ui->op2Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
 	connect(ui->op3Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
