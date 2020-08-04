@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LabeledSlider</class>
- <widget class="QFrame" name="LabeledSlider">
+ <class>LabeledVSlider</class>
+ <widget class="QWidget" name="LabeledVSlider">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -14,9 +14,7 @@
    <string>Frame</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QFrame {
-	border: none;
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -31,10 +29,13 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="1" column="0" alignment="Qt::AlignHCenter">
+   <item row="1" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Text</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>

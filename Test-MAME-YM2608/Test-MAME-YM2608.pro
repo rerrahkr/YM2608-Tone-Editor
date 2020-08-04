@@ -41,7 +41,8 @@ SOURCES += \
     chips/mame/ymdeltat.c \
     audio_stream.cpp \
     audio_stream_mixier.cpp \
-    widgets/labeled_slider.cpp \
+    widgets/labeled_hslider.cpp \
+    widgets/labeled_vslider.cpp \
     widgets/operator_sliders.cpp \
     parameter_state.cpp \
     chips/chip.cpp \
@@ -73,7 +74,8 @@ HEADERS += \
     types.h \
     audio_stream.hpp \
     audio_stream_mixier.hpp \
-    widgets/labeled_slider.h \
+    widgets/labeled_hslider.hpp \
+    widgets/labeled_vslider.h \
     widgets/operator_sliders.h \
     parameter_state.hpp \
     chips/chip.hpp \
@@ -93,7 +95,8 @@ FORMS += \
     fmenvelopeformatdialog.ui \
     fmenvelopeorderdialog.ui \
         mainwindow.ui \
-    widgets/labeled_slider.ui \
+    widgets/labeled_hslider.ui \
+    widgets/labeled_vslider.ui \
     widgets/operator_sliders.ui \
     namedialog.ui \
     tonetextdialog.ui \

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>OperatorSliders</class>
- <widget class="QFrame" name="OperatorSliders">
+ <widget class="QWidget" name="OperatorSliders">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>420</width>
     <height>300</height>
    </rect>
   </property>
@@ -14,11 +14,12 @@
    <string>Frame</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QFrame {
-	border: none;
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -31,110 +32,119 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item alignment="Qt::AlignHCenter">
+   <item>
     <widget class="QLabel" name="operatorNumberLabel">
+     <property name="minimumSize">
+      <size>
+       <width>40</width>
+       <height>0</height>
+      </size>
+     </property>
      <property name="text">
       <string>number</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="LabeledSlider" name="arSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="LabeledSlider" name="drSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="LabeledSlider" name="srSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    <widget class="LabeledVSlider" name="arSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="LabeledSlider" name="rrSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="LabeledSlider" name="slSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    <widget class="LabeledVSlider" name="drSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="LabeledSlider" name="tlSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="LabeledSlider" name="ksSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    <widget class="LabeledVSlider" name="srSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="LabeledSlider" name="mlSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="LabeledSlider" name="dtSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    <widget class="LabeledVSlider" name="rrSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="LabeledSlider" name="amSlider">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+    <widget class="LabeledVSlider" name="slSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+    </widget>
+   </item>
+   <item>
+    <widget class="LabeledVSlider" name="tlSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="LabeledVSlider" name="ksSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="LabeledVSlider" name="mlSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="LabeledVSlider" name="dtSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="LabeledVSlider" name="amSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
      </property>
     </widget>
    </item>
@@ -142,9 +152,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LabeledSlider</class>
-   <extends>QFrame</extends>
-   <header>widgets/labeled_slider.h</header>
+   <class>LabeledVSlider</class>
+   <extends>QWidget</extends>
+   <header>widgets/labeled_vslider.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
