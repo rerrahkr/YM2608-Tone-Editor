@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <vector>
 
 struct Operator {
 	uint8_t AR;
@@ -17,9 +18,14 @@ struct Operator {
 };
 
 struct Tone {
-    std::string name;
-    std::string path;
-	uint8_t AL;
-	uint8_t FB;
-    Operator op[4];
+	std::string name = "name";
+	std::string path = "./";
+	uint8_t AL = 4;
+	uint8_t FB = 0;
+	Operator op[4] = {
+		{ 31, 0, 0, 7, 0, 32, 0, 0, 0, 0 },
+		{ 31, 0, 0, 7, 0, 0, 0, 0, 0, 0 },
+		{ 31, 0, 0, 7, 0, 32, 0, 0, 0, 0 },
+		{ 31, 0, 0, 7, 0, 0, 0, 0, 0, 0 }
+	};
 };
