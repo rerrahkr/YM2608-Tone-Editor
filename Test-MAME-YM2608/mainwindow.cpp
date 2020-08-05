@@ -6,8 +6,10 @@
 #include <utility>
 #include <QKeyEvent>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QMimeData>
+#include <QListWidgetItem>
+#include <QSignalBlocker>
+#include <QVariant>
 #include "namedialog.h"
 #include "setupdialog.h"
 #include "aboutdialog.h"
@@ -15,6 +17,8 @@
 #include "text_conversion.hpp"
 #include "tonetextdialog.h"
 #include "io/file_io.hpp"
+
+Q_DECLARE_METATYPE(MainWindow::TonePtr)
 
 const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
 	{ Qt::Key_Z, 0 },
@@ -67,6 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	setWindowTitle("YM2608 Tone Editor[*]");
+
 	ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
 
 	ui->alSlider->setText("AL: ");
@@ -91,25 +97,13 @@ MainWindow::MainWindow(QWidget *parent) :
 		sliders_[i]->setOperatorNumber(i + 1);
 	}
 
-	tone_ = std::make_unique<Tone>();
-	{
-		tone_->name = "name";
-		tone_->path = "./";
-		tone_->AL = 4;
-		for (int i = 0; i < 4; ++i) {
-			tone_->op[i].AR = 31;
-			tone_->op[i].RR = 7;
-			if (i % 2 == 0) tone_->op[i].TL = 32;
-		}
-	}
-
 	chip_.setRegister(0x29, 0x80);	// Init interrupt
 	chip_.setRegister(0x07, 0xff);  // PSG mix
 	chip_.setRegister(0x11, 0x3f);  // Drum total volume
 	InitPan();
-	for (int i = 1; i <= 6; ++i) {
-		SetFMTone(i);
-	}
+
+	addToneTo(0);
+	setWindowModified(false);
 }
 
 MainWindow::~MainWindow()
@@ -180,9 +174,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 		// Clear key on table
 		jamKeyOnTableFM_.clear();
 		jamKeyOnTablePSG_.clear();
-		break;
-	case Qt::Key_Escape:
-		close();
 		break;
 	default:
 		break;
@@ -378,9 +369,9 @@ void MainWindow::SetFMTone(int channel)
 	}
 
 	uint8_t data;
-
-	data = tone_->FB << 3;
-	data += tone_->AL;
+	auto tone = getCurrentTone();
+	data = tone->FB << 3;
+	data += tone->AL;
 	chip_.setRegister(0xb0 + bch, data);
 
 	for (int i = 0; i < 4; i++) {
@@ -392,47 +383,28 @@ void MainWindow::SetFMTone(int channel)
 		case 3: offset = 12; break;
 		}
 
-		data = tone_->op[i].DT << 4;
-		data |= tone_->op[i].ML;
+		data = tone->op[i].DT << 4;
+		data |= tone->op[i].ML;
 		chip_.setRegister(0x30 + bch + offset, data);
 
-		data = tone_->op[i].TL;
+		data = tone->op[i].TL;
 		chip_.setRegister(0x40 + bch + offset, data);
 
-		data = tone_->op[i].KS << 6;
-		data |= tone_->op[i].AR;
+		data = tone->op[i].KS << 6;
+		data |= tone->op[i].AR;
 		chip_.setRegister(0x50 + bch + offset, data);
 
-		data = tone_->op[i].AM << 7;
-		data |= tone_->op[i].DR;
+		data = tone->op[i].AM << 7;
+		data |= tone->op[i].DR;
 		chip_.setRegister(0x60 + bch + offset, data);
 
-		data = tone_->op[i].SR;
+		data = tone->op[i].SR;
 		chip_.setRegister(0x70 + bch + offset, data);
 
-		data = tone_->op[i].SL << 4;
-		data |= tone_->op[i].RR;
+		data = tone->op[i].SL << 4;
+		data |= tone->op[i].RR;
 		chip_.setRegister(0x80 + bch + offset, data);
 	}
-
-	ui->nameLabel->setText(QString::fromStdString(tone_->name));
-	ui->alSlider->setValue(tone_->AL);
-	ui->fbSlider->setValue(tone_->FB);
-	for (int i = 0; i< 4; ++i) {
-		sliders_[i]->setParameterValue(ParameterState::AR, tone_->op[i].AR);
-		sliders_[i]->setParameterValue(ParameterState::DR, tone_->op[i].DR);
-		sliders_[i]->setParameterValue(ParameterState::SR, tone_->op[i].SR);
-		sliders_[i]->setParameterValue(ParameterState::RR, tone_->op[i].RR);
-		sliders_[i]->setParameterValue(ParameterState::SL, tone_->op[i].SL);
-		sliders_[i]->setParameterValue(ParameterState::TL, tone_->op[i].TL);
-		sliders_[i]->setParameterValue(ParameterState::KS, tone_->op[i].KS);
-		sliders_[i]->setParameterValue(ParameterState::ML, tone_->op[i].ML);
-		sliders_[i]->setParameterValue(ParameterState::DT, tone_->op[i].DT);
-		sliders_[i]->setParameterValue(ParameterState::AM, tone_->op[i].AM);
-	}
-
-	setWindowModified(false);
-	setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 }
 
 void MainWindow::SetFMKeyOn(int channel)
@@ -557,8 +529,7 @@ QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 void MainWindow::closeEvent(QCloseEvent* event)
 {
 	if (isWindowModified()) {
-		QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-		switch (mbox.exec()) {
+		switch (showSaveWarning()) {
 		case QMessageBox::Yes:
 			if (!saveTone()) event->ignore();
 			break;
@@ -570,11 +541,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::onALChanged(int value)
 {
+	auto tone = getCurrentTone();
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
-			tone_->AL = value;
-			uint8_t reg = (tone_->FB << 3) | tone_->AL;
+			tone->AL = value;
+			uint8_t reg = (tone->FB << 3) | value;
 			chip_.setRegister(0xb0 + chOffset, reg);
 		}
 	}
@@ -584,11 +556,12 @@ void MainWindow::onALChanged(int value)
 
 void MainWindow::onFBChanged(int value)
 {
+	auto tone = getCurrentTone();
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
-			tone_->FB = value;
-			uint8_t reg = (tone_->FB << 3) | tone_->AL;
+			tone->FB = value;
+			uint8_t reg = (value << 3) | tone->AL;
 			chip_.setRegister(0xb0 + chOffset, reg);
 		}
 	}
@@ -599,7 +572,7 @@ void MainWindow::onFBChanged(int value)
 void MainWindow::onParameterChanged(int op, const ParameterState& state)
 {
 	uint8_t value = state.getValue();
-	Operator& slot = tone_->op[op - 1];
+	Operator& slot = getCurrentTone()->op[op - 1];
 
 	uint32_t opOffset;
 	switch (op) {
@@ -677,18 +650,38 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
 void MainWindow::loadSingleTone(const QString& file)
 {
 	if (Tone* t = FileIo::getInstance().loadSingleToneFrom(file)) {
-		tone_.reset(t);
-		for (int i = 1; i <= 6; ++i) {
-			SetFMTone(i);
-		}
+		addToneTo(ui->listWidget->count(), t);
+		ui->removeTonePushButton->setEnabled(true);
 	}
+}
+
+void MainWindow::addToneTo(int n)
+{
+	addToneTo(n, new Tone);
+}
+
+void MainWindow::addToneTo(int n, Tone* tone)
+{
+	auto item = new QListWidgetItem(ui->listWidget);
+	QString name = utf8ToQString(tone->name);
+	item->setText(name);
+	item->setData(Qt::UserRole, QVariant::fromValue(TonePtr(tone)));
+	ui->nameLabel->setText(name);
+	ui->listWidget->insertItem(n, item);
+	setWindowModified(true);
+
+	ui->listWidget->setCurrentRow(n);
+}
+
+MainWindow::TonePtr MainWindow::getCurrentTone() const
+{
+	return ui->listWidget->currentItem()->data(Qt::UserRole).value<TonePtr>();
 }
 
 void MainWindow::on_actionOpen_O_triggered()
 {
 	if (isWindowModified()) {
-		QMessageBox mbox(QMessageBox::Warning, "Warning", "Do you want to save changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-		switch (mbox.exec()) {
+		switch (showSaveWarning()) {
 		case QMessageBox::Yes:
 			if (saveTone()) break;
 			else return;
@@ -700,7 +693,7 @@ void MainWindow::on_actionOpen_O_triggered()
 	QStringList filters {
 		"FM tone file (*.tone)"
 	};
-	QString file = QFileDialog::getOpenFileName(this, "Open tone", QString::fromStdString(tone_->path), filters.join(";;"));
+	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path), filters.join(";;"));
 	if (!file.isNull()) {
 		loadSingleTone(file);
 	}
@@ -723,16 +716,10 @@ void MainWindow::on_actionSave_As_triggered()
 
 bool MainWindow::saveTone()
 {
-	bool isExist = false;
-	if (tone_->path != "./") {
-		std::ifstream check(tone_->path, std::ios::in | std::ios::binary);
-		isExist = check.is_open();
-	}
-
-	if (isExist) {
-		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone_->path), *tone_);
+	auto tone = getCurrentTone();
+	if (tone->path != "./" && QFile::exists(utf8ToQString(tone->path))) {
+		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 		setWindowModified(false);
-		setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 	}
 	else {
 		return saveToneAs();
@@ -743,18 +730,18 @@ bool MainWindow::saveTone()
 
 bool MainWindow::saveToneAs()
 {
+	auto tone = getCurrentTone();
 	QStringList filters {
 		"FM tone file (*.tone)"
 	};
-	QString file = QFileDialog::getSaveFileName(this, "Save tone", QString::fromStdString(tone_->path), filters.join(";;"));
+	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
 	if (file.isNull()) return false;
 	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
-	tone_->path = file.toStdString();
-	FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone_->path), *tone_);
+	tone->path = file.toUtf8().toStdString();
+	FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 
 	setWindowModified(false);
-	setWindowTitle("YM2608 Tone Editor - " + QString::fromStdString(tone_->name) + "[*]");
 
 	return true;
 }
@@ -764,9 +751,9 @@ void MainWindow::on_nameButton_clicked()
 	NameDialog dialog(this);
 	if (dialog.exec() == QDialog::Accepted) {
 		ui->nameLabel->setText(dialog.toneName());
-		tone_->name = dialog.toneName().toStdString();
+		ui->listWidget->currentItem()->setText(dialog.toneName());
+		getCurrentTone()->name = dialog.toneName().toUtf8().toStdString();
 		setWindowModified(true);
-		setWindowTitle("YM2608 Tone Editor - " + dialog.toneName() + "[*]");
 	}
 }
 
@@ -775,7 +762,7 @@ void MainWindow::on_actionConvert_To_Text_C_triggered()
 	if (converter_.getOutputFormats().empty())
 		QMessageBox::critical(this, "Error", "No output format is saved.");
 
-	ToneTextDialog diag(*tone_, converter_);
+	ToneTextDialog diag(*getCurrentTone(), converter_);
 	diag.exec();
 }
 
@@ -810,17 +797,59 @@ void MainWindow::on_actionRead_Text_R_triggered()
 	ReadTextDialog dialog(types, this);
 	if (dialog.exec() == QDialog::Accepted) {
 		if (!formats.empty()){
-			if (std::unique_ptr<Tone> tone = converter_.textToTone(dialog.text(), dialog.type())) {
-				tone_ = std::move(tone);
-				for (int i = 1; i <= 6; ++i) {
-					SetFMTone(i);
-				}
+			if (Tone* tone = converter_.textToTone(dialog.text(), dialog.type())) {
+				addToneTo(ui->listWidget->currentRow(), tone);
 				setWindowModified(true);
-				setWindowTitle("YM2608 Tone Editor - [*]");
 				return;
 			}
 		}
 		// Error
 		QMessageBox::critical(this, "Error", "Failed to read tone data from text.");
+	}
+}
+
+void MainWindow::on_newTonePushButton_clicked()
+{
+	addToneTo(ui->listWidget->count());
+
+	ui->removeTonePushButton->setEnabled(true);
+}
+
+void MainWindow::on_removeTonePushButton_clicked()
+{
+	int row = ui->listWidget->currentRow();
+	if (row == -1) return;
+
+	delete ui->listWidget->takeItem(row);
+	setWindowModified(true);
+
+	ui->removeTonePushButton->setEnabled(ui->listWidget->count() != 1);
+}
+
+void MainWindow::on_listWidget_currentRowChanged(int currentRow)
+{
+	Q_UNUSED(currentRow)
+	auto tone = getCurrentTone();
+	ui->nameLabel->setText(utf8ToQString(tone->name));
+	QSignalBlocker bal(ui->alSlider);
+	QSignalBlocker bfb(ui->fbSlider);
+	ui->alSlider->setValue(tone->AL);
+	ui->fbSlider->setValue(tone->FB);
+	for (int i = 0; i< 4; ++i) {
+		QSignalBlocker bop(sliders_[i]);
+		sliders_[i]->setParameterValue(ParameterState::AR, tone->op[i].AR);
+		sliders_[i]->setParameterValue(ParameterState::DR, tone->op[i].DR);
+		sliders_[i]->setParameterValue(ParameterState::SR, tone->op[i].SR);
+		sliders_[i]->setParameterValue(ParameterState::RR, tone->op[i].RR);
+		sliders_[i]->setParameterValue(ParameterState::SL, tone->op[i].SL);
+		sliders_[i]->setParameterValue(ParameterState::TL, tone->op[i].TL);
+		sliders_[i]->setParameterValue(ParameterState::KS, tone->op[i].KS);
+		sliders_[i]->setParameterValue(ParameterState::ML, tone->op[i].ML);
+		sliders_[i]->setParameterValue(ParameterState::DT, tone->op[i].DT);
+		sliders_[i]->setParameterValue(ParameterState::AM, tone->op[i].AM);
+	}
+
+	for (int i = 1; i <= 6; ++i) {
+		SetFMTone(i);
 	}
 }

@@ -29,7 +29,7 @@ public:
 	QString toneToText(const Tone& tone, const QString& type) const;
 	FmOutEnvelopeFormats getOutputFormats() const;
 	void setOutputFormats(FmOutEnvelopeFormats list);
-	std::unique_ptr<Tone> textToTone(const QString& text, const QString& type) const;
+	Tone* textToTone(const QString& text, const QString& type) const;
 	FmInEnvelopeFormats getInputFormats() const;
 	void setInputFormats(FmInEnvelopeFormats list);
 

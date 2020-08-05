@@ -69,37 +69,6 @@ ToneConverter::ToneConverter()
 			}
 		},
 		{
-			"VOPM",
-			{
-				// Number
-				FmEnvelopeTextType::Skip,
-				// LFO
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				// CH
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::FB, FmEnvelopeTextType::AL,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip,
-				// Op
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
-				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
-				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
-				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
-				FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2,
-				FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2,
-				FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
-				FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3,
-				FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3,
-				FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
-				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
-				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
-				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip
-			}
-		},
-		{
 			"MMLDRV",
 			{
 				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL, FmEnvelopeTextType::FB,
@@ -196,6 +165,7 @@ ToneConverter::~ToneConverter()
 	QSettings settings(FORMAT_PATH_, QSettings::IniFormat);
 
 	settings.beginGroup("Input");
+	settings.remove("");
 	for (const auto& pair : inFormats_) {
 		auto& ordrs = pair.second;
 		QString str = std::accumulate(
@@ -209,6 +179,7 @@ ToneConverter::~ToneConverter()
 	settings.endGroup();
 
 	settings.beginGroup("Output");
+	settings.remove("");
 	for (const auto& pair : outFormats_) {
 		settings.setValue(utf8ToQString(pair.first), utf8ToQString(pair.second));
 	}
@@ -325,13 +296,13 @@ void ToneConverter::parseMacro(std::string src, Manip &manip) const
 	manip.setw = std::stoi(src);
 }
 
-std::unique_ptr<Tone> ToneConverter::textToTone(const QString& text, const QString& type) const
+Tone* ToneConverter::textToTone(const QString& text, const QString& type) const
 {
 	std::string stdText = std::regex_replace(text.toUtf8().toStdString(), std::regex(R"(\D+)"), ",");
 	if (stdText.front() == ',') stdText.erase(stdText.begin());
 	if (stdText.back() == ',') stdText.erase(--stdText.end());
 
-	if (stdText.empty()) return std::unique_ptr<Tone>();
+	if (stdText.empty()) return nullptr;
 
 	std::stringstream ss(stdText);
 	std::string tmp;
@@ -340,108 +311,106 @@ std::unique_ptr<Tone> ToneConverter::textToTone(const QString& text, const QStri
 		vec.push_back(tmp);
 	}
 	FmInEnvelopeOrders order = inFormats_.at(type.toUtf8().toStdString());
-	if (vec.size() >= order.size()) {
-		std::unique_ptr<Tone> tone = std::make_unique<Tone>();
-		for (size_t i = 0; i < order.size(); ++i) {
-			int v = std::stoi(vec[i]);
+	if (vec.size() < order.size()) return nullptr;
+
+	std::unique_ptr<Tone> tone = std::make_unique<Tone>();
+	for (size_t i = 0; i < order.size(); ++i) {
+		int v = std::stoi(vec[i]);
+		switch (order[i]) {
+		case FmEnvelopeTextType::Skip:	// Skip tone number
+			break;
+		case FmEnvelopeTextType::AL:
+			if (v < 8) tone->AL = v;
+			else return nullptr;
+			break;
+		case FmEnvelopeTextType::FB:
+			if (v < 8) tone->FB = v;
+			else return nullptr;
+			break;
+		default:
+		{
+			int o = (static_cast<int>(order[i]) - 3) / 10;
 			switch (order[i]) {
-			case FmEnvelopeTextType::Skip:	// Skip tone number
+			case FmEnvelopeTextType::AR1:
+			case FmEnvelopeTextType::AR2:
+			case FmEnvelopeTextType::AR3:
+			case FmEnvelopeTextType::AR4:
+				if (v < 32) tone->op[o].AR = v;
+				else return nullptr;
 				break;
-			case FmEnvelopeTextType::AL:
-				if (v < 8) tone->AL = v;
-				else return std::unique_ptr<Tone>();
+			case FmEnvelopeTextType::DR1:
+			case FmEnvelopeTextType::DR2:
+			case FmEnvelopeTextType::DR3:
+			case FmEnvelopeTextType::DR4:
+				if (v < 32) tone->op[o].DR = v;
+				else return nullptr;
 				break;
-			case FmEnvelopeTextType::FB:
-				if (v < 8) tone->FB = v;
-				else return std::unique_ptr<Tone>();
+			case FmEnvelopeTextType::SR1:
+			case FmEnvelopeTextType::SR2:
+			case FmEnvelopeTextType::SR3:
+			case FmEnvelopeTextType::SR4:
+				if (v < 32) tone->op[o].SR = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::RR1:
+			case FmEnvelopeTextType::RR2:
+			case FmEnvelopeTextType::RR3:
+			case FmEnvelopeTextType::RR4:
+				if (v < 16) tone->op[o].RR = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::SL1:
+			case FmEnvelopeTextType::SL2:
+			case FmEnvelopeTextType::SL3:
+			case FmEnvelopeTextType::SL4:
+				if (v < 16) tone->op[o].SL = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::TL1:
+			case FmEnvelopeTextType::TL2:
+			case FmEnvelopeTextType::TL3:
+			case FmEnvelopeTextType::TL4:
+				if (v < 127) tone->op[o].TL = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::KS1:
+			case FmEnvelopeTextType::KS2:
+			case FmEnvelopeTextType::KS3:
+			case FmEnvelopeTextType::KS4:
+				if (v < 4) tone->op[o].KS = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::ML1:
+			case FmEnvelopeTextType::ML2:
+			case FmEnvelopeTextType::ML3:
+			case FmEnvelopeTextType::ML4:
+				if (v < 16) tone->op[o].ML = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::DT1:
+			case FmEnvelopeTextType::DT2:
+			case FmEnvelopeTextType::DT3:
+			case FmEnvelopeTextType::DT4:
+				if (v < 8) tone->op[o].DT = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::AM1:
+			case FmEnvelopeTextType::AM2:
+			case FmEnvelopeTextType::AM3:
+			case FmEnvelopeTextType::AM4:
+				if (v < 2) tone->op[o].AM = v;
+				else return nullptr;
 				break;
 			default:
-			{
-				int o = (static_cast<int>(order[i]) - 3) / 10;
-				switch (order[i]) {
-				case FmEnvelopeTextType::AR1:
-				case FmEnvelopeTextType::AR2:
-				case FmEnvelopeTextType::AR3:
-				case FmEnvelopeTextType::AR4:
-					if (v < 32) tone->op[o].AR = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::DR1:
-				case FmEnvelopeTextType::DR2:
-				case FmEnvelopeTextType::DR3:
-				case FmEnvelopeTextType::DR4:
-					if (v < 32) tone->op[o].DR = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::SR1:
-				case FmEnvelopeTextType::SR2:
-				case FmEnvelopeTextType::SR3:
-				case FmEnvelopeTextType::SR4:
-					if (v < 32) tone->op[o].SR = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::RR1:
-				case FmEnvelopeTextType::RR2:
-				case FmEnvelopeTextType::RR3:
-				case FmEnvelopeTextType::RR4:
-					if (v < 16) tone->op[o].RR = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::SL1:
-				case FmEnvelopeTextType::SL2:
-				case FmEnvelopeTextType::SL3:
-				case FmEnvelopeTextType::SL4:
-					if (v < 16) tone->op[o].SL = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::TL1:
-				case FmEnvelopeTextType::TL2:
-				case FmEnvelopeTextType::TL3:
-				case FmEnvelopeTextType::TL4:
-					if (v < 127) tone->op[o].TL = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::KS1:
-				case FmEnvelopeTextType::KS2:
-				case FmEnvelopeTextType::KS3:
-				case FmEnvelopeTextType::KS4:
-					if (v < 4) tone->op[o].KS = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::ML1:
-				case FmEnvelopeTextType::ML2:
-				case FmEnvelopeTextType::ML3:
-				case FmEnvelopeTextType::ML4:
-					if (v < 16) tone->op[o].ML = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::DT1:
-				case FmEnvelopeTextType::DT2:
-				case FmEnvelopeTextType::DT3:
-				case FmEnvelopeTextType::DT4:
-					if (v < 8) tone->op[o].DT = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				case FmEnvelopeTextType::AM1:
-				case FmEnvelopeTextType::AM2:
-				case FmEnvelopeTextType::AM3:
-				case FmEnvelopeTextType::AM4:
-					if (v < 2) tone->op[o].AM = v;
-					else return std::unique_ptr<Tone>();
-					break;
-				default:
-					break;
-				}
 				break;
 			}
-			}
+			break;
 		}
-		tone->name = "";
-		return tone;
+		}
 	}
-	else {
-		return std::unique_ptr<Tone>();
-	}
+	tone->name = "";
+
+	return tone.release();
 }
 
 FmInEnvelopeFormats ToneConverter::getInputFormats() const

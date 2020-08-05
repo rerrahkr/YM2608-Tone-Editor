@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QString>
 #include <QCloseEvent>
+#include <QMessageBox>
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
 #include "parameter_state.hpp"
@@ -26,6 +27,8 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow() override;
 
+	using TonePtr = std::shared_ptr<Tone>;
+
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
 	void keyReleaseEvent(QKeyEvent* event) override;
@@ -39,8 +42,6 @@ private:
 
 	chip::OPNA chip_;
 	AudioStream audio_;
-
-	std::unique_ptr<Tone> tone_;
 
 	int octave_;
 	std::vector<int> jamKeyOnTableFM_, jamKeyOnTablePSG_;
@@ -104,6 +105,17 @@ private:
 
 	void loadSingleTone(const QString& file);
 
+	void addToneTo(int n);
+	void addToneTo(int n, Tone* tone);
+
+	TonePtr getCurrentTone() const;
+
+	inline QMessageBox::StandardButton showSaveWarning()
+	{
+		return QMessageBox::warning(this, "Warning", "Do you want to save changes?",
+									QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+	}
+
 private slots:
 	void onALChanged(int value);
 	void onFBChanged(int value);
@@ -116,8 +128,10 @@ private slots:
 	void on_actionConvert_To_Text_C_triggered();
 	void on_actionSetup_E_triggered();
 	void on_actionAbout_A_triggered();
-
 	void on_actionRead_Text_R_triggered();
+	void on_newTonePushButton_clicked();
+	void on_removeTonePushButton_clicked();
+	void on_listWidget_currentRowChanged(int currentRow);
 
 private:
 	bool saveTone();
