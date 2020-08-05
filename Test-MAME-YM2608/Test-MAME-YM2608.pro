@@ -30,7 +30,9 @@ SOURCES += \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
     io/binary_container.cpp \
+    io/bti_io.cpp \
     io/file_io.cpp \
+    io/file_io_error.cpp \
     io/original_tone_io.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -60,7 +62,9 @@ HEADERS += \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
     io/binary_container.hpp \
+    io/bti_io.hpp \
     io/file_io.hpp \
+    io/file_io_error.hpp \
     io/original_tone_io.hpp \
         mainwindow.h \
     chips/mame/2608intf.h \
