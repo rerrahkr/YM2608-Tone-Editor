@@ -1,4 +1,5 @@
 #include "original_tone_io.hpp"
+#include "file_io_error.hpp"
 
 Tone* OriginalToneIo::load(const BinaryContainer& container) const
 {
@@ -6,7 +7,7 @@ Tone* OriginalToneIo::load(const BinaryContainer& container) const
 
 	size_t csr = 0;
 	if (container.readString(csr, 4) != "TONE")
-		return nullptr;
+		throw FileCorruptionError(FileIo::FileType::SingleTone);
 	csr += 4;
 
 	uint32_t hdOffset = container.readUint32(csr);

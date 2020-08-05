@@ -17,6 +17,7 @@
 #include "text_conversion.hpp"
 #include "tonetextdialog.h"
 #include "io/file_io.hpp"
+#include "io/file_io_error.hpp"
 
 Q_DECLARE_METATYPE(MainWindow::TonePtr)
 
@@ -649,9 +650,13 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
 
 void MainWindow::loadSingleTone(const QString& file)
 {
-	if (Tone* t = FileIo::getInstance().loadSingleToneFrom(file)) {
+	try {
+		Tone* t = FileIo::getInstance().loadSingleToneFrom(file);
 		addToneTo(ui->listWidget->count(), t);
 		ui->removeTonePushButton->setEnabled(true);
+	}
+	catch (FileIoError& e) {
+		QMessageBox::critical(this, "Error", ("Failed to load tone.\n\n") + QString(e.what()));
 	}
 }
 
@@ -691,7 +696,8 @@ void MainWindow::on_actionOpen_O_triggered()
 	}
 
 	QStringList filters {
-		"FM tone file (*.tone)"
+		"FM tone file (*.tone)",
+		"BambooTracker instrument (*.bti)"
 	};
 	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path), filters.join(";;"));
 	if (!file.isNull()) {
@@ -718,7 +724,12 @@ bool MainWindow::saveTone()
 {
 	auto tone = getCurrentTone();
 	if (tone->path != "./" && QFile::exists(utf8ToQString(tone->path))) {
-		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+		try {
+			FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+		}
+		catch (FileIoError& e) {
+			QMessageBox::critical(this, "Error", ("Failed to save tone.\n\n") + QString(e.what()));
+		}
 		setWindowModified(false);
 	}
 	else {
@@ -732,14 +743,20 @@ bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
 	QStringList filters {
-		"FM tone file (*.tone)"
+		"FM tone file (*.tone)",
+		"BambooTracker instrument (*.bti)"
 	};
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
 	if (file.isNull()) return false;
-	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
+//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
 	tone->path = file.toUtf8().toStdString();
-	FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+	try {
+		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+	}
+	catch (FileIoError& e) {
+		QMessageBox::critical(this, "Error", ("Failed to save tone.\n\n") + QString(e.what()));
+	}
 
 	setWindowModified(false);
 
