@@ -14,6 +14,13 @@ public:
 	virtual const BinaryContainer save(const Tone& tone) const = 0;
 };
 
+class AbstractToneBankIo
+{
+public:
+	virtual std::vector<TonePtr> load(const BinaryContainer& container) const = 0;
+	virtual const BinaryContainer save(const std::vector<TonePtr>& tone) const = 0;
+};
+
 class FileIo
 {
 public:
@@ -24,6 +31,8 @@ public:
 	FileType detectFileType(const QString& file) const;
 	Tone* loadSingleToneFrom(const QString& file) const;
 	void saveSingleToneFrom(const QString& file, const Tone& tone) const;
+	std::vector<TonePtr> loadToneBankFrom(const QString& file) const;
+	void saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const;
 
 private:
 	FileIo();
@@ -36,4 +45,5 @@ private:
 	static std::unique_ptr<FileIo> instance_;
 
 	std::unordered_map<QString, std::unique_ptr<AbstractSingleToneIo>> SINGLE_TONE_HANDLER_;
+	std::unordered_map<QString, std::unique_ptr<AbstractToneBankIo>> TONE_BANK_HANDLER_;
 };

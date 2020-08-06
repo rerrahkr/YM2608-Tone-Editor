@@ -3,7 +3,7 @@
 ## Unreleased
 ### Added
 - FM/PSG switch key
-- Support .bti import/export
+- Support .bti and .btb import/export
 
 ### Changed
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
