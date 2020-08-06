@@ -10,9 +10,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 		throw FileCorruptionError(FileIo::FileType::SingleTone);
 	globCsr += 16;
 	/*size_t eofOfs = */container.readUint32(globCsr);
-	globCsr += 4;
-	/*uint32_t fileVersion =*/ container.readUint32(globCsr);
-	globCsr += 4;
+	globCsr += 8;	// Skip also file version
 
 	/***** Instrument section *****/
 	if (container.readString(globCsr, 8) != "INSTRMNT")
@@ -42,7 +40,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 		while (instPropCsr < globCsr) {
 			uint8_t secId = container.readUint8(instPropCsr++);
 			if (secId == 0x00) {
-				/*uint8_t ofs =*/ container.readUint8(instPropCsr);
+				/*uint8_t ofs = container.readUint8(instPropCsr);*/
 				size_t csr = instPropCsr + 1;
 				uint8_t tmp = container.readUint8(csr++);
 				tone->AL = tmp >> 4;
@@ -65,7 +63,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 					op.TL = tmp;
 					tmp = container.readUint8(csr++);
 					op.ML = tmp & 0x0f;
-					//						op.SSGEG = (tmp & 0x80) ? -1 : ((tmp >> 4) & 0x07);
+					// op.SSGEG = (tmp & 0x80) ? -1 : ((tmp >> 4) & 0x07);
 				}
 				break;
 			}
@@ -124,7 +122,7 @@ const BinaryContainer BtiIo::save(const Tone& tone) const
 		size_t ofs = container.size();
 		container.appendUint8(0);	// Dummy offset
 		container.appendUint8(tone.AL << 4 | tone.FB);
-		// Operator
+		// Operators
 		for (size_t o = 0; o < 4; ++o) {
 			const Operator& op = tone.op[o];
 			container.appendUint8(0x20 | op.AR);

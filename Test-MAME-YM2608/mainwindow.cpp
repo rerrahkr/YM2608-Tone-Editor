@@ -19,7 +19,7 @@
 #include "io/file_io.hpp"
 #include "io/file_io_error.hpp"
 
-Q_DECLARE_METATYPE(MainWindow::TonePtr)
+Q_DECLARE_METATYPE(TonePtr)
 
 const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
 	{ Qt::Key_Z, 0 },
@@ -105,11 +105,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	addToneTo(0);
 	setWindowModified(false);
+
+	ui->listWidget->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == ui->listWidget) {
+		switch (event->type()) {
+		case QEvent::KeyPress:
+			keyPressEvent(reinterpret_cast<QKeyEvent*>(event));
+			break;
+		case QEvent::KeyRelease:
+			keyReleaseEvent(reinterpret_cast<QKeyEvent*>(event));
+			break;
+		default:
+			break;
+		}
+	}
+
+	return false;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -208,16 +228,10 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 void MainWindow::dropEvent(QDropEvent* event)
 {
 	QString file = event->mimeData()->urls().first().toLocalFile();
-
 	switch (FileIo::getInstance().detectFileType(file)) {
-	case FileIo::FileType::SingleTone:
-		loadSingleTone(file);
-		break;
-	case FileIo::FileType::ToneBank:
-		// TODO
-		break;
-	default:
-		break;
+	case FileIo::FileType::SingleTone:	loadSingleTone(file);	break;
+	case FileIo::FileType::ToneBank:	loadToneBank(file);		break;
+	default:	break;
 	}
 }
 
@@ -660,41 +674,49 @@ void MainWindow::loadSingleTone(const QString& file)
 	}
 }
 
+void MainWindow::loadToneBank(const QString& file)
+{
+	try {
+		std::vector<TonePtr> bank = FileIo::getInstance().loadToneBankFrom(file);
+		for (TonePtr tone : bank) addToneTo(ui->listWidget->count(), tone);
+		ui->removeTonePushButton->setEnabled(true);
+	}
+	catch (FileIoError& e) {
+		QMessageBox::critical(this, "Error", ("Failed to load bank.\n\n") + QString(e.what()));
+	}
+}
+
 void MainWindow::addToneTo(int n)
 {
-	addToneTo(n, new Tone);
+	addToneTo(n, TonePtr(new Tone));
 }
 
 void MainWindow::addToneTo(int n, Tone* tone)
 {
+	addToneTo(n, TonePtr(tone));
+}
+
+void MainWindow::addToneTo(int n, TonePtr tone)
+{
 	auto item = new QListWidgetItem(ui->listWidget);
 	QString name = utf8ToQString(tone->name);
 	item->setText(name);
-	item->setData(Qt::UserRole, QVariant::fromValue(TonePtr(tone)));
+	item->setData(Qt::UserRole, QVariant::fromValue(tone));
 	ui->nameLabel->setText(name);
 	ui->listWidget->insertItem(n, item);
 	setWindowModified(true);
 
+	ui->listWidget->clearSelection();
 	ui->listWidget->setCurrentRow(n);
 }
 
-MainWindow::TonePtr MainWindow::getCurrentTone() const
+TonePtr MainWindow::getCurrentTone() const
 {
 	return ui->listWidget->currentItem()->data(Qt::UserRole).value<TonePtr>();
 }
 
 void MainWindow::on_actionOpen_O_triggered()
 {
-	if (isWindowModified()) {
-		switch (showSaveWarning()) {
-		case QMessageBox::Yes:
-			if (saveTone()) break;
-			else return;
-		case QMessageBox::No: break;
-		default: return;
-		}
-	}
-
 	QStringList filters {
 		"FM tone file (*.tone)",
 		"BambooTracker instrument (*.bti)"
@@ -728,7 +750,7 @@ bool MainWindow::saveTone()
 			FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 		}
 		catch (FileIoError& e) {
-			QMessageBox::critical(this, "Error", ("Failed to save tone.\n\n") + QString(e.what()));
+			QMessageBox::critical(this, "Error", ("Failed to save the tone.\n\n") + QString(e.what()));
 		}
 		setWindowModified(false);
 	}
@@ -748,14 +770,14 @@ bool MainWindow::saveToneAs()
 	};
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
 	if (file.isNull()) return false;
-//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
+	//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
 	tone->path = file.toUtf8().toStdString();
 	try {
 		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 	}
 	catch (FileIoError& e) {
-		QMessageBox::critical(this, "Error", ("Failed to save tone.\n\n") + QString(e.what()));
+		QMessageBox::critical(this, "Error", ("Failed to save the tone.\n\n") + QString(e.what()));
 	}
 
 	setWindowModified(false);
@@ -840,6 +862,9 @@ void MainWindow::on_removeTonePushButton_clicked()
 	delete ui->listWidget->takeItem(row);
 	setWindowModified(true);
 
+	ui->listWidget->clearSelection();
+	ui->listWidget->setCurrentRow(std::min(row ,ui->listWidget->count() - 1));
+
 	ui->removeTonePushButton->setEnabled(ui->listWidget->count() != 1);
 }
 
@@ -868,5 +893,45 @@ void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 
 	for (int i = 1; i <= 6; ++i) {
 		SetFMTone(i);
+	}
+}
+
+void MainWindow::on_actionSave_Bank_As_triggered()
+{
+	auto items = ui->listWidget->selectedItems();
+	if (items.empty()) {
+		QMessageBox::information(this, "Information", "No tone saved as a bank is selected.");
+		return;
+	}
+
+	QStringList filters {
+		"BambooTracker bank (*.btb)"
+	};
+	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"));
+	if (file.isNull()) return;
+
+	std::vector<TonePtr> bank;
+	bank.reserve(items.size());
+	std::transform(items.begin(), items.end(), std::back_inserter(bank),
+				   [](const QListWidgetItem* item) { return item->data(Qt::UserRole).value<TonePtr>(); });
+
+	try {
+		FileIo::getInstance().saveToneBankFrom(file, bank);
+	}
+	catch (FileIoError& e) {
+		QMessageBox::critical(this, "Error", ("Failed to save the bank.\n\n") + QString(e.what()));
+	}
+
+	setWindowModified(false);
+}
+
+void MainWindow::on_actionO_pen_Bank_triggered()
+{
+	QStringList filters {
+		"BambooTracker instrument (*.bti)"
+	};
+	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
+	if (!file.isNull()) {
+		loadSingleTone(file);
 	}
 }

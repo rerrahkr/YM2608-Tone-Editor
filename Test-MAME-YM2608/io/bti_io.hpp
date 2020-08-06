@@ -1,8 +1,6 @@
 #pragma once
 
 #include "file_io.hpp"
-#include <stdexcept>
-#include <cstdint>
 
 class BtiIo final : public AbstractSingleToneIo
 {

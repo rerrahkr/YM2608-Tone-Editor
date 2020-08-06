@@ -30,6 +30,7 @@ SOURCES += \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
     io/binary_container.cpp \
+    io/btb_io.cpp \
     io/bti_io.cpp \
     io/file_io.cpp \
     io/file_io_error.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
     io/binary_container.hpp \
+    io/btb_io.hpp \
     io/bti_io.hpp \
     io/file_io.hpp \
     io/file_io_error.hpp \

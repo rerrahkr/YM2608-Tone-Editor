@@ -27,9 +27,8 @@ public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow() override;
 
-	using TonePtr = std::shared_ptr<Tone>;
-
 protected:
+	bool eventFilter(QObject* obj, QEvent* event) override;
 	void keyPressEvent(QKeyEvent* event) override;
 	void keyReleaseEvent(QKeyEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
@@ -104,9 +103,11 @@ private:
 	};
 
 	void loadSingleTone(const QString& file);
+	void loadToneBank(const QString& file);
 
 	void addToneTo(int n);
 	void addToneTo(int n, Tone* tone);
+	void addToneTo(int n, TonePtr tone);
 
 	TonePtr getCurrentTone() const;
 
@@ -132,6 +133,9 @@ private slots:
 	void on_newTonePushButton_clicked();
 	void on_removeTonePushButton_clicked();
 	void on_listWidget_currentRowChanged(int currentRow);
+	void on_actionSave_Bank_As_triggered();
+
+	void on_actionO_pen_Bank_triggered();
 
 private:
 	bool saveTone();

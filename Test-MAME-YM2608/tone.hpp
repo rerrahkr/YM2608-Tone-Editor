@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 struct Operator {
 	uint8_t AR;
@@ -29,3 +30,5 @@ struct Tone {
 		{ 31, 0, 0, 7, 0, 0, 0, 0, 0, 0 }
 	};
 };
+
+using TonePtr = std::shared_ptr<Tone>;
