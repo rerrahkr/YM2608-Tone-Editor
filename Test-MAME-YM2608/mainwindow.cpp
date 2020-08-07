@@ -917,10 +917,10 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
 	QStringList filters {
-		"BambooTracker instrument (*.bti)"
+		"BambooTracker bank (*.btb)"
 	};
 	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
 	if (!file.isNull()) {
-		loadSingleTone(file);
+		loadToneBank(file);
 	}
 }
