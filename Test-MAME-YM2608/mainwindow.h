@@ -3,10 +3,12 @@
 
 #include <vector>
 #include <unordered_map>
+#include <memory>
 #include <QMainWindow>
 #include <QString>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QFontMetrics>
 #include "chips/opna.hpp"
 #include "audio_stream.hpp"
 #include "parameter_state.hpp"
@@ -29,10 +31,12 @@ public:
 
 protected:
 	bool eventFilter(QObject* obj, QEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
 	void keyPressEvent(QKeyEvent* event) override;
 	void keyReleaseEvent(QKeyEvent* event) override;
 	void dragEnterEvent(QDragEnterEvent* event) override;
 	void dropEvent(QDropEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 
 private:
 	Ui::MainWindow *ui;
@@ -47,6 +51,7 @@ private:
 	QString pressedKeyNameFM_, pressedKeyNamePSG_;
 
 	OperatorSliders* sliders_[4];
+	std::unique_ptr<QFontMetrics> nameFontMet_;
 
 	ToneConverter converter_;
 
@@ -67,8 +72,7 @@ private:
 	void(MainWindow::*jamKeyOffFunc_)(int, bool);
 
 	QString keyNumberToNameString(int jamKeyNumber);
-
-	void closeEvent(QCloseEvent* event) override;
+	QString modifyDisplayedToneName(const QString& src) const;
 
 	static const std::unordered_map<int, int> NOTE_NUM_MAP_;
 	static const QString NOTE_NAME_TBL_[12];
@@ -109,6 +113,7 @@ private:
 	void addToneTo(int n);
 	void addToneTo(int n, Tone* tone);
 	void addToneTo(int n, TonePtr tone);
+	void removeToneAt(int n);
 
 	TonePtr getCurrentTone() const;
 
@@ -135,7 +140,6 @@ private slots:
 	void on_removeTonePushButton_clicked();
 	void on_listWidget_currentRowChanged(int currentRow);
 	void on_actionSave_Bank_As_triggered();
-
 	void on_actionO_pen_Bank_triggered();
 
 private:

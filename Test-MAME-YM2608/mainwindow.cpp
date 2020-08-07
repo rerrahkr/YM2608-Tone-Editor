@@ -55,7 +55,7 @@ const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
 	{ Qt::Key_9, 25 },
 	{ Qt::Key_O, 26 },
 	{ Qt::Key_0, 27 },
-	{ Qt::Key_P, 28 },
+	{ Qt::Key_P, 28 }
 };
 
 const QString MainWindow::NOTE_NAME_TBL_[12] = {
@@ -102,6 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
 		sliders_[i]->setOperatorNumber(i + 1);
 	}
 
+	nameFontMet_ = std::make_unique<QFontMetrics>(ui->nameLabel->font());
+
 	chip_.setRegister(0x29, 0x80);	// Init interrupt
 	chip_.setRegister(0x07, 0xff);  // PSG mix
 	chip_.setRegister(0x11, 0x3f);  // Drum total volume
@@ -123,8 +125,34 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 	if (obj == ui->listWidget) {
 		switch (event->type()) {
 		case QEvent::KeyPress:
-			keyPressEvent(reinterpret_cast<QKeyEvent*>(event));
+		{
+			auto ke = reinterpret_cast<QKeyEvent*>(event);
+			keyPressEvent(ke);
+			if (NOTE_NUM_MAP_.count(ke->key())) return true;
+			switch (ke->key()) {
+			case Qt::Key_Insert:
+				on_newTonePushButton_clicked();
+				return true;
+			case Qt::Key_Delete:
+				if (ui->listWidget->count() > 1) {
+					auto items = ui->listWidget->selectedItems();
+					if (!items.size()) {	// No selection
+						removeToneAt(ui->listWidget->currentRow());
+					}
+					else {
+						if (items.size() == ui->listWidget->count())
+							items.pop_front();	// Leave first tone
+						for (const auto& item : items)
+							removeToneAt(ui->listWidget->row(item));
+					}
+					return true;
+				}
+				break;
+			default:
+				break;
+			}
 			break;
+		}
 		case QEvent::KeyRelease:
 			keyReleaseEvent(reinterpret_cast<QKeyEvent*>(event));
 			break;
@@ -134,6 +162,12 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 	}
 
 	return false;
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+	Q_UNUSED(event)
+	ui->nameLabel->setText(modifyDisplayedToneName(ui->nameLabel->text()));
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -236,6 +270,19 @@ void MainWindow::dropEvent(QDropEvent* event)
 	case FileIo::FileType::SingleTone:	loadSingleTone(file);	break;
 	case FileIo::FileType::ToneBank:	loadToneBank(file);		break;
 	default:	break;
+	}
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+	if (isWindowModified()) {
+		switch (showSaveWarning()) {
+		case QMessageBox::Yes:
+			if (!saveTone()) event->ignore();
+			break;
+		case QMessageBox::No: break;
+		default: event->ignore(); break;
+		}
 	}
 }
 
@@ -373,7 +420,6 @@ void MainWindow::JamKeyOffPSG(int jamKeyNumber, bool isRepeat)
 		}
 	}
 }
-
 
 void MainWindow::SetFMTone(int channel)
 {
@@ -530,17 +576,9 @@ QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 	return NOTE_NAME_TBL_[jamKeyNumber % 12];
 }
 
-void MainWindow::closeEvent(QCloseEvent* event)
+QString MainWindow::modifyDisplayedToneName(const QString& src) const
 {
-	if (isWindowModified()) {
-		switch (showSaveWarning()) {
-		case QMessageBox::Yes:
-			if (!saveTone()) event->ignore();
-			break;
-		case QMessageBox::No: break;
-		default: event->ignore(); break;
-		}
-	}
+	return nameFontMet_->elidedText(src, Qt::ElideRight, ui->nameLabel->width());
 }
 
 void MainWindow::onALChanged(int value)
@@ -691,12 +729,23 @@ void MainWindow::addToneTo(int n, TonePtr tone)
 	QString name = utf8ToQString(tone->name);
 	item->setText(name);
 	item->setData(Qt::UserRole, QVariant::fromValue(tone));
-	ui->nameLabel->setText(name);
+	ui->nameLabel->setText(modifyDisplayedToneName(name));
 	ui->listWidget->insertItem(n, item);
 	setWindowModified(true);
 
 	ui->listWidget->clearSelection();
 	ui->listWidget->setCurrentRow(n);
+}
+
+void MainWindow::removeToneAt(int n)
+{
+	delete ui->listWidget->takeItem(n);
+	setWindowModified(true);
+
+	ui->listWidget->clearSelection();
+	ui->listWidget->setCurrentRow(std::min(n, ui->listWidget->count() - 1));
+
+	ui->removeTonePushButton->setEnabled(ui->listWidget->count() != 1);
 }
 
 TonePtr MainWindow::getCurrentTone() const
@@ -778,7 +827,7 @@ void MainWindow::on_nameButton_clicked()
 {
 	NameDialog dialog(this);
 	if (dialog.exec() == QDialog::Accepted) {
-		ui->nameLabel->setText(dialog.toneName());
+		ui->nameLabel->setText(modifyDisplayedToneName(dialog.toneName()));
 		ui->listWidget->currentItem()->setText(dialog.toneName());
 		getCurrentTone()->name = dialog.toneName().toUtf8().toStdString();
 		setWindowModified(true);
@@ -826,7 +875,7 @@ void MainWindow::on_actionRead_Text_R_triggered()
 	if (dialog.exec() == QDialog::Accepted) {
 		if (!formats.empty()){
 			if (Tone* tone = converter_.textToTone(dialog.text(), dialog.type())) {
-				addToneTo(ui->listWidget->currentRow(), tone);
+				addToneTo(ui->listWidget->count(), tone);
 				setWindowModified(true);
 				return;
 			}
@@ -838,7 +887,7 @@ void MainWindow::on_actionRead_Text_R_triggered()
 
 void MainWindow::on_newTonePushButton_clicked()
 {
-	addToneTo(ui->listWidget->count());
+	addToneTo(ui->listWidget->currentRow());
 
 	ui->removeTonePushButton->setEnabled(true);
 }
@@ -846,22 +895,14 @@ void MainWindow::on_newTonePushButton_clicked()
 void MainWindow::on_removeTonePushButton_clicked()
 {
 	int row = ui->listWidget->currentRow();
-	if (row == -1) return;
-
-	delete ui->listWidget->takeItem(row);
-	setWindowModified(true);
-
-	ui->listWidget->clearSelection();
-	ui->listWidget->setCurrentRow(std::min(row ,ui->listWidget->count() - 1));
-
-	ui->removeTonePushButton->setEnabled(ui->listWidget->count() != 1);
+	if (row != -1) removeToneAt(row);
 }
 
 void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 {
 	Q_UNUSED(currentRow)
 	auto tone = getCurrentTone();
-	ui->nameLabel->setText(utf8ToQString(tone->name));
+	ui->nameLabel->setText(modifyDisplayedToneName(utf8ToQString(tone->name)));
 	QSignalBlocker bal(ui->alSlider);
 	QSignalBlocker bfb(ui->fbSlider);
 	ui->alSlider->setValue(tone->AL);
