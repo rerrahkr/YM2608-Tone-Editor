@@ -58,6 +58,10 @@ const std::unordered_map<int, int> MainWindow::NOTE_NUM_MAP_ = {
 	{ Qt::Key_P, 28 },
 };
 
+const QString MainWindow::NOTE_NAME_TBL_[12] = {
+	"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+};
+
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
@@ -519,26 +523,7 @@ void MainWindow::InitPan()
 
 QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 {
-	switch (jamKeyNumber) {
-	case 0:
-	case 12:    return "C";
-	case 1:
-	case 13:    return "C#";
-	case 2:
-	case 14:    return "D";
-	case 3:
-	case 15:    return "D#";
-	case 4:
-	case 16:    return "E";
-	case 5:     return "F";
-	case 6:     return "F#";
-	case 7:     return "G";
-	case 8:     return "G#";
-	case 9:     return "A";
-	case 10:    return "A#";
-	case 11:    return "B";
-	default:    return "";
-	}
+	return NOTE_NAME_TBL_[jamKeyNumber % 12];
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

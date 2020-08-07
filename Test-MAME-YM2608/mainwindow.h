@@ -71,6 +71,7 @@ private:
 	void closeEvent(QCloseEvent* event) override;
 
 	static const std::unordered_map<int, int> NOTE_NUM_MAP_;
+	static const QString NOTE_NAME_TBL_[12];
 
 	static constexpr int FM_FNUM_TBL_[12] = {
 		0x026a,	// C
