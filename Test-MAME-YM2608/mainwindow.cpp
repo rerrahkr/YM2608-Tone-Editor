@@ -148,7 +148,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 	switch (event->key()) {
 	case Qt::Key_F1:
-		if (octave_ > 1) --octave_;
+		if (octave_ > 0) --octave_;
 		break;
 	case Qt::Key_F2:
 		if (octave_ < 7) ++octave_;
@@ -270,7 +270,9 @@ void MainWindow::JamKeyOnFM(int jamKeyNumber, bool isRepeat)
 		}
 
 		// Set key on
-		SetFMKey(ch, (octave_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+		int oct = octave_ + jamKeyNumber / 12;
+		if (7 < oct) return;
+		SetFMKey(ch, oct, (jamKeyNumber % 12));
 		SetFMKeyOn(ch);
 		int value = (1 << (ch + 7)) | (octave_ * 12 + jamKeyNumber);
 		jamKeyOnTableFM_.push_back(value);
@@ -312,7 +314,9 @@ void MainWindow::JamKeyOnPSG(int jamKeyNumber, bool isRepeat)
 		}
 
 		// Set key on
-		SetPSGKey(ch, (octave_ + jamKeyNumber / 12), (jamKeyNumber % 12));
+		int oct = octave_ + jamKeyNumber / 12;
+		if (7 < oct) return;
+		SetPSGKey(ch, oct, (jamKeyNumber % 12));
 		SetPSGKeyOn(ch);
 		int value = (1 << (ch + 7)) | (octave_ * 12 + jamKeyNumber);
 		jamKeyOnTablePSG_.push_back(value);
