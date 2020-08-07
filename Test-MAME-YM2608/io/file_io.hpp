@@ -37,13 +37,13 @@ public:
 private:
 	FileIo();
 
-	inline QString extractExtention(const QString& file) const
+	inline std::string extractExtention(const QString& file) const
 	{
-		return QFileInfo(file).suffix().toLower();
+		return QFileInfo(file).suffix().toLower().toUtf8().toStdString();
 	}
 
 	static std::unique_ptr<FileIo> instance_;
 
-	std::unordered_map<QString, std::unique_ptr<AbstractSingleToneIo>> SINGLE_TONE_HANDLER_;
-	std::unordered_map<QString, std::unique_ptr<AbstractToneBankIo>> TONE_BANK_HANDLER_;
+	std::unordered_map<std::string, std::unique_ptr<AbstractSingleToneIo>> SINGLE_TONE_HANDLER_;
+	std::unordered_map<std::string, std::unique_ptr<AbstractToneBankIo>> TONE_BANK_HANDLER_;
 };

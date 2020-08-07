@@ -24,7 +24,7 @@ FileIo& FileIo::getInstance()
 
 FileIo::FileType FileIo::detectFileType(const QString& file) const
 {
-	const QString ext = FileIo::extractExtention(file);
+	const std::string ext = FileIo::extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.count(ext)) return FileType::SingleTone;
 	if (TONE_BANK_HANDLER_.count(ext)) return FileType::ToneBank;
@@ -34,7 +34,7 @@ FileIo::FileType FileIo::detectFileType(const QString& file) const
 
 Tone* FileIo::loadSingleToneFrom(const QString& file) const
 {
-	const QString ext = FileIo::extractExtention(file);
+	const std::string ext = FileIo::extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.count(ext)) {
 		QFile f(file);
@@ -53,7 +53,7 @@ Tone* FileIo::loadSingleToneFrom(const QString& file) const
 
 void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 {
-	const QString ext = FileIo::extractExtention(file);
+	const std::string ext = FileIo::extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.count(ext)) {
 		const BinaryContainer&& container = SINGLE_TONE_HANDLER_.at(ext)->save(tone);
@@ -65,7 +65,7 @@ void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 
 std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 {
-	const QString ext = FileIo::extractExtention(file);
+	const std::string ext = FileIo::extractExtention(file);
 
 	if (TONE_BANK_HANDLER_.count(ext)) {
 		QFile f(file);
@@ -84,7 +84,7 @@ std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 
 void FileIo::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const
 {
-	const QString ext = FileIo::extractExtention(file);
+	const std::string ext = FileIo::extractExtention(file);
 
 	if (TONE_BANK_HANDLER_.count(ext)) {
 		const BinaryContainer&& container = TONE_BANK_HANDLER_.at(ext)->save(bank);
