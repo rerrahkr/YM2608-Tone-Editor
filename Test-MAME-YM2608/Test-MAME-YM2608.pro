@@ -34,6 +34,7 @@ SOURCES += \
     io/bti_io.cpp \
     io/file_io.cpp \
     io/file_io_error.cpp \
+    io/original_bank_io.cpp \
     io/original_tone_io.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -67,6 +68,7 @@ HEADERS += \
     io/bti_io.hpp \
     io/file_io.hpp \
     io/file_io_error.hpp \
+    io/original_bank_io.hpp \
     io/original_tone_io.hpp \
         mainwindow.h \
     chips/mame/2608intf.h \

@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Added
+- Bank support
 - FM/PSG switch key
 - [#3], [#5] - Support .bti and .btb import/export (thanks [@freq-mod])
 
@@ -10,8 +11,8 @@
 - Enable to save multiple text input/output formats
 - Integrate FM/PSG octave keys
 - Accept dragging and dropping file
-- [#4] -  Change keyboard input to 2 rows - 2 octaves (thanks [@freq-mod])
-- [#4] -  Change minimum octave to 0 (thanks [@freq-mod])
+- [#4] - Change keyboard input to 2 rows - 2 octaves (thanks [@freq-mod])
+- [#4] - Change minimum octave to 0 (thanks [@freq-mod])
 
 ### Fixed
 - [#2] - Fixed internal FM sample rate (thanks [@freq-mod])
