@@ -3,6 +3,7 @@
 #include <QIODevice>
 #include "file_io_error.hpp"
 #include "original_tone_io.hpp"
+#include "original_bank_io.hpp"
 #include "bti_io.hpp"
 #include "btb_io.hpp"
 
@@ -13,6 +14,7 @@ FileIo::FileIo()
 	SINGLE_TONE_HANDLER_["tone"].reset(new OriginalToneIo);
 	SINGLE_TONE_HANDLER_["bti"].reset(new BtiIo);
 
+	TONE_BANK_HANDLER_["bank"].reset(new OriginalBankIo);
 	TONE_BANK_HANDLER_["btb"].reset(new BtbIo);
 }
 

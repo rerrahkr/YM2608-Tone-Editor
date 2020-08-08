@@ -28,7 +28,11 @@
     </widget>
    </item>
    <item alignment="Qt::AlignVCenter">
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="maxLength">
+      <number>255</number>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

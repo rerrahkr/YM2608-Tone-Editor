@@ -935,6 +935,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 	}
 
 	QStringList filters {
+		"FM bank file (*.bank)",
 		"BambooTracker bank (*.btb)"
 	};
 	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"));
@@ -958,6 +959,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
 	QStringList filters {
+		"FM bank file (*.bank)",
 		"BambooTracker bank (*.btb)"
 	};
 	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
