@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <mutex>
-#include "../types.h"
+#include "chip_def.h"
 #include "resampler.hpp"
 
 namespace chip

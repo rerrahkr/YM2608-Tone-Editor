@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "mamedef.h"
+
 /* --- select emulation chips --- */
 /*
 #define BUILD_YM2203  (HAS_YM2203)		// build YM2203(OPN)   emulator
@@ -14,12 +16,12 @@
 #define BUILD_YM2612  (HAS_YM2612)		// build YM2612(OPN2)  emulator
 #define BUILD_YM3438  (HAS_YM3438)		// build YM3438(OPN) emulator
 */
-//#define BUILD_YM2203  1
+/*#define BUILD_YM2203  1*/
 #define BUILD_YM2608  1
-//#define BUILD_YM2610  1
-//#define BUILD_YM2610B 1
-//#define BUILD_YM2612  1
-//#define BUILD_YM3438  1
+/*#define BUILD_YM2610  1
+#define BUILD_YM2610B 1
+#define BUILD_YM2612  1
+#define BUILD_YM3438  1*/
 
 /* select bit size of output : 8 or 16 */
 #define FM_SAMPLE_BITS 16
@@ -29,7 +31,7 @@
 
 /* --- speedup optimize --- */
 /* busy flag enulation , The definition of FM_GET_TIME_NOW() is necessary. */
-//#define FM_BUSY_FLAG_SUPPORT 1
+/*#define FM_BUSY_FLAG_SUPPORT 1*/
 
 /* --- external SSG(YM2149/AY-3-8910)emulator interface port */
 /* used by YM2203,YM2608,and YM2610 */
@@ -127,10 +129,10 @@ typedef void (*FM_IRQHANDLER)(void *param,int irq);
 ** 'IRQHandler'    IRQ callback handler when changed IRQ level
 ** return      0 = success
 */
-//void * ym2203_init(void *param, const device_config *device, int baseclock, int rate,
-//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
+/*//void * ym2203_init(void *param, const device_config *device, int baseclock, int rate,
+//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);*/
 void * ym2203_init(void *param, int baseclock, int rate,
-               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
+			   FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
 
 /*
 ** shutdown the YM2203 emulators
@@ -174,11 +176,13 @@ void ym2203_set_mutemask(void *chip, UINT32 MuteMask);
 
 #if BUILD_YM2608
 /* -------------------- YM2608(OPNA) Interface -------------------- */
-//void * ym2608_init(void *param, const device_config *device, int baseclock, int rate,
+/*//void * ym2608_init(void *param, const device_config *device, int baseclock, int rate,
 //               void *pcmroma,int pcmsizea,
 //               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
 void * ym2608_init(void *param, int baseclock, int rate,
-               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
+			   FM_TIMERHANDLER TimerHandler, FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);*/
+void * ym2608_init(void *param, int baseclock, int rate, offs_t dram_size,
+			   FM_TIMERHANDLER TimerHandler, FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
 void ym2608_shutdown(void *chip);
 void ym2608_reset_chip(void *chip);
 void ym2608_update_one(void *chip, FMSAMPLE **buffer, int length);
@@ -195,11 +199,11 @@ void ym2608_set_mutemask(void *chip, UINT32 MuteMask);
 
 #if (BUILD_YM2610||BUILD_YM2610B)
 /* -------------------- YM2610(OPNB) Interface -------------------- */
-//void * ym2610_init(void *param, const device_config *device, int baseclock, int rate,
+/*//void * ym2610_init(void *param, const device_config *device, int baseclock, int rate,
 //               void *pcmroma,int pcmasize,void *pcmromb,int pcmbsize,
-//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
+//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);*/
 void * ym2610_init(void *param, int baseclock, int rate,
-               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
+			   FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg);
 void ym2610_shutdown(void *chip);
 void ym2610_reset_chip(void *chip);
 void ym2610_update_one(void *chip, FMSAMPLE **buffer, int length);
@@ -219,10 +223,10 @@ void ym2610_set_mutemask(void *chip, UINT32 MuteMask);
 #endif /* (BUILD_YM2610||BUILD_YM2610B) */
 
 #if (BUILD_YM2612||BUILD_YM3438)
-//void * ym2612_init(void *param, const device_config *device, int baseclock, int rate,
-//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler);
+/*//void * ym2612_init(void *param, const device_config *device, int baseclock, int rate,
+//               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler);*/
 void * ym2612_init(void *param, int baseclock, int rate,
-               FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler);
+			   FM_TIMERHANDLER TimerHandler,FM_IRQHANDLER IRQHandler);
 void ym2612_shutdown(void *chip);
 void ym2612_reset_chip(void *chip);
 void ym2612_update_one(void *chip, FMSAMPLE **buffer, int length);

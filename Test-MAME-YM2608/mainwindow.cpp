@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
 	settings_(),
-	chip_(3993600 * 2, settings_.getRate()),
+	chip_(settings_.getEmulation(), 3993600 * 2, settings_.getRate()),
 	audio_(chip_, chip_.getRate(), 40),
 	octave_(4),
 	pressedKeyNameFM_("FM: "),
@@ -849,6 +849,7 @@ void MainWindow::on_actionSetup_E_triggered()
 	if (dialog.exec() == QDialog::Accepted) {
 		converter_.setOutputFormats(dialog.outputFormats());
 		converter_.setInputFormats(dialog.inputFormats());
+		settings_.setEmulation(dialog.emulation());
 		settings_.setDuration(dialog.duration());
 		settings_.setRate(dialog.rate());
 

@@ -3,7 +3,7 @@
 #include <QAudioOutput>
 #include <QAudioFormat>
 #include <memory>
-#include "types.h"
+#include "chips/chip_def.h"
 #include "chips/chip.hpp"
 #include "audio_stream_mixier.hpp"
 

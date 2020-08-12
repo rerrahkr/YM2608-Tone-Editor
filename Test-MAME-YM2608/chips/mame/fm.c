@@ -118,12 +118,12 @@
 #include <math.h>
 
 #include "mamedef.h"
-//#ifndef __RAINE__
-//#include "sndintrf.h"		/* use M.A.M.E. */
-//#else
-//#include "deftypes.h"		/* use RAINE */
-//#include "support.h"		/* use RAINE */
-//#endif
+/*#ifndef __RAINE__*/
+/*#include "sndintrf.h"*/		/* use M.A.M.E. */
+/*#else*/
+/*#include "deftypes.h"*/		/* use RAINE */
+/*#include "support.h"*/		/* use RAINE */
+/*#endif*/
 #include "fm.h"
 
 
@@ -381,10 +381,10 @@ static const UINT32 lfo_samples_per_step[8] = {108, 77, 71, 67, 62, 44, 8, 5};
 
   It's implemented as generator from 0..126 with step 2 then a shift
   right N times, where N is:
-    8 for 0 dB
-    3 for 1.4 dB
-    1 for 5.9 dB
-    0 for 11.8 dB
+	8 for 0 dB
+	3 for 1.4 dB
+	1 for 5.9 dB
+	0 for 11.8 dB
 */
 static const UINT8 lfo_ams_depth_shift[4] = {8, 3, 1, 0};
 
@@ -408,7 +408,7 @@ static const UINT8 lfo_ams_depth_shift[4] = {8, 3, 1, 0};
    one value from "lfo_pm_output" table lasts for 432 consecutive
    samples (4*108=432) and one full LFO waveform cycle lasts for 13824
    samples (32*432=13824; 32 because we store only a quarter of whole
-            waveform in the table below)
+			waveform in the table below)
 */
 static const UINT8 lfo_pm_output[7*8][8]={ /* 7 bits meaningful (of F-NUMBER), 8 LFO output levels per one depth (out of 32), 8 LFO depths */
 /* FNUM BIT 4: 000 0001xxxx */
@@ -600,7 +600,7 @@ typedef struct
 
 typedef struct
 {
-	//const device_config *device;
+	/*const device_config *device;*/
 	void *		param;				/* this chip parameter  */
 	int			clock;				/* master clock  (Hz)   */
 	int			rate;				/* sampling rate (Hz)   */
@@ -659,7 +659,7 @@ typedef struct
 
 
 	/* there are 2048 FNUMs that can be generated using FNUM/BLK registers
-        but LFO works with one more bit of a precision so we really need 4096 elements */
+		but LFO works with one more bit of a precision so we really need 4096 elements */
 
 	UINT32	fn_table[4096];	/* fnumber->increment counter */
 	UINT32 fn_max;    /* maximal phase increment (used for phase overflow) */
@@ -876,6 +876,7 @@ INLINE void FM_BUSY_SET(FM_ST *ST,int busyclock )
 INLINE void FM_KEYON(UINT8 type, FM_CH *CH , int s )
 {
 	FM_SLOT *SLOT = &CH->SLOT[s];
+	(void)type;
 	if( !SLOT->key )
 	{
 		SLOT->key = 1;
@@ -995,6 +996,7 @@ INLINE void set_det_mul(FM_ST *ST,FM_CH *CH,FM_SLOT *SLOT,int v)
 /* set total level */
 INLINE void set_tl(FM_CH *CH,FM_SLOT *SLOT , int v)
 {
+	(void)CH;
 	SLOT->tl = (v&0x7f)<<(ENV_BITS-7); /* 7bit TL */
 }
 
@@ -1002,6 +1004,7 @@ INLINE void set_tl(FM_CH *CH,FM_SLOT *SLOT , int v)
 INLINE void set_ar_ksr(UINT8 type, FM_CH *CH,FM_SLOT *SLOT,int v)
 {
 	UINT8 old_KSR = SLOT->KSR;
+	(void)type;
 
 	SLOT->ar = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
 
@@ -1027,6 +1030,7 @@ INLINE void set_ar_ksr(UINT8 type, FM_CH *CH,FM_SLOT *SLOT,int v)
 /* set decay rate */
 INLINE void set_dr(UINT8 type, FM_SLOT *SLOT,int v)
 {
+	(void)type;
 	SLOT->d1r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
 
 	SLOT->eg_sh_d1r = eg_rate_shift [SLOT->d1r + SLOT->ksr];
@@ -1036,6 +1040,7 @@ INLINE void set_dr(UINT8 type, FM_SLOT *SLOT,int v)
 /* set sustain rate */
 INLINE void set_sr(UINT8 type, FM_SLOT *SLOT,int v)
 {
+	(void)type;
 	SLOT->d2r = (v&0x1f) ? 32 + ((v&0x1f)<<1) : 0;
 
 	SLOT->eg_sh_d2r = eg_rate_shift [SLOT->d2r + SLOT->ksr];
@@ -1045,6 +1050,7 @@ INLINE void set_sr(UINT8 type, FM_SLOT *SLOT,int v)
 /* set release rate */
 INLINE void set_sl_rr(UINT8 type, FM_SLOT *SLOT,int v)
 {
+	(void)type;
 	SLOT->sl = sl_table[ v>>4 ];
 
 	SLOT->rr  = 34 + ((v&0x0f)<<2);
@@ -1092,7 +1098,7 @@ INLINE void advance_lfo(FM_OPN *OPN)
 		/* update AM when LFO output changes */
 
 		/* actually I can't optimize is this way without rewriting chan_calc()
-        to use chip->lfo_am instead of global lfo_am */
+		to use chip->lfo_am instead of global lfo_am */
 		{
 
 			/* triangle */
@@ -1139,8 +1145,8 @@ static void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT)
 			if ( !(OPN->eg_cnt & ((1<<SLOT->eg_sh_ar)-1) ) )
 			{
 				SLOT->volume += (~SLOT->volume *
-                                  (eg_inc[SLOT->eg_sel_ar + ((OPN->eg_cnt>>SLOT->eg_sh_ar)&7)])
-                                ) >>4;
+								  (eg_inc[SLOT->eg_sel_ar + ((OPN->eg_cnt>>SLOT->eg_sh_ar)&7)])
+								) >>4;
 
 				if (SLOT->volume <= MIN_ATT_INDEX)
 				{
@@ -1250,15 +1256,15 @@ static void advance_eg_channel(FM_OPN *OPN, FM_SLOT *SLOT)
 
 		out = ((UINT32)SLOT->volume);
 
-                /* negate output (changes come from alternate bit, init comes from attack bit) */
+				/* negate output (changes come from alternate bit, init comes from attack bit) */
 		if ((SLOT->ssg&0x08) && (SLOT->ssgn&2) && (SLOT->state > EG_REL))
 			out ^= MAX_ATT_INDEX;
 
 		/* we need to store the result here because we are going to change ssgn
-            in next instruction */
+			in next instruction */
 		SLOT->vol_out = out + SLOT->tl;
 
-                /* reverse SLOT inversion flag */
+				/* reverse SLOT inversion flag */
 		SLOT->ssgn ^= swap_flag;
 
 		SLOT++;
@@ -1314,19 +1320,19 @@ INLINE void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
 
 	if (lfo_fn_table_index_offset)    /* LFO phase modulation active */
 	{
-	        UINT8 blk;
-	        UINT32 fn;
+			UINT8 blk;
+			UINT32 fn;
 		int kc, fc, finc;
 
 		block_fnum = block_fnum*2 + lfo_fn_table_index_offset;
 
-	        blk = (block_fnum&0x7000) >> 12;
-	        fn  = block_fnum & 0xfff;
+			blk = (block_fnum&0x7000) >> 12;
+			fn  = block_fnum & 0xfff;
 
 		/* keyscale code */
-	        kc = (blk<<2) | opn_fktable[fn >> 8];
+			kc = (blk<<2) | opn_fktable[fn >> 8];
 
-	        /* phase increment counter */
+			/* phase increment counter */
 		fc = (OPN->fn_table[fn]>>(7-blk));
 
 		/* detects frequency overflow (credits to Nemesis) */
@@ -1349,10 +1355,10 @@ INLINE void update_phase_lfo_channel(FM_OPN *OPN, FM_CH *CH)
 	}
 	else    /* LFO phase modulation  = zero */
 	{
-	        CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
-	        CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
-	        CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
-	        CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
+			CH->SLOT[SLOT1].phase += CH->SLOT[SLOT1].Incr;
+			CH->SLOT[SLOT2].phase += CH->SLOT[SLOT2].Incr;
+			CH->SLOT[SLOT3].phase += CH->SLOT[SLOT3].Incr;
+			CH->SLOT[SLOT4].phase += CH->SLOT[SLOT4].Incr;
 	}
 }
 
@@ -1418,10 +1424,10 @@ INLINE void chan_calc(FM_OPN *OPN, FM_CH *CH, int chnum)
 		/* add support for 3 slot mode */
 		if ((OPN->ST.mode & 0xC0) && (chnum == 2))
 		{
-		        update_phase_lfo_slot(OPN, &CH->SLOT[SLOT1], CH->pms, OPN->SL3.block_fnum[1]);
-		        update_phase_lfo_slot(OPN, &CH->SLOT[SLOT2], CH->pms, OPN->SL3.block_fnum[2]);
-		        update_phase_lfo_slot(OPN, &CH->SLOT[SLOT3], CH->pms, OPN->SL3.block_fnum[0]);
-		        update_phase_lfo_slot(OPN, &CH->SLOT[SLOT4], CH->pms, CH->block_fnum);
+				update_phase_lfo_slot(OPN, &CH->SLOT[SLOT1], CH->pms, OPN->SL3.block_fnum[1]);
+				update_phase_lfo_slot(OPN, &CH->SLOT[SLOT2], CH->pms, OPN->SL3.block_fnum[2]);
+				update_phase_lfo_slot(OPN, &CH->SLOT[SLOT3], CH->pms, OPN->SL3.block_fnum[0]);
+				update_phase_lfo_slot(OPN, &CH->SLOT[SLOT4], CH->pms, CH->block_fnum);
 		}
 		else update_phase_lfo_channel(OPN, CH);
 	}
@@ -1528,14 +1534,14 @@ static void reset_channels( FM_ST *ST , FM_CH *CH , int num )
 
 	for( c = 0 ; c < num ; c++ )
 	{
-		//memset(&CH[c], 0x00, sizeof(FM_CH));
+		/*memset(&CH[c], 0x00, sizeof(FM_CH));*/
 		CH[c].mem_value = 0;
 		CH[c].op1_out[0] = 0;
 		CH[c].op1_out[1] = 0;
 		CH[c].fc = 0;
 		for(s = 0 ; s < 4 ; s++ )
 		{
-			//memset(&CH[c].SLOT[s], 0x00, sizeof(FM_SLOT));
+			/*memset(&CH[c].SLOT[s], 0x00, sizeof(FM_SLOT));*/
 			CH[c].SLOT[s].Incr = -1;
 			CH[c].SLOT[s].key = 0;
 			CH[c].SLOT[s].phase = 0;
@@ -1760,7 +1766,7 @@ static void OPNSetPres(FM_OPN *OPN, int pres, int timer_prescaler, int SSGpres)
 	OPN->ST.freqbase = 1.0;
 #endif
 
-	//OPN->eg_timer_add  = (1<<EG_SH)  *  OPN->ST.freqbase;
+	/*OPN->eg_timer_add  = (1<<EG_SH)  *  OPN->ST.freqbase;*/
 	OPN->eg_timer_add = (UINT32)((1 << EG_SH)  *  OPN->ST.freqbase);
 	OPN->eg_timer_overflow = ( 3 ) * (1<<EG_SH);
 
@@ -1775,7 +1781,7 @@ static void OPNSetPres(FM_OPN *OPN, int pres, int timer_prescaler, int SSGpres)
 	init_timetables( &OPN->ST, dt_tab );
 
 	/* there are 2048 FNUMs that can be generated using FNUM/BLK registers
-        but LFO works with one more bit of a precision so we really need 4096 elements */
+		but LFO works with one more bit of a precision so we really need 4096 elements */
 	/* calculate fnumber -> increment counter table */
 	for(i = 0; i < 4096; i++)
 	{
@@ -1796,7 +1802,7 @@ static void OPNSetPres(FM_OPN *OPN, int pres, int timer_prescaler, int SSGpres)
 	{
 		/* Amplitude modulation: 64 output levels (triangle waveform); 1 level lasts for one of "lfo_samples_per_step" samples */
 		/* Phase modulation: one entry from lfo_pm_output lasts for one of 4 * "lfo_samples_per_step" samples  */
-		//OPN->lfo_freq[i] = (1.0 / lfo_samples_per_step[i]) * (1<<LFO_SH) * OPN->ST.freqbase;
+		/*OPN->lfo_freq[i] = (1.0 / lfo_samples_per_step[i]) * (1<<LFO_SH) * OPN->ST.freqbase;*/
 		OPN->lfo_freq[i] = (UINT32)((1.0 / lfo_samples_per_step[i]) * (1 << LFO_SH) * OPN->ST.freqbase);
 #if 0
 		logerror("FM.C: lfo_freq[%i] = %08x (dec=%8i)\n",
@@ -1910,77 +1916,77 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
 
 		/* SSG-EG envelope shapes :
 
-        E AtAlH
-        1 0 0 0  \\\\
+		E AtAlH
+		1 0 0 0  \\\\
 
-        1 0 0 1  \___
+		1 0 0 1  \___
 
-        1 0 1 0  \/\/
-                  ___
-        1 0 1 1  \
+		1 0 1 0  \/\/
+				  ___
+		1 0 1 1  \
 
-        1 1 0 0  ////
-                  ___
-        1 1 0 1  /
+		1 1 0 0  ////
+				  ___
+		1 1 0 1  /
 
-        1 1 1 0  /\/\
+		1 1 1 0  /\/\
 
-        1 1 1 1  /___
-
-
-        E = SSG-EG enable
+		1 1 1 1  /___
 
 
-        The shapes are generated using Attack, Decay and Sustain phases.
-
-        Each single character in the diagrams above represents this whole
-        sequence:
-
-        - when KEY-ON = 1, normal Attack phase is generated (*without* any
-          difference when compared to normal mode),
-
-        - later, when envelope level reaches minimum level (max volume),
-          the EG switches to Decay phase (which works with bigger steps
-          when compared to normal mode - see below),
-
-        - later when envelope level passes the SL level,
-          the EG swithes to Sustain phase (which works with bigger steps
-          when compared to normal mode - see below),
-
-        - finally when envelope level reaches maximum level (min volume),
-          the EG switches to Attack phase again (depends on actual waveform).
-
-        Important is that when switch to Attack phase occurs, the phase counter
-        of that operator will be zeroed-out (as in normal KEY-ON) but not always.
-        (I havent found the rule for that - perhaps only when the output level is low)
-
-        The difference (when compared to normal Envelope Generator mode) is
-        that the resolution in Decay and Sustain phases is 4 times lower;
-        this results in only 256 steps instead of normal 1024.
-        In other words:
-        when SSG-EG is disabled, the step inside of the EG is one,
-        when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
-
-        Times between the level changes are the same in both modes.
+		E = SSG-EG enable
 
 
-        Important:
-        Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
-        it is the same in both SSG and no-SSG modes, with this exception:
+		The shapes are generated using Attack, Decay and Sustain phases.
 
-        when the SSG-EG is enabled and is generating raising levels
-        (when the EG output is inverted) the SL will be found at wrong level !!!
-        For example, when SL=02:
-            0 -6 = -6dB in non-inverted EG output
-            96-6 = -90dB in inverted EG output
-        Which means that EG compares its level to SL as usual, and that the
-        output is simply inverted afterall.
+		Each single character in the diagrams above represents this whole
+		sequence:
+
+		- when KEY-ON = 1, normal Attack phase is generated (*without* any
+		  difference when compared to normal mode),
+
+		- later, when envelope level reaches minimum level (max volume),
+		  the EG switches to Decay phase (which works with bigger steps
+		  when compared to normal mode - see below),
+
+		- later when envelope level passes the SL level,
+		  the EG swithes to Sustain phase (which works with bigger steps
+		  when compared to normal mode - see below),
+
+		- finally when envelope level reaches maximum level (min volume),
+		  the EG switches to Attack phase again (depends on actual waveform).
+
+		Important is that when switch to Attack phase occurs, the phase counter
+		of that operator will be zeroed-out (as in normal KEY-ON) but not always.
+		(I havent found the rule for that - perhaps only when the output level is low)
+
+		The difference (when compared to normal Envelope Generator mode) is
+		that the resolution in Decay and Sustain phases is 4 times lower;
+		this results in only 256 steps instead of normal 1024.
+		In other words:
+		when SSG-EG is disabled, the step inside of the EG is one,
+		when SSG-EG is enabled, the step is four (in Decay and Sustain phases).
+
+		Times between the level changes are the same in both modes.
 
 
-        The Yamaha's manuals say that AR should be set to 0x1f (max speed).
-        That is not necessary, but then EG will be generating Attack phase.
+		Important:
+		Decay 1 Level (so called SL) is compared to actual SSG-EG output, so
+		it is the same in both SSG and no-SSG modes, with this exception:
 
-        */
+		when the SSG-EG is enabled and is generating raising levels
+		(when the EG output is inverted) the SL will be found at wrong level !!!
+		For example, when SL=02:
+			0 -6 = -6dB in non-inverted EG output
+			96-6 = -90dB in inverted EG output
+		Which means that EG compares its level to SL as usual, and that the
+		output is simply inverted afterall.
+
+
+		The Yamaha's manuals say that AR should be set to 0x1f (max speed).
+		That is not necessary, but then EG will be generating Attack phase.
+
+		*/
 
 
 		break;
@@ -2063,13 +2069,13 @@ static void OPNWriteReg(FM_OPN *OPN, int r, int v)
 /*
   prescaler circuit (best guess to verified chip behaviour)
 
-               +--------------+  +-sel2-+
-               |              +--|in20  |
-         +---+ |  +-sel1-+       |      |
+			   +--------------+  +-sel2-+
+			   |              +--|in20  |
+		 +---+ |  +-sel1-+       |      |
 M-CLK -+-|1/2|-+--|in10  | +---+ |   out|--INT_CLOCK
-       | +---+    |   out|-|1/3|-|in21  |
-       +----------|in11  | +---+ +------+
-                  +------+
+	   | +---+    |   out|-|1/3|-|in21  |
+	   +----------|in11  | +---+ +------+
+				  +------+
 
 reg.2d : sel2 = in21 (select sel2)
 reg.2e : sel1 = in11 (select sel1)
@@ -2191,7 +2197,7 @@ void ym2203_update_one(void *chip, FMSAMPLE **buffer, int length)
 
 			lt >>= FINAL_SH;
 
-			//Limit( lt , MAXOUT, MINOUT );
+			/*Limit( lt , MAXOUT, MINOUT );*/
 
 			#ifdef SAVE_SAMPLE
 				SAVE_ALL_CHANNELS
@@ -2285,10 +2291,10 @@ static void YM2203_save_state(YM2203 *F2203, const device_config *device)
    'clock' is the chip clock in Hz
    'rate' is sampling rate
 */
-//void * ym2203_init(void *param, const device_config *device, int clock, int rate,
-//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
+/*//void * ym2203_init(void *param, const device_config *device, int clock, int rate,
+//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)*/
 void * ym2203_init(void *param, int clock, int rate,
-               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
+			   FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
 {
 	YM2203 *F2203;
 
@@ -2307,7 +2313,7 @@ void * ym2203_init(void *param, int clock, int rate,
 	F2203->OPN.ST.param = param;
 	F2203->OPN.type = TYPE_YM2203;
 	F2203->OPN.P_CH = F2203->CH;
-	//F2203->OPN.ST.device = device;
+	/*F2203->OPN.ST.device = device;*/
 	F2203->OPN.ST.clock = clock;
 	F2203->OPN.ST.rate = rate;
 
@@ -2415,10 +2421,10 @@ void ym2203_set_mutemask(void *chip, UINT32 MuteMask)
 {
 	YM2203 *F2203 = (YM2203 *)chip;
 	UINT8 CurChn;
-	
+
 	for (CurChn = 0; CurChn < 3; CurChn ++)
 		F2203->CH[CurChn].Muted = (MuteMask >> CurChn) & 0x01;
-	
+
 	return;
 }
 #endif /* BUILD_YM2203 */
@@ -2457,7 +2463,7 @@ typedef struct
 	UINT8		addr_A1;			/* address line A1      */
 
 	/* ADPCM-A unit */
-	//const UINT8	*pcmbuf;			/* pcm rom buffer       */
+	/*const UINT8	*pcmbuf;*/			/* pcm rom buffer       */
 	UINT8		*pcmbuf;			/* pcm rom buffer       */
 	UINT32		pcm_size;			/* size of pcm rom      */
 	UINT8		adpcmTL;			/* adpcmA total level   */
@@ -2467,8 +2473,8 @@ typedef struct
 	YM_DELTAT	deltaT;				/* Delta-T ADPCM unit   */
 	UINT8		MuteDeltaT;
 
-    UINT8		flagmask;			/* YM2608 only */
-    UINT8		irqmask;			/* YM2608 only */
+	UINT8		flagmask;			/* YM2608 only */
+	UINT8		irqmask;			/* YM2608 only */
 } YM2610;
 
 /* here is the virtual YM2608 */
@@ -2563,11 +2569,12 @@ INLINE void ADPCMA_calc_chan( YM2610 *F2610, ADPCM_CH *ch )
 
 			ch->adpcm_acc += jedi_table[ch->adpcm_step + data];
 
+			/* the 12-bit accumulator wraps on the ym2610 and ym2608 (like the msm5205), it does not saturate (like the msm5218) */
+			ch->adpcm_acc &= 0xfff;
+
 			/* extend 12-bit signed int */
-			if (ch->adpcm_acc & ~0x7ff)
+			if (ch->adpcm_acc & 0x800)
 				ch->adpcm_acc |= ~0xfff;
-			else
-				ch->adpcm_acc &= 0xfff;
 
 			ch->adpcm_step += step_inc[data & 7];
 			Limit( ch->adpcm_step, 48*16, 0*16 );
@@ -2600,8 +2607,8 @@ static void FM_ADPCMAWrite(YM2610 *F2610,int r,int v)
 				if( (v>>c)&1 )
 				{
 					/**** start adpcm ****/
-					// The .step variable is already set and for the YM2608 it is different on channels 4 and 5.
-					//adpcm[c].step      = (UINT32)((float)(1<<ADPCM_SHIFT)*((float)F2610->OPN.ST.freqbase)/3.0);
+					/* The .step variable is already set and for the YM2608 it is different on channels 4 and 5. */
+					/*adpcm[c].step      = (UINT32)((float)(1<<ADPCM_SHIFT)*((float)F2610->OPN.ST.freqbase)/3.0);*/
 					adpcm[c].now_addr  = adpcm[c].start<<1;
 					adpcm[c].now_step  = 0;
 					adpcm[c].adpcm_acc = 0;
@@ -2737,7 +2744,7 @@ static void FMsave_state_adpcma(const device_config *device,ADPCM_CH *adpcm)
 
 
 
-static const unsigned int YM2608_ADPCM_ROM_addr[2*6] = {
+const unsigned int YM2608_ADPCM_ROM_addr[2*6] = {
 0x0000, 0x01bf, /* bass drum  */
 0x01c0, 0x043f, /* snare drum */
 0x0440, 0x1b7f, /* top cymbal */
@@ -2748,11 +2755,11 @@ static const unsigned int YM2608_ADPCM_ROM_addr[2*6] = {
 
 
 /*
-    This data is derived from the chip's output - internal ROM can't be read.
-    It was verified, using real YM2608, that this ADPCM stream produces 100% correct output signal.
+	This data is derived from the chip's output - internal ROM can't be read.
+	It was verified, using real YM2608, that this ADPCM stream produces 100% correct output signal.
 */
 
-static const unsigned char YM2608_ADPCM_ROM[0x2000] = {
+const unsigned char YM2608_ADPCM_ROM[0x2000] = {
 
 /* Source: 01BD.ROM */
 /* Length: 448 / 0x000001C0 */
@@ -3437,7 +3444,7 @@ void ym2608_update_one(void *chip, FMSAMPLE **buffer, int length)
 			rt += ((out_fm[4]>>1) & OPN->pan[9]);
 			lt += ((out_fm[5]>>1) & OPN->pan[10]);
 			rt += ((out_fm[5]>>1) & OPN->pan[11]);*/
-			// this way it's louder (and more accurate)
+			/* this way it's louder (and more accurate) */
 			lt =  (OPN->out_adpcm[OUTD_LEFT]  + OPN->out_adpcm[OUTD_CENTER]) << 1;
 			rt =  (OPN->out_adpcm[OUTD_RIGHT] + OPN->out_adpcm[OUTD_CENTER]) << 1;
 			lt += (OPN->out_delta[OUTD_LEFT]  + OPN->out_delta[OUTD_CENTER])>>8;
@@ -3458,8 +3465,8 @@ void ym2608_update_one(void *chip, FMSAMPLE **buffer, int length)
 			lt >>= FINAL_SH;
 			rt >>= FINAL_SH;
 
-			//Limit( lt, MAXOUT, MINOUT );
-			//Limit( rt, MAXOUT, MINOUT );
+			/*Limit( lt, MAXOUT, MINOUT );*/
+			/*Limit( rt, MAXOUT, MINOUT );*/
 			/* buffering */
 			bufL[i] = lt;
 			bufR[i] = rt;
@@ -3556,11 +3563,13 @@ static void YM2608_deltat_status_reset(void *chip, UINT8 changebits)
 	FM_STATUS_RESET(&(F2608->OPN.ST), changebits);
 }
 /* YM2608(OPNA) */
-//void * ym2608_init(void *param, const device_config *device, int clock, int rate,
+/*//void * ym2608_init(void *param, const device_config *device, int clock, int rate,
 //               void *pcmrom,int pcmsize,
-//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
-void * ym2608_init(void *param, int clock, int rate,
-               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
+//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)*/
+/*void * ym2608_init(void *param, int clock, int rate,
+			   FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)*/
+void * ym2608_init(void *param, int clock, int rate, offs_t dram_size,
+			   FM_TIMERHANDLER timer_handler, FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
 {
 	YM2608 *F2608;
 
@@ -3579,7 +3588,7 @@ void * ym2608_init(void *param, int clock, int rate,
 	F2608->OPN.ST.param = param;
 	F2608->OPN.type = TYPE_YM2608;
 	F2608->OPN.P_CH = F2608->CH;
-	//F2608->OPN.ST.device = device;
+	/*F2608->OPN.ST.device = device;*/
 	F2608->OPN.ST.clock = clock;
 	F2608->OPN.ST.rate = rate;
 
@@ -3589,11 +3598,14 @@ void * ym2608_init(void *param, int clock, int rate,
 	F2608->OPN.ST.SSG           = ssg;
 
 	/* DELTA-T */
-	//F2608->deltaT.memory = (UINT8 *)pcmrom;
+	/*//F2608->deltaT.memory = (UINT8 *)pcmrom;
 	//F2608->deltaT.memory_size = pcmsize;
-	F2608->deltaT.memory = NULL;
-	F2608->deltaT.memory_size = 0x00;
-	F2608->deltaT.memory_mask = 0x00;
+	//F2608->deltaT.memory = NULL;
+	//F2608->deltaT.memory_size = 0x00;
+	//F2608->deltaT.memory_mask = 0x00;*/
+	F2608->deltaT.memory = (UINT8*)realloc(F2608->deltaT.memory, dram_size);
+	F2608->deltaT.memory_size = dram_size;
+	YM_DELTAT_calc_mem_mask(&F2608->deltaT);
 
 	/*F2608->deltaT.write_time = 20.0 / clock;*/	/* a single byte write takes 20 cycles of main clock */
 	/*F2608->deltaT.read_time  = 18.0 / clock;*/	/* a single byte read takes 18 cycles of main clock */
@@ -3646,7 +3658,7 @@ void ym2608_reset_chip(void *chip)
 	FM_BUSY_CLEAR(&OPN->ST);
 
 	/* register 0x29 - default value after reset is:
-        enable only 3 FM channels and enable all the status flags */
+		enable only 3 FM channels and enable all the status flags */
 	YM2608IRQMaskWrite(OPN, F2608, 0x1f );	/* default value for D4-D0 is 1 */
 
 	/* register 0x10, A1=1 - default value is 1 for D4, D3, D2, 0 for the rest */
@@ -3732,7 +3744,7 @@ int ym2608_write(void *chip, int a,UINT8 v)
 		if( v >= 0x2d && v <= 0x2f )
 		{
 			OPNPrescaler_w(OPN , v , 2);
-			//TODO: set ADPCM[c].step
+			/*TODO: set ADPCM[c].step*/
 			F2608->deltaT.freqbase = OPN->ST.freqbase;
 		}
 		break;
@@ -3857,7 +3869,7 @@ int ym2608_timer_over(void *chip,int c)
 {
 	YM2608 *F2608 = (YM2608 *)chip;
 
-    switch(c)
+	switch(c)
 	{
 #if 0
 	case 2:
@@ -3885,7 +3897,7 @@ int ym2608_timer_over(void *chip,int c)
 		break;
 	default:
 		break;
-    }
+	}
 
 	return F2608->OPN.ST.irq;
 }
@@ -3894,13 +3906,13 @@ void ym2608_write_pcmrom(void *chip, UINT8 rom_id, offs_t ROMSize, offs_t DataSt
 						 offs_t DataLength, const UINT8* ROMData)
 {
 	YM2608 *F2608 = (YM2608 *)chip;
-	
+
 	switch(rom_id)
 	{
-	case 0x01:	// ADPCM
-		// unused, it's constant
+	case 0x01:	/* ADPCM */
+		/* unused, it's constant */
 		break;
-	case 0x02:	// DELTA-T
+	case 0x02:	/* DELTA-T */
 		if (F2608->deltaT.memory_size != ROMSize)
 		{
 			F2608->deltaT.memory = (UINT8*)realloc(F2608->deltaT.memory, ROMSize);
@@ -3912,11 +3924,11 @@ void ym2608_write_pcmrom(void *chip, UINT8 rom_id, offs_t ROMSize, offs_t DataSt
 			return;
 		if (DataStart + DataLength > ROMSize)
 			DataLength = ROMSize - DataStart;
-		
+
 		memcpy(F2608->deltaT.memory + DataStart, ROMData, DataLength);
 		break;
 	}
-	
+
 	return;
 }
 
@@ -3924,13 +3936,13 @@ void ym2608_set_mutemask(void *chip, UINT32 MuteMask)
 {
 	YM2608 *F2608 = (YM2608 *)chip;
 	UINT8 CurChn;
-	
+
 	for (CurChn = 0; CurChn < 6; CurChn ++)
 		F2608->CH[CurChn].Muted = (MuteMask >> CurChn) & 0x01;
 	for (CurChn = 0; CurChn < 6; CurChn ++)
 		F2608->adpcm[CurChn].Muted = (MuteMask >> (CurChn + 6)) & 0x01;
 	F2608->MuteDeltaT = (MuteMask >> 12) & 0x01;
-	
+
 	return;
 }
 #endif /* BUILD_YM2608 */
@@ -4079,8 +4091,8 @@ void ym2610_update_one(void *chip, FMSAMPLE **buffer, int length)
 			lt >>= FINAL_SH;
 			rt >>= FINAL_SH;
 
-			//Limit( lt, MAXOUT, MINOUT );
-			//Limit( rt, MAXOUT, MINOUT );
+			/*//Limit( lt, MAXOUT, MINOUT );
+			//Limit( rt, MAXOUT, MINOUT );*/
 
 			#ifdef SAVE_SAMPLE
 				SAVE_ALL_CHANNELS
@@ -4235,8 +4247,8 @@ void ym2610b_update_one(void *chip, FMSAMPLE **buffer, int length)
 			lt >>= FINAL_SH;
 			rt >>= FINAL_SH;
 
-			//Limit( lt, MAXOUT, MINOUT );
-			//Limit( rt, MAXOUT, MINOUT );
+			/*//Limit( lt, MAXOUT, MINOUT );
+			//Limit( rt, MAXOUT, MINOUT );*/
 
 			#ifdef SAVE_SAMPLE
 				SAVE_ALL_CHANNELS
@@ -4335,11 +4347,11 @@ static void YM2610_deltat_status_reset(void *chip, UINT8 changebits)
 	F2610->adpcm_arrivedEndAddress &= (~changebits);
 }
 
-//void *ym2610_init(void *param, const device_config *device, int clock, int rate,
+/*//void *ym2610_init(void *param, const device_config *device, int clock, int rate,
 //               void *pcmroma,int pcmsizea,void *pcmromb,int pcmsizeb,
-//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
+//               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)*/
 void *ym2610_init(void *param, int clock, int rate,
-               FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
+			   FM_TIMERHANDLER timer_handler,FM_IRQHANDLER IRQHandler, const ssg_callbacks *ssg)
 {
 	YM2610 *F2610;
 
@@ -4359,7 +4371,7 @@ void *ym2610_init(void *param, int clock, int rate,
 	F2610->OPN.ST.param = param;
 	F2610->OPN.type = TYPE_YM2610;
 	F2610->OPN.P_CH = F2610->CH;
-	//F2610->OPN.ST.device = device;
+	/*F2610->OPN.ST.device = device;*/
 	F2610->OPN.ST.clock = clock;
 	F2610->OPN.ST.rate = rate;
 	/* Extend handler */
@@ -4367,13 +4379,13 @@ void *ym2610_init(void *param, int clock, int rate,
 	F2610->OPN.ST.IRQ_Handler   = IRQHandler;
 	F2610->OPN.ST.SSG           = ssg;
 	/* ADPCM */
-	//F2610->pcmbuf   = (const UINT8 *)pcmroma;
-	//F2610->pcm_size = pcmsizea;
+	/*//F2610->pcmbuf   = (const UINT8 *)pcmroma;
+	//F2610->pcm_size = pcmsizea;*/
 	F2610->pcmbuf   = NULL;
 	F2610->pcm_size = 0x00;
 	/* DELTA-T */
-	//F2610->deltaT.memory = (UINT8 *)pcmromb;
-	//F2610->deltaT.memory_size = pcmsizeb;
+	/*//F2610->deltaT.memory = (UINT8 *)pcmromb;
+	//F2610->deltaT.memory_size = pcmsizeb;*/
 	F2610->deltaT.memory = NULL;
 	F2610->deltaT.memory_size = 0x00;
 	F2610->deltaT.memory_mask = 0x00;
@@ -4647,10 +4659,10 @@ void ym2610_write_pcmrom(void *chip, UINT8 rom_id, offs_t ROMSize, offs_t DataSt
 						 offs_t DataLength, const UINT8* ROMData)
 {
 	YM2610 *F2610 = (YM2610 *)chip;
-	
+
 	switch(rom_id)
 	{
-	case 0x01:	// ADPCM
+	case 0x01:	/* ADPCM */
 		if (F2610->pcm_size != ROMSize)
 		{
 			F2610->pcmbuf = (UINT8*)realloc(F2610->pcmbuf, ROMSize);
@@ -4661,10 +4673,10 @@ void ym2610_write_pcmrom(void *chip, UINT8 rom_id, offs_t ROMSize, offs_t DataSt
 			return;
 		if (DataStart + DataLength > ROMSize)
 			DataLength = ROMSize - DataStart;
-		
+
 		memcpy(F2610->pcmbuf + DataStart, ROMData, DataLength);
 		break;
-	case 0x02:	// DELTA-T
+	case 0x02:	/* DELTA-T */
 		if (F2610->deltaT.memory_size != ROMSize)
 		{
 			F2610->deltaT.memory = (UINT8*)realloc(F2610->deltaT.memory, ROMSize);
@@ -4676,11 +4688,11 @@ void ym2610_write_pcmrom(void *chip, UINT8 rom_id, offs_t ROMSize, offs_t DataSt
 			return;
 		if (DataStart + DataLength > ROMSize)
 			DataLength = ROMSize - DataStart;
-		
+
 		memcpy(F2610->deltaT.memory + DataStart, ROMData, DataLength);
 		break;
 	}
-	
+
 	return;
 }
 
@@ -4688,13 +4700,13 @@ void ym2610_set_mutemask(void *chip, UINT32 MuteMask)
 {
 	YM2610 *F2610 = (YM2610 *)chip;
 	UINT8 CurChn;
-	
+
 	for (CurChn = 0; CurChn < 6; CurChn ++)
 		F2610->CH[CurChn].Muted = (MuteMask >> CurChn) & 0x01;
 	for (CurChn = 0; CurChn < 6; CurChn ++)
 		F2610->adpcm[CurChn].Muted = (MuteMask >> (CurChn + 6)) & 0x01;
 	F2610->MuteDeltaT = (MuteMask >> 12) & 0x01;
-	
+
 	return;
 }
 #endif /* (BUILD_YM2610||BUILD_YM2610B) */
