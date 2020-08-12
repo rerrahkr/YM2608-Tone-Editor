@@ -2,7 +2,7 @@
 #define __MAMEDEF_H__
 
 #include <stdint.h>
-#include "../../types.h"
+#include "../chip_def.h"
 
 // typedefs to use MAME's (U)INTxx types (copied from MAME\src\ods\odscomm.h)
 /* 8-bit values */

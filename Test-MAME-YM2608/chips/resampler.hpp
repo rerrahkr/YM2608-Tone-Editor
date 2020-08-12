@@ -2,7 +2,7 @@
 
 #include <cstddef>
 #include <cmath>
-#include "../types.h"
+#include "chip_def.h"
 
 namespace chip
 {

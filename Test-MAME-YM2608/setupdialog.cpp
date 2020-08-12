@@ -16,6 +16,13 @@ SetupDialog::SetupDialog(const Settings& settings, const ToneConverter& converte
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	// Stream
+	ui->emuComboBox->addItem("MAME YM2608", static_cast<int>(chip::Emu::Mame));
+	ui->emuComboBox->addItem("Nuked OPN-Mod", static_cast<int>(chip::Emu::Nuked));
+	for (int i = 0; i < ui->emuComboBox->count(); ++i) {
+		if (ui->emuComboBox->itemData(i).toInt() == static_cast<int>(settings.getEmulation()))
+			ui->emuComboBox->setCurrentIndex(i);
+	}
+
 	rateMap_[ui->buttonGroup->id(ui->radioButton44100)] = 44100;
 	rateMap_[ui->buttonGroup->id(ui->radioButton48000)] = 48000;
 	rateMap_[ui->buttonGroup->id(ui->radioButton55466)] = 55466;
@@ -42,22 +49,27 @@ SetupDialog::~SetupDialog()
 	delete ui;
 }
 
-unsigned int SetupDialog::duration()
+chip::Emu SetupDialog::emulation() const
+{
+	return static_cast<chip::Emu>(ui->emuComboBox->currentData().toInt());
+}
+
+unsigned int SetupDialog::duration() const
 {
 	return static_cast<unsigned int>(ui->horizontalSlider->value());
 }
 
-unsigned int SetupDialog::rate()
+unsigned int SetupDialog::rate() const
 {
-	return rateMap_[ui->buttonGroup->checkedId()];
+	return rateMap_.at(ui->buttonGroup->checkedId());
 }
 
-FmOutEnvelopeFormats SetupDialog::outputFormats()
+FmOutEnvelopeFormats SetupDialog::outputFormats() const
 {
 	return fmOutEnvFormats_;
 }
 
-FmInEnvelopeFormats SetupDialog::inputFormats()
+FmInEnvelopeFormats SetupDialog::inputFormats() const
 {
 	return fmInEnvFormats_;
 }

@@ -5,6 +5,7 @@
 - Bank support
 - FM/PSG switch key
 - [#3], [#5] - Support .bti and .btb import/export (thanks [@freq-mod])
+- [#6] - Add Nuked OPN-Mod emulation (thanks [@freq-mod])
 
 ### Changed
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
@@ -24,6 +25,7 @@
 [#3]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/3
 [#4]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/4
 [#5]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/5
+[#6]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/6
 
 ## v0.2.0 (2018/09/03)
 ### Added

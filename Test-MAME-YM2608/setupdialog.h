@@ -7,6 +7,7 @@
 #include <map>
 #include "settings.hpp"
 #include "tone_converter.hpp"
+#include "chips/chip_misc.h"
 
 namespace Ui {
 	class SetupDialog;
@@ -20,10 +21,11 @@ public:
 	SetupDialog(const Settings& settings, const ToneConverter& converter, QWidget *parent = nullptr);
 	~SetupDialog() override;
 
-	unsigned int rate();
-	unsigned int duration();
-	FmOutEnvelopeFormats outputFormats();
-	FmInEnvelopeFormats inputFormats();
+	chip::Emu emulation() const;
+	unsigned int rate() const;
+	unsigned int duration() const;
+	FmOutEnvelopeFormats outputFormats() const;
+	FmInEnvelopeFormats inputFormats() const;
 
 private slots:
 	void on_horizontalSlider_valueChanged(int value);

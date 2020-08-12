@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chip.hpp"
+#include "chip_misc.h"
 
 namespace chip
 {
@@ -9,7 +10,7 @@ namespace chip
 	public:
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
-		OPNA(int clock, int rate);
+		OPNA(Emu emu, int clock, int rate);
 		~OPNA();
 
 		void reset() override;
@@ -20,6 +21,8 @@ namespace chip
 
 	private:
 		static size_t count_;
+
+		intf2608* intf_;
 
 		/*static const int DEF_AMP_FM_, DEF_AMP_SSG_;*/
 

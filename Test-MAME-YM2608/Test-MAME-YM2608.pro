@@ -27,6 +27,8 @@ CONFIG += c++17
 
 
 SOURCES += \
+    chips/nuked/nuke2608intf.c \
+    chips/nuked/ym3438.c \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
     io/binary_container.cpp \
@@ -61,6 +63,9 @@ SOURCES += \
     readtextdialog.cpp
 
 HEADERS += \
+    chips/chip_def.h \
+    chips/nuked/nuke2608intf.h \
+    chips/nuked/ym3438.h \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
     io/binary_container.hpp \
