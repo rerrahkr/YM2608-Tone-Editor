@@ -6,6 +6,7 @@
 #include "original_bank_io.hpp"
 #include "bti_io.hpp"
 #include "btb_io.hpp"
+#include "ff_io.hpp"
 
 std::unique_ptr<FileIo> FileIo::instance_;
 
@@ -16,6 +17,7 @@ FileIo::FileIo()
 
 	TONE_BANK_HANDLER_["bank"].reset(new OriginalBankIo);
 	TONE_BANK_HANDLER_["btb"].reset(new BtbIo);
+	TONE_BANK_HANDLER_["ff"].reset(new FfIo);
 }
 
 FileIo& FileIo::getInstance()

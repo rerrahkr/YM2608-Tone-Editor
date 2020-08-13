@@ -34,6 +34,7 @@ SOURCES += \
     io/binary_container.cpp \
     io/btb_io.cpp \
     io/bti_io.cpp \
+    io/ff_io.cpp \
     io/file_io.cpp \
     io/file_io_error.cpp \
     io/original_bank_io.cpp \
@@ -71,6 +72,7 @@ HEADERS += \
     io/binary_container.hpp \
     io/btb_io.hpp \
     io/bti_io.hpp \
+    io/ff_io.hpp \
     io/file_io.hpp \
     io/file_io_error.hpp \
     io/original_bank_io.hpp \

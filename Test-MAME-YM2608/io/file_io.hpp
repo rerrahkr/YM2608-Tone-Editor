@@ -18,7 +18,7 @@ class AbstractToneBankIo
 {
 public:
 	virtual std::vector<TonePtr> load(const BinaryContainer& container) const = 0;
-	virtual const BinaryContainer save(const std::vector<TonePtr>& tone) const = 0;
+	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const = 0;
 };
 
 class FileIo
