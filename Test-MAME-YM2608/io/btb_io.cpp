@@ -76,8 +76,7 @@ std::vector<TonePtr> BtbIo::load(const BinaryContainer& container) const
 						uint8_t dtsr = container.readUint8(csr++);
 						uint8_t slrr = container.readUint8(csr++);
 						uint8_t tl = container.readUint8(csr++);
-						uint8_t ml = container.readUint8(csr++);
-						// op.SSGEG = (tmp & 0x80) ? -1 : ((tmp >> 4) & 0x07);
+						uint8_t egml = container.readUint8(csr++);
 						for (const size_t toneIdx : toneIdcs) {
 							Operator& op = bank[toneIdx]->op[o];
 							op.AR = ar & 0x1f;
@@ -88,7 +87,8 @@ std::vector<TonePtr> BtbIo::load(const BinaryContainer& container) const
 							op.SL = slrr >> 4;
 							op.RR = slrr & 0x0f;
 							op.TL = tl;
-							op.ML = ml & 0x0f;
+							op.ML = egml & 0x0f;
+							op.SSGEG = (egml >> 4) ^ 0x08;
 						}
 					}
 				}
@@ -185,7 +185,7 @@ const BinaryContainer BtbIo::save(const std::vector<TonePtr>& bank) const
 			container.appendUint8((op.DT << 5) | op.SR);
 			container.appendUint8((op.SL << 4) | op.RR);
 			container.appendUint8(op.TL);
-			container.appendUint8(op.ML);
+			container.appendUint8(((op.SSGEG ^ 8) << 4)| op.ML);
 		}
 		container.writeUint8(ofs, static_cast<uint8_t>(container.size() - ofs));
 	}

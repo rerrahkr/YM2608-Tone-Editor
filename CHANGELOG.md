@@ -2,6 +2,7 @@
 
 ## Unreleased
 ### Added
+- [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
 - [#3], [#5] - Support .bti and .btb import/export (thanks [@freq-mod])

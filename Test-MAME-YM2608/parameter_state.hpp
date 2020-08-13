@@ -1,25 +1,12 @@
 #pragma once
 
-class ParameterState
+enum class OperatorParameter
 {
-public:
-    enum Parameter
-    {
-        DT, ML,
-        TL,
-        KS, AR,
-        AM, DR,
-        SR,
-        SL, RR,
-        FB, AL
-    };
-
-    ParameterState(Parameter parameter, int value = 0);
-    Parameter getParametor() const;
-    int getValue() const;
-    void setValue(int value);
-
-private:
-    Parameter parameter_;
-    int value_;
+	DT, ML,
+	TL,
+	KS, AR,
+	AM, DR,
+	SR,
+	SL, RR,
+	SSGEG
 };

@@ -126,7 +126,7 @@ private:
 private slots:
 	void onALChanged(int value);
 	void onFBChanged(int value);
-	void onParameterChanged(int op, const ParameterState& state);
+	void onParameterChanged(int op, OperatorParameter param, int value);
 	void on_actionOpen_O_triggered();
 	void on_actionSave_S_triggered();
 	void on_actionExit_X_triggered();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
+    <width>460</width>
     <height>300</height>
    </rect>
   </property>
@@ -148,6 +148,16 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="SSGEGSlider" name="ssgegSlider" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>38</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -155,6 +165,12 @@
    <class>LabeledVSlider</class>
    <extends>QWidget</extends>
    <header>widgets/labeled_vslider.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SSGEGSlider</class>
+   <extends>QWidget</extends>
+   <header>widgets/ssgeg_slider.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

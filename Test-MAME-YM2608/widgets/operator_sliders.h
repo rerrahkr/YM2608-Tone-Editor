@@ -18,41 +18,16 @@ public:
 
 	int operatorNumber() const;
 	void setOperatorNumber(int number);
-	int parameterValue(ParameterState::Parameter param) const;
-	void setParameterValue(ParameterState::Parameter param, int value);
+	int parameterValue(OperatorParameter param) const;
+	void setParameterValue(OperatorParameter param, int value);
 
 signals:
-	void parameterChanged(int op, const ParameterState& state);
+	void parameterChanged(int op, OperatorParameter state, int value);
 
 private:
 	Ui::OperatorSliders *ui;
 
 	int number_;
-
-	ParameterState arState_;
-	ParameterState drState_;
-	ParameterState srState_;
-	ParameterState rrState_;
-	ParameterState slState_;
-	ParameterState tlState_;
-	ParameterState ksState_;
-	ParameterState mlState_;
-	ParameterState dtState_;
-	ParameterState amState_;
-
-	void setStateValue(ParameterState& state, int value);
-
-private slots:
-	void onARChanged(int value);
-	void onDRChanged(int value);
-	void onSRChanged(int value);
-	void onRRChanged(int value);
-	void onSLChanged(int value);
-	void onTLChanged(int value);
-	void onKSChanged(int value);
-	void onMLChanged(int value);
-	void onDTChanged(int value);
-	void onAMChanged(int value);
 };
 
 #endif // OPERATOR_SLIDERS_H

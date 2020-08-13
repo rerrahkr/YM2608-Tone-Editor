@@ -63,7 +63,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 					op.TL = tmp;
 					tmp = container.readUint8(csr++);
 					op.ML = tmp & 0x0f;
-					// op.SSGEG = (tmp & 0x80) ? -1 : ((tmp >> 4) & 0x07);
+					op.SSGEG = (tmp >> 4) ^ 0x08;
 				}
 				break;
 			}
@@ -130,7 +130,7 @@ const BinaryContainer BtiIo::save(const Tone& tone) const
 			container.appendUint8((op.DT << 5) | op.SR);
 			container.appendUint8((op.SL << 4) | op.RR);
 			container.appendUint8(op.TL);
-			container.appendUint8(op.ML);
+			container.appendUint8(((op.SSGEG ^ 8) << 4)| op.ML);
 		}
 		container.writeUint8(ofs, static_cast<uint8_t>(container.size() - ofs));
 	}

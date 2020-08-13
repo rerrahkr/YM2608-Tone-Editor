@@ -5,17 +5,7 @@
 OperatorSliders::OperatorSliders(QWidget *parent, int number) :
 	QWidget(parent),
 	ui(new Ui::OperatorSliders),
-	number_(number),
-	arState_(ParameterState::AR),
-	drState_(ParameterState::DR),
-	srState_(ParameterState::SR),
-	rrState_(ParameterState::RR),
-	slState_(ParameterState::SL),
-	tlState_(ParameterState::TL),
-	ksState_(ParameterState::KS),
-	mlState_(ParameterState::ML),
-	dtState_(ParameterState::DT),
-	amState_(ParameterState::AM)
+	number_(number)
 {
 	ui->setupUi(this);
 
@@ -43,16 +33,28 @@ OperatorSliders::OperatorSliders(QWidget *parent, int number) :
 	ui->dtSlider->setMaximum(7);
 	ui->amSlider->setMaximum(1);
 
-	connect(ui->arSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onARChanged);
-	connect(ui->drSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onDRChanged);
-	connect(ui->srSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onSRChanged);
-	connect(ui->rrSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onRRChanged);
-	connect(ui->slSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onSLChanged);
-	connect(ui->tlSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onTLChanged);
-	connect(ui->ksSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onKSChanged);
-	connect(ui->mlSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onMLChanged);
-	connect(ui->dtSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onDTChanged);
-	connect(ui->amSlider, &LabeledVSlider::valueChanged, this, &OperatorSliders::onAMChanged);
+	connect(ui->arSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::AR, v); });
+	connect(ui->drSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::DR, v); });
+	connect(ui->srSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::SR, v); });
+	connect(ui->rrSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::RR, v); });
+	connect(ui->slSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::SL, v); });
+	connect(ui->tlSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::TL, v); });
+	connect(ui->ksSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::KS, v); });
+	connect(ui->mlSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::ML, v); });
+	connect(ui->dtSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::DT, v); });
+	connect(ui->amSlider, &LabeledVSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::AM, v); });
+	connect(ui->ssgegSlider, &SSGEGSlider::valueChanged, this,
+			[&](int v) { emit parameterChanged(number_, OperatorParameter::SSGEG, v); });
 }
 
 OperatorSliders::~OperatorSliders()
@@ -71,92 +73,38 @@ void OperatorSliders::setOperatorNumber(int number)
 	ui->operatorNumberLabel->setText("Op" + QString::number(number_));
 }
 
-int OperatorSliders::parameterValue(ParameterState::Parameter param) const
+int OperatorSliders::parameterValue(OperatorParameter param) const
 {
 	switch (param) {
-	case ParameterState::AR: return ui->arSlider->value();
-	case ParameterState::DR: return ui->drSlider->value();
-	case ParameterState::SR: return ui->srSlider->value();
-	case ParameterState::RR: return ui->rrSlider->value();
-	case ParameterState::SL: return ui->slSlider->value();
-	case ParameterState::TL: return ui->tlSlider->value();
-	case ParameterState::KS: return ui->ksSlider->value();
-	case ParameterState::ML: return ui->mlSlider->value();
-	case ParameterState::DT: return ui->dtSlider->value();
-	case ParameterState::AM: return ui->amSlider->value();
+	case OperatorParameter::AR: return ui->arSlider->value();
+	case OperatorParameter::DR: return ui->drSlider->value();
+	case OperatorParameter::SR: return ui->srSlider->value();
+	case OperatorParameter::RR: return ui->rrSlider->value();
+	case OperatorParameter::SL: return ui->slSlider->value();
+	case OperatorParameter::TL: return ui->tlSlider->value();
+	case OperatorParameter::KS: return ui->ksSlider->value();
+	case OperatorParameter::ML: return ui->mlSlider->value();
+	case OperatorParameter::DT: return ui->dtSlider->value();
+	case OperatorParameter::AM: return ui->amSlider->value();
+	case OperatorParameter::SSGEG:	return ui->ssgegSlider->value();
 	default:                 return -1; // Error
 	}
 }
 
-void OperatorSliders::setParameterValue(ParameterState::Parameter param, int value)
+void OperatorSliders::setParameterValue(OperatorParameter param, int value)
 {
 	switch (param) {
-	case ParameterState::AR: ui->arSlider->setValue(value); break;
-	case ParameterState::DR: ui->drSlider->setValue(value); break;
-	case ParameterState::SR: ui->srSlider->setValue(value); break;
-	case ParameterState::RR: ui->rrSlider->setValue(value); break;
-	case ParameterState::SL: ui->slSlider->setValue(value); break;
-	case ParameterState::TL: ui->tlSlider->setValue(value); break;
-	case ParameterState::KS: ui->ksSlider->setValue(value); break;
-	case ParameterState::ML: ui->mlSlider->setValue(value); break;
-	case ParameterState::DT: ui->dtSlider->setValue(value); break;
-	case ParameterState::AM: ui->amSlider->setValue(value); break;
+	case OperatorParameter::AR: ui->arSlider->setValue(value); break;
+	case OperatorParameter::DR: ui->drSlider->setValue(value); break;
+	case OperatorParameter::SR: ui->srSlider->setValue(value); break;
+	case OperatorParameter::RR: ui->rrSlider->setValue(value); break;
+	case OperatorParameter::SL: ui->slSlider->setValue(value); break;
+	case OperatorParameter::TL: ui->tlSlider->setValue(value); break;
+	case OperatorParameter::KS: ui->ksSlider->setValue(value); break;
+	case OperatorParameter::ML: ui->mlSlider->setValue(value); break;
+	case OperatorParameter::DT: ui->dtSlider->setValue(value); break;
+	case OperatorParameter::AM: ui->amSlider->setValue(value); break;
+	case OperatorParameter::SSGEG:	ui->ssgegSlider->setValue(value);	break;
 	default:                 break; // Error
 	}
-}
-
-void OperatorSliders::setStateValue(ParameterState &state, int value)
-{
-	state.setValue(value);
-	emit parameterChanged(number_, state);
-}
-
-void OperatorSliders::onARChanged(int value)
-{
-	setStateValue(arState_, value);
-}
-
-void OperatorSliders::onDRChanged(int value)
-{
-	setStateValue(drState_, value);
-}
-
-void OperatorSliders::onSRChanged(int value)
-{
-	setStateValue(srState_, value);
-}
-
-void OperatorSliders::onRRChanged(int value)
-{
-	setStateValue(rrState_, value);
-}
-
-void OperatorSliders::onSLChanged(int value)
-{
-	setStateValue(slState_, value);
-}
-
-void OperatorSliders::onTLChanged(int value)
-{
-	setStateValue(tlState_, value);
-}
-
-void OperatorSliders::onKSChanged(int value)
-{
-	setStateValue(ksState_, value);
-}
-
-void OperatorSliders::onMLChanged(int value)
-{
-	setStateValue(mlState_, value);
-}
-
-void OperatorSliders::onDTChanged(int value)
-{
-	setStateValue(dtState_, value);
-}
-
-void OperatorSliders::onAMChanged(int value)
-{
-	setStateValue(amState_, value);
 }
