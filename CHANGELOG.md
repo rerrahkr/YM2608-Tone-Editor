@@ -5,7 +5,9 @@
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
-- [#3], [#5] - Support .bti and .btb import/export (thanks [@freq-mod])
+- [#3], [#5] - Support 3 new format import/export (thanks [@freq-mod])
+  - .bti/.btb (BambooTracker instrument/bank)
+  - .ff (PMD FF)
 - [#6] - Add Nuked OPN-Mod emulation (thanks [@freq-mod])
 
 ### Changed
