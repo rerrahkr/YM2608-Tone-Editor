@@ -473,6 +473,9 @@ void MainWindow::SetFMTone(int channel)
 		data = tone->op[i].SL << 4;
 		data |= tone->op[i].RR;
 		chip_.setRegister(0x80 + bch + offset, data);
+
+		data = tone->op[i].SSGEG;
+		chip_.setRegister(0x90 + bch + offset, data);
 	}
 }
 
