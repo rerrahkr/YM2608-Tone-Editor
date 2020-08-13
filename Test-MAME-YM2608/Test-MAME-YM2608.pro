@@ -50,7 +50,6 @@ SOURCES += \
     widgets/labeled_hslider.cpp \
     widgets/labeled_vslider.cpp \
     widgets/operator_sliders.cpp \
-    parameter_state.cpp \
     chips/chip.cpp \
     chips/resampler.cpp \
     namedialog.cpp \
@@ -60,7 +59,8 @@ SOURCES += \
     settings.cpp \
     aboutdialog.cpp \
     sliderstyle.cpp \
-    readtextdialog.cpp
+    readtextdialog.cpp \
+    widgets/ssgeg_slider.cpp
 
 HEADERS += \
     chips/chip_def.h \
@@ -102,7 +102,8 @@ HEADERS += \
     settings.hpp \
     aboutdialog.h \
     sliderstyle.hpp \
-    readtextdialog.hpp
+    readtextdialog.hpp \
+    widgets/ssgeg_slider.hpp
 
 FORMS += \
     fmenvelopeformatdialog.ui \
@@ -115,4 +116,5 @@ FORMS += \
     tonetextdialog.ui \
     setupdialog.ui \
     aboutdialog.ui \
-    readtextdialog.ui
+    readtextdialog.ui \
+    widgets/ssgeg_slider.ui

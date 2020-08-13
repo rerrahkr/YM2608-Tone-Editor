@@ -6,8 +6,8 @@ std::vector<TonePtr> OriginalBankIo::load(const BinaryContainer& container) cons
 	std::vector<TonePtr> bank;
 
 	size_t csr = 0;
-	if (container.readString(csr, 4) != "BANK")
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+	std::string ident = container.readString(csr, 4);
+	if (ident != "BANK" && ident != "BKV2") throw FileCorruptionError(FileIo::FileType::ToneBank);
 	csr += 4;
 
 	uint16_t cnt = container.readUint16(csr);
@@ -33,6 +33,7 @@ std::vector<TonePtr> OriginalBankIo::load(const BinaryContainer& container) cons
 			op.ML = container.readUint8(csr++);
 			op.DT = container.readUint8(csr++);
 			op.AM = container.readUint8(csr++);
+			if (ident == "BKV2") op.SSGEG = container.readUint8(csr++);
 		}
 		bank.push_back(std::move(tone));
 	}
@@ -43,7 +44,7 @@ std::vector<TonePtr> OriginalBankIo::load(const BinaryContainer& container) cons
 const BinaryContainer OriginalBankIo::save(const std::vector<TonePtr>& bank) const
 {
 	BinaryContainer container;
-	container.appendString("BANK");
+	container.appendString("BKV2");
 	container.appendUint16(static_cast<uint16_t>(bank.size()));
 	for (const TonePtr& tone : bank) {
 		uint8_t nameLen = static_cast<uint8_t>(tone->name.size());
@@ -62,6 +63,7 @@ const BinaryContainer OriginalBankIo::save(const std::vector<TonePtr>& bank) con
 			container.appendUint8(op.ML);
 			container.appendUint8(op.DT);
 			container.appendUint8(op.AM);
+			container.appendUint8(op.SSGEG);
 		}
 	}
 	return container;

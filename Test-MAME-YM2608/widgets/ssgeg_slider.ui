@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LabeledVSlider</class>
- <widget class="QWidget" name="LabeledVSlider">
+ <class>SSGEGSlider</class>
+ <widget class="QWidget" name="SSGEGSlider">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>50</width>
-    <height>200</height>
+    <width>68</width>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Frame</string>
-  </property>
-  <property name="styleSheet">
-   <string notr="true"/>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -29,6 +26,13 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item alignment="Qt::AlignHCenter">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+   </item>
    <item alignment="Qt::AlignHCenter">
     <widget class="QSlider" name="verticalSlider">
      <property name="styleSheet">
@@ -55,9 +59,6 @@ QSlider::add-page:vertical {
 	border-radius: 2px;
 }</string>
      </property>
-     <property name="singleStep">
-      <number>1</number>
-     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -66,7 +67,7 @@ QSlider::add-page:vertical {
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Text</string>
+      <string>TextLabel</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -75,6 +76,10 @@ QSlider::add-page:vertical {
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>checkBox</tabstop>
+  <tabstop>verticalSlider</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

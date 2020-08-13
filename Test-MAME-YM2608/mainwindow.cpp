@@ -611,9 +611,9 @@ void MainWindow::onFBChanged(int value)
 	setWindowModified(true);
 }
 
-void MainWindow::onParameterChanged(int op, const ParameterState& state)
+void MainWindow::onParameterChanged(int op, OperatorParameter param, int value)
 {
-	uint8_t value = state.getValue();
+	uint8_t v = static_cast<uint8_t>(value);
 	Operator& slot = getCurrentTone()->op[op - 1];
 
 	uint32_t opOffset;
@@ -629,56 +629,61 @@ void MainWindow::onParameterChanged(int op, const ParameterState& state)
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
 			uint8_t reg;
-			switch (state.getParametor()) {
-			case ParameterState::AR:
-				slot.AR = value;
+			switch (param) {
+			case OperatorParameter::AR:
+				slot.AR = v;
 				reg = (slot.KS << 6) | slot.AR;
 				chip_.setRegister(0x50 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::DR:
-				slot.DR = value;
+			case OperatorParameter::DR:
+				slot.DR = v;
 				reg = (slot.AM << 7) | slot.DR;
 				chip_.setRegister(0x60 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::SR:
-				slot.SR = value;
+			case OperatorParameter::SR:
+				slot.SR = v;
 				reg = slot.SR;
 				chip_.setRegister(0x70 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::RR:
-				slot.RR = value;
+			case OperatorParameter::RR:
+				slot.RR = v;
 				reg = (slot.SL << 4) | slot.RR;
 				chip_.setRegister(0x80 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::SL:
-				slot.SL = value;
+			case OperatorParameter::SL:
+				slot.SL = v;
 				reg = (slot.SL << 4) | slot.RR;
 				chip_.setRegister(0x80 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::TL:
-				slot.TL = value;
+			case OperatorParameter::TL:
+				slot.TL = v;
 				reg = slot.TL;
 				chip_.setRegister(0x40 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::KS:
-				slot.KS = value;
+			case OperatorParameter::KS:
+				slot.KS = v;
 				reg = (slot.KS << 6) | slot.AR;
 				chip_.setRegister(0x50 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::ML:
-				slot.ML = value;
+			case OperatorParameter::ML:
+				slot.ML = v;
 				reg = (slot.DT << 4) | slot.ML;
 				chip_.setRegister(0x30 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::DT:
-				slot.DT = value;
+			case OperatorParameter::DT:
+				slot.DT = v;
 				reg = (slot.DT << 4) | slot.ML;
 				chip_.setRegister(0x30 + chOffset + opOffset, reg);
 				break;
-			case ParameterState::AM:
-				slot.AM = value;
+			case OperatorParameter::AM:
+				slot.AM = v;
 				reg = (slot.AM << 7) | slot.DR;
 				chip_.setRegister(0x60 + chOffset + opOffset, reg);
+				break;
+			case OperatorParameter::SSGEG:
+				slot.SSGEG = v;
+				reg = slot.SSGEG;
+				chip_.setRegister(0x90 + chOffset + opOffset, reg);
 				break;
 			default:
 				return;
@@ -910,16 +915,17 @@ void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 	ui->fbSlider->setValue(tone->FB);
 	for (int i = 0; i< 4; ++i) {
 		QSignalBlocker bop(sliders_[i]);
-		sliders_[i]->setParameterValue(ParameterState::AR, tone->op[i].AR);
-		sliders_[i]->setParameterValue(ParameterState::DR, tone->op[i].DR);
-		sliders_[i]->setParameterValue(ParameterState::SR, tone->op[i].SR);
-		sliders_[i]->setParameterValue(ParameterState::RR, tone->op[i].RR);
-		sliders_[i]->setParameterValue(ParameterState::SL, tone->op[i].SL);
-		sliders_[i]->setParameterValue(ParameterState::TL, tone->op[i].TL);
-		sliders_[i]->setParameterValue(ParameterState::KS, tone->op[i].KS);
-		sliders_[i]->setParameterValue(ParameterState::ML, tone->op[i].ML);
-		sliders_[i]->setParameterValue(ParameterState::DT, tone->op[i].DT);
-		sliders_[i]->setParameterValue(ParameterState::AM, tone->op[i].AM);
+		sliders_[i]->setParameterValue(OperatorParameter::AR, tone->op[i].AR);
+		sliders_[i]->setParameterValue(OperatorParameter::DR, tone->op[i].DR);
+		sliders_[i]->setParameterValue(OperatorParameter::SR, tone->op[i].SR);
+		sliders_[i]->setParameterValue(OperatorParameter::RR, tone->op[i].RR);
+		sliders_[i]->setParameterValue(OperatorParameter::SL, tone->op[i].SL);
+		sliders_[i]->setParameterValue(OperatorParameter::TL, tone->op[i].TL);
+		sliders_[i]->setParameterValue(OperatorParameter::KS, tone->op[i].KS);
+		sliders_[i]->setParameterValue(OperatorParameter::ML, tone->op[i].ML);
+		sliders_[i]->setParameterValue(OperatorParameter::DT, tone->op[i].DT);
+		sliders_[i]->setParameterValue(OperatorParameter::AM, tone->op[i].AM);
+		sliders_[i]->setParameterValue(OperatorParameter::SSGEG, tone->op[i].SSGEG);
 	}
 
 	for (int i = 1; i <= 6; ++i) {
