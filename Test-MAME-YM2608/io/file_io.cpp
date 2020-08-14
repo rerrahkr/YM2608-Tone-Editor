@@ -9,6 +9,7 @@
 #include "ff_io.hpp"
 #include "wopn/wopn_io.hpp"
 #include "wopn/opni_io.hpp"
+#include "dmp_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -34,12 +35,11 @@ const BinaryContainer AbstractToneBankIo::save(const std::vector<TonePtr>& bank)
 	throw FileUnsupportedError(FileIo::FileType::ToneBank);
 }
 
-std::unique_ptr<FileIo> FileIo::instance_;
-
 FileIo::FileIo()
 {
 	SINGLE_TONE_HANDLER_.add(new OriginalToneIo);
 	SINGLE_TONE_HANDLER_.add(new BtiIo);
+	SINGLE_TONE_HANDLER_.add(new DmpIo);
 	SINGLE_TONE_HANDLER_.add(new OpniIo);
 
 	TONE_BANK_HANDLER_.add(new OriginalBankIo);
