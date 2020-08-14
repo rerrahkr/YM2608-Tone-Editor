@@ -39,8 +39,10 @@ SOURCES += \
     io/file_io_error.cpp \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
-        main.cpp \
-        mainwindow.cpp \
+    io/wopn/wopn_file.c \
+    io/wopn/wopn_io.cpp \
+    main.cpp \
+    mainwindow.cpp \
     chips/opna.cpp \
     chips/mame/2608intf.c \
     chips/mame/emu2149.c \
@@ -77,7 +79,9 @@ HEADERS += \
     io/file_io_error.hpp \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
-        mainwindow.h \
+    io/wopn/wopn_file.h \
+    io/wopn/wopn_io.hpp \
+    mainwindow.h \
     chips/mame/2608intf.h \
     chips/mame/emu2149.h \
     chips/mame/emutypes.h \
@@ -86,7 +90,6 @@ HEADERS += \
     chips/mame/ymdeltat.h \
     chips/opna.hpp \
     text_conversion.hpp \
-    types.h \
     audio_stream.hpp \
     audio_stream_mixier.hpp \
     widgets/labeled_hslider.hpp \
@@ -110,7 +113,7 @@ HEADERS += \
 FORMS += \
     fmenvelopeformatdialog.ui \
     fmenvelopeorderdialog.ui \
-        mainwindow.ui \
+    mainwindow.ui \
     widgets/labeled_hslider.ui \
     widgets/labeled_vslider.ui \
     widgets/operator_sliders.ui \

@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include "file_io_error.hpp"
 
-BtbIo::BtbIo() : AbstractToneBankIo("btb", "BambooTracker bank") {}
+BtbIo::BtbIo() : AbstractToneBankIo("btb", "BambooTracker bank", true, true) {}
 
 std::vector<TonePtr> BtbIo::load(const BinaryContainer& container) const
 {

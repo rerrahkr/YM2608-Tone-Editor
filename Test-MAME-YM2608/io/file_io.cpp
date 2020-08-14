@@ -7,6 +7,31 @@
 #include "bti_io.hpp"
 #include "btb_io.hpp"
 #include "ff_io.hpp"
+#include "wopn/wopn_io.hpp"
+
+Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
+{
+	(void)container;
+	throw FileUnsupportedError(FileIo::FileType::SingleTone);
+}
+
+const BinaryContainer AbstractSingleToneIo::save(const Tone& tone) const
+{
+	(void)tone;
+	throw FileUnsupportedError(FileIo::FileType::SingleTone);
+}
+
+std::vector<TonePtr> AbstractToneBankIo::load(const BinaryContainer& container) const
+{
+	(void)container;
+	throw FileUnsupportedError(FileIo::FileType::ToneBank);
+}
+
+const BinaryContainer AbstractToneBankIo::save(const std::vector<TonePtr>& bank) const
+{
+	(void)bank;
+	throw FileUnsupportedError(FileIo::FileType::ToneBank);
+}
 
 std::unique_ptr<FileIo> FileIo::instance_;
 
@@ -18,6 +43,7 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new OriginalBankIo);
 	TONE_BANK_HANDLER_.add(new BtbIo);
 	TONE_BANK_HANDLER_.add(new FfIo);
+	TONE_BANK_HANDLER_.add(new WopnIo);
 }
 
 FileIo& FileIo::getInstance()
@@ -36,9 +62,14 @@ FileIo::FileType FileIo::detectFileType(const QString& file) const
 	return FileType::Unknown;
 }
 
-QStringList FileIo::getSingleToneFilter() const
+QStringList FileIo::getSingleToneLoadFilter() const
 {
-	return SINGLE_TONE_HANDLER_.getFilterList();
+	return SINGLE_TONE_HANDLER_.getLoadFilterList();
+}
+
+QStringList FileIo::getSingleToneSaveFilter() const
+{
+	return SINGLE_TONE_HANDLER_.getSaveFilterList();
 }
 
 Tone* FileIo::loadSingleToneFrom(const QString& file) const
@@ -72,9 +103,14 @@ void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 	}
 }
 
-QStringList FileIo::getToneBankFilter() const
+QStringList FileIo::getToneBankLoadFilter() const
 {
-	return TONE_BANK_HANDLER_.getFilterList();
+	return TONE_BANK_HANDLER_.getLoadFilterList();
+}
+
+QStringList FileIo::getToneBankSaveFilter() const
+{
+	return TONE_BANK_HANDLER_.getSaveFilterList();
 }
 
 std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
