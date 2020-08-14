@@ -763,10 +763,7 @@ TonePtr MainWindow::getCurrentTone() const
 
 void MainWindow::on_actionOpen_O_triggered()
 {
-	QStringList filters {
-		"FM tone file (*.tone)",
-		"BambooTracker instrument (*.bti)"
-	};
+	QStringList filters = FileIo::getInstance().getSingleToneFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path), filters.join(";;"));
 	if (!file.isNull()) {
 		loadSingleTone(file);
@@ -810,10 +807,7 @@ bool MainWindow::saveTone()
 bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
-	QStringList filters {
-		"FM tone file (*.tone)",
-		"BambooTracker instrument (*.bti)"
-	};
+	QStringList filters = FileIo::getInstance().getSingleToneFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
 	if (file.isNull()) return false;
 	//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
@@ -944,11 +938,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 		return;
 	}
 
-	QStringList filters {
-		"FM bank file (*.bank)",
-		"BambooTracker bank (*.btb)",
-		"PMD FF (*.ff)"
-	};
+	QStringList filters = FileIo::getInstance().getToneBankFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"));
 	if (file.isNull()) return;
 
@@ -969,11 +959,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
-	QStringList filters {
-		"FM bank file (*.bank)",
-		"BambooTracker bank (*.btb)",
-		"PMD FF (*.ff)"
-	};
+	QStringList filters = FileIo::getInstance().getToneBankFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
 	if (!file.isNull()) {
 		loadToneBank(file);

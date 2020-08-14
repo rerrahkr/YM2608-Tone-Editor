@@ -1,6 +1,8 @@
 #include "original_bank_io.hpp"
 #include "file_io_error.hpp"
 
+OriginalBankIo::OriginalBankIo() : AbstractToneBankIo("bank", "FM bank file") {}
+
 std::vector<TonePtr> OriginalBankIo::load(const BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;

@@ -1,6 +1,8 @@
 #include "original_tone_io.hpp"
 #include "file_io_error.hpp"
 
+OriginalToneIo::OriginalToneIo() : AbstractSingleToneIo("tone", "FM tone file") {}
+
 Tone* OriginalToneIo::load(const BinaryContainer& container) const
 {
 	auto tone = std::make_unique<Tone>();

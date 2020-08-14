@@ -1,6 +1,8 @@
 #include "bti_io.hpp"
 #include "file_io_error.hpp"
 
+BtiIo::BtiIo() : AbstractSingleToneIo("bti", "BambooTracker instrument") {}
+
 Tone* BtiIo::load(const BinaryContainer& container) const
 {
 	auto tone = std::make_unique<Tone>();
