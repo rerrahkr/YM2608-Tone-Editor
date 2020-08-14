@@ -10,10 +10,10 @@
 enum class FmEnvelopeTextType : int
 {
 	Skip = 0, AL, FB,
-	AR1, DR1, SR1, RR1, SL1, TL1, KS1, ML1, DT1, AM1,
-	AR2, DR2, SR2, RR2, SL2, TL2, KS2, ML2, DT2, AM2,
-	AR3, DR3, SR3, RR3, SL3, TL3, KS3, ML3, DT3, AM3,
-	AR4, DR4, SR4, RR4, SL4, TL4, KS4, ML4, DT4, AM4
+	AR1, DR1, SR1, RR1, SL1, TL1, KS1, ML1, DT1, AM1, SSGEG1,
+	AR2, DR2, SR2, RR2, SL2, TL2, KS2, ML2, DT2, AM2, SSGEG2,
+	AR3, DR3, SR3, RR3, SL3, TL3, KS3, ML3, DT3, AM3, SSGEG3,
+	AR4, DR4, SR4, RR4, SL4, TL4, KS4, ML4, DT4, AM4, SSGEG4
 };
 
 using FmInEnvelopeOrders = std::vector<FmEnvelopeTextType>;

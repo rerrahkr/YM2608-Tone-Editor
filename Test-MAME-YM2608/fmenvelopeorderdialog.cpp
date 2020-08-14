@@ -95,6 +95,7 @@ QComboBox* FmEnvelopeOrderDialog::makeCombobox()
 	box->addItem("ML1", static_cast<int>(FmEnvelopeTextType::ML1));
 	box->addItem("DT1", static_cast<int>(FmEnvelopeTextType::DT1));
 	box->addItem("AM1", static_cast<int>(FmEnvelopeTextType::AM1));
+	box->addItem("SSGEG1", static_cast<int>(FmEnvelopeTextType::SSGEG1));
 	box->addItem("AR2", static_cast<int>(FmEnvelopeTextType::AR2));
 	box->addItem("DR2", static_cast<int>(FmEnvelopeTextType::DR2));
 	box->addItem("SR2", static_cast<int>(FmEnvelopeTextType::SR2));
@@ -105,6 +106,7 @@ QComboBox* FmEnvelopeOrderDialog::makeCombobox()
 	box->addItem("ML2", static_cast<int>(FmEnvelopeTextType::ML2));
 	box->addItem("DT2", static_cast<int>(FmEnvelopeTextType::DT2));
 	box->addItem("AM2", static_cast<int>(FmEnvelopeTextType::AM2));
+	box->addItem("SSGEG2", static_cast<int>(FmEnvelopeTextType::SSGEG2));
 	box->addItem("AR3", static_cast<int>(FmEnvelopeTextType::AR3));
 	box->addItem("DR3", static_cast<int>(FmEnvelopeTextType::DR3));
 	box->addItem("SR3", static_cast<int>(FmEnvelopeTextType::SR3));
@@ -115,6 +117,7 @@ QComboBox* FmEnvelopeOrderDialog::makeCombobox()
 	box->addItem("ML3", static_cast<int>(FmEnvelopeTextType::ML3));
 	box->addItem("DT3", static_cast<int>(FmEnvelopeTextType::DT3));
 	box->addItem("AM3", static_cast<int>(FmEnvelopeTextType::AM3));
+	box->addItem("SSGEG3", static_cast<int>(FmEnvelopeTextType::SSGEG3));
 	box->addItem("AR4", static_cast<int>(FmEnvelopeTextType::AR4));
 	box->addItem("DR4", static_cast<int>(FmEnvelopeTextType::DR4));
 	box->addItem("SR4", static_cast<int>(FmEnvelopeTextType::SR4));
@@ -125,6 +128,7 @@ QComboBox* FmEnvelopeOrderDialog::makeCombobox()
 	box->addItem("ML4", static_cast<int>(FmEnvelopeTextType::ML4));
 	box->addItem("DT4", static_cast<int>(FmEnvelopeTextType::DT4));
 	box->addItem("AM4", static_cast<int>(FmEnvelopeTextType::AM4));
+	box->addItem("SSGEG4", static_cast<int>(FmEnvelopeTextType::SSGEG4));
 	return box;
 }
 
