@@ -39,6 +39,7 @@ SOURCES += \
     io/file_io_error.cpp \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
+    io/wopn/opni_io.cpp \
     io/wopn/wopn_file.c \
     io/wopn/wopn_io.cpp \
     main.cpp \
@@ -79,6 +80,7 @@ HEADERS += \
     io/file_io_error.hpp \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
+    io/wopn/opni_io.hpp \
     io/wopn/wopn_file.h \
     io/wopn/wopn_io.hpp \
     mainwindow.h \
