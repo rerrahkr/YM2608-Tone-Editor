@@ -68,7 +68,7 @@ private:
 		return QFileInfo(file).suffix().toLower().toUtf8().toStdString();
 	}
 
-	static std::unique_ptr<FileIo> instance_;
+	static inline std::unique_ptr<FileIo> instance_;
 
 	template<class T>
 	class IoManagerMap

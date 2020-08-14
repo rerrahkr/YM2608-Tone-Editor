@@ -5,10 +5,11 @@
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
-- [#3], [#5] - Support 5 new format import/export (thanks [@freq-mod])
+- [#3], [#5] - Support 6 new format import/export (thanks [@freq-mod])
   - .bti/.btb (BambooTracker instrument/bank)
   - .ff (PMD FF)
   - .opni/.wopn (OPN2BankEditor imstrument/bank) (import only)
+  - .dmp (Deflemask preset)
 - [#6] - Add Nuked OPN-Mod emulation (thanks [@freq-mod])
 
 ### Changed
