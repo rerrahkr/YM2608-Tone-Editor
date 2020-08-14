@@ -12,12 +12,12 @@ std::unique_ptr<FileIo> FileIo::instance_;
 
 FileIo::FileIo()
 {
-	SINGLE_TONE_HANDLER_["tone"].reset(new OriginalToneIo);
-	SINGLE_TONE_HANDLER_["bti"].reset(new BtiIo);
+	SINGLE_TONE_HANDLER_.add(new OriginalToneIo);
+	SINGLE_TONE_HANDLER_.add(new BtiIo);
 
-	TONE_BANK_HANDLER_["bank"].reset(new OriginalBankIo);
-	TONE_BANK_HANDLER_["btb"].reset(new BtbIo);
-	TONE_BANK_HANDLER_["ff"].reset(new FfIo);
+	TONE_BANK_HANDLER_.add(new OriginalBankIo);
+	TONE_BANK_HANDLER_.add(new BtbIo);
+	TONE_BANK_HANDLER_.add(new FfIo);
 }
 
 FileIo& FileIo::getInstance()
@@ -30,17 +30,22 @@ FileIo::FileType FileIo::detectFileType(const QString& file) const
 {
 	const std::string ext = FileIo::extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.count(ext)) return FileType::SingleTone;
-	if (TONE_BANK_HANDLER_.count(ext)) return FileType::ToneBank;
+	if (SINGLE_TONE_HANDLER_.containExtension(ext)) return FileType::SingleTone;
+	if (TONE_BANK_HANDLER_.containExtension(ext)) return FileType::ToneBank;
 
 	return FileType::Unknown;
+}
+
+QStringList FileIo::getSingleToneFilter() const
+{
+	return SINGLE_TONE_HANDLER_.getFilterList();
 }
 
 Tone* FileIo::loadSingleToneFrom(const QString& file) const
 {
 	const std::string ext = FileIo::extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.count(ext)) {
+	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
 		QFile f(file);
 		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::SingleTone);
 		QByteArray array = f.readAll();
@@ -59,7 +64,7 @@ void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 {
 	const std::string ext = FileIo::extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.count(ext)) {
+	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
 		const BinaryContainer&& container = SINGLE_TONE_HANDLER_.at(ext)->save(tone);
 		QFile f(file);
 		if (!f.open(QIODevice::WriteOnly)) throw FileOutputError(FileType::SingleTone);
@@ -67,11 +72,16 @@ void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 	}
 }
 
+QStringList FileIo::getToneBankFilter() const
+{
+	return TONE_BANK_HANDLER_.getFilterList();
+}
+
 std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 {
 	const std::string ext = FileIo::extractExtention(file);
 
-	if (TONE_BANK_HANDLER_.count(ext)) {
+	if (TONE_BANK_HANDLER_.containExtension(ext)) {
 		QFile f(file);
 		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::ToneBank);
 		QByteArray array = f.readAll();
@@ -90,7 +100,7 @@ void FileIo::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& b
 {
 	const std::string ext = FileIo::extractExtention(file);
 
-	if (TONE_BANK_HANDLER_.count(ext)) {
+	if (TONE_BANK_HANDLER_.containExtension(ext)) {
 		const BinaryContainer&& container = TONE_BANK_HANDLER_.at(ext)->save(bank);
 		QFile f(file);
 		if (!f.open(QIODevice::WriteOnly)) throw FileOutputError(FileType::ToneBank);

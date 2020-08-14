@@ -3,6 +3,8 @@
 #include "file_io_error.hpp"
 #include "../text_conversion.hpp"
 
+FfIo::FfIo() : AbstractToneBankIo("ff", "PMD FF") {}
+
 std::vector<TonePtr> FfIo::load(const BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
