@@ -12,27 +12,35 @@
 class AbstractSingleToneIo
 {
 public:
-	AbstractSingleToneIo(std::string ext, std::string desc) : ext_(ext), desc_(desc) {}
-	virtual Tone* load(const BinaryContainer& container) const = 0;
-	virtual const BinaryContainer save(const Tone& tone) const = 0;
+	AbstractSingleToneIo(std::string ext, std::string desc, bool loadable, bool savable)
+		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	virtual Tone* load(const BinaryContainer& container) const;
+	virtual const BinaryContainer save(const Tone& tone) const;
 	inline std::string getExtension() const { return ext_; }
 	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
+	inline bool isLoadable() const { return loadable_; }
+	inline bool isSavable() const { return savable_; }
 
 private:
 	std::string ext_, desc_;
+	bool loadable_, savable_;
 };
 
 class AbstractToneBankIo
 {
 public:
-	AbstractToneBankIo(std::string ext, std::string desc) : ext_(ext), desc_(desc) {}
-	virtual std::vector<TonePtr> load(const BinaryContainer& container) const = 0;
-	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const = 0;
+	AbstractToneBankIo(std::string ext, std::string desc, bool loadable, bool savable)
+		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	virtual std::vector<TonePtr> load(const BinaryContainer& container) const;
+	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const;
 	inline std::string getExtension() const { return ext_; }
 	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
+	inline bool isLoadable() const { return loadable_; }
+	inline bool isSavable() const { return savable_; }
 
 private:
 	std::string ext_, desc_;
+	bool loadable_, savable_;
 };
 
 class FileIo
@@ -43,10 +51,12 @@ public:
 	static FileIo& getInstance();
 
 	FileType detectFileType(const QString& file) const;
-	QStringList getSingleToneFilter() const;
+	QStringList getSingleToneLoadFilter() const;
+	QStringList getSingleToneSaveFilter() const;
 	Tone* loadSingleToneFrom(const QString& file) const;
 	void saveSingleToneFrom(const QString& file, const Tone& tone) const;
-	QStringList getToneBankFilter() const;
+	QStringList getToneBankLoadFilter() const;
+	QStringList getToneBankSaveFilter() const;
 	std::vector<TonePtr> loadToneBankFrom(const QString& file) const;
 	void saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const;
 
@@ -67,15 +77,18 @@ private:
 		inline void add(T* handler)
 		{
 			map_[handler->getExtension()].reset(handler);
-			filters_.push_back(utf8ToQString(handler->getFilterText()));
+			QString filter = utf8ToQString(handler->getFilterText());
+			if (handler->isLoadable()) ldFilters_.push_back(filter);
+			if (handler->isSavable()) svFilters_.push_back(filter);
 		}
 		inline bool containExtension(std::string ext) const { return map_.count(ext); }
 		inline const std::unique_ptr<T>& at(std::string ext) const { return map_.at(ext); }
-		inline QStringList getFilterList() const { return filters_; }
+		inline QStringList getLoadFilterList() const { return ldFilters_; }
+		inline QStringList getSaveFilterList() const { return svFilters_; }
 
 	private:
 		std::unordered_map<std::string, std::unique_ptr<T>> map_;
-		QStringList filters_;
+		QStringList ldFilters_, svFilters_;
 	};
 
 	IoManagerMap<AbstractSingleToneIo> SINGLE_TONE_HANDLER_;

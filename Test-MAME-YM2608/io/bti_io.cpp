@@ -1,7 +1,7 @@
 #include "bti_io.hpp"
 #include "file_io_error.hpp"
 
-BtiIo::BtiIo() : AbstractSingleToneIo("bti", "BambooTracker instrument") {}
+BtiIo::BtiIo() : AbstractSingleToneIo("bti", "BambooTracker instrument", true, true) {}
 
 Tone* BtiIo::load(const BinaryContainer& container) const
 {

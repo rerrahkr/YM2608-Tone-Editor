@@ -1,7 +1,7 @@
 #include "original_tone_io.hpp"
 #include "file_io_error.hpp"
 
-OriginalToneIo::OriginalToneIo() : AbstractSingleToneIo("tone", "FM tone file") {}
+OriginalToneIo::OriginalToneIo() : AbstractSingleToneIo("tone", "FM tone file", true, true) {}
 
 Tone* OriginalToneIo::load(const BinaryContainer& container) const
 {

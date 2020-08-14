@@ -763,7 +763,7 @@ TonePtr MainWindow::getCurrentTone() const
 
 void MainWindow::on_actionOpen_O_triggered()
 {
-	QStringList filters = FileIo::getInstance().getSingleToneFilter();
+	QStringList filters = FileIo::getInstance().getSingleToneLoadFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path), filters.join(";;"));
 	if (!file.isNull()) {
 		loadSingleTone(file);
@@ -807,7 +807,7 @@ bool MainWindow::saveTone()
 bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
-	QStringList filters = FileIo::getInstance().getSingleToneFilter();
+	QStringList filters = FileIo::getInstance().getSingleToneSaveFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
 	if (file.isNull()) return false;
 	//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
@@ -938,7 +938,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 		return;
 	}
 
-	QStringList filters = FileIo::getInstance().getToneBankFilter();
+	QStringList filters = FileIo::getInstance().getToneBankSaveFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"));
 	if (file.isNull()) return;
 
@@ -959,7 +959,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
-	QStringList filters = FileIo::getInstance().getToneBankFilter();
+	QStringList filters = FileIo::getInstance().getToneBankLoadFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
 	if (!file.isNull()) {
 		loadToneBank(file);
