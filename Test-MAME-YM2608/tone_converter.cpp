@@ -157,7 +157,7 @@ ToneConverter::ToneConverter()
 		}
 	};
 
-//	loadFormats();
+	loadFormats();
 }
 
 ToneConverter::~ToneConverter()
