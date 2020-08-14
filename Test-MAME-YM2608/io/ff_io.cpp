@@ -97,7 +97,7 @@ const BinaryContainer FfIo::save(const std::vector<TonePtr>& bank) const
 		container.appendUint8((tone->FB << 3) | tone->AL);
 
 		std::string name = codec->fromUnicode(utf8ToQString(tone->name)).toStdString();
-		size_t nameLen = std::min(name.length(), 7u);
+		size_t nameLen = std::min<size_t>(name.length(), 7);
 		container.appendString(name.substr(0, nameLen));
 		for (size_t l = nameLen; l < 7; ++l) container.appendUint8(0);
 	}

@@ -35,21 +35,22 @@ To copy tone parameters text, open "Convert to text" dialog ("File" -> "Convert 
 All Macros are described as `%{param name:param format}` except tone name macro `%{NAME}`.  
 `param name` specifies parameter to replace macro.
 
-|`param name`|tone parameter|
-|-|-|
-|NO|Tone number (always 0).|
-|AL|Algorithm.|
-|FB|Feedback.|
-|ARn|Attack rate. n is operator number (1-4).|
-|DRn|Decay rate. n is operator number (1-4).|
-|SRn|Sustain rate. n is operator number (1-4).|
-|RRn|Release rate. n is operator number (1-4).|
-|SLn|Sustain level. n is operator number (1-4).|
-|TLn|Total level. n is operator number (1-4).|
-|KSn|Key scale. n is operator number (1-4).|
-|MLn|Multiple. n is operator number (1-4).|
-|DTn|Detune. n is operator number (1-4).|
-|AMn|AMS enable. n is operator number (1-4).|
+| `param name` | tone parameter                             |
+| ------------ | ------------------------------------------ |
+| NO           | Tone number (always 0).                    |
+| AL           | Algorithm.                                 |
+| FB           | Feedback.                                  |
+| ARn          | Attack rate. n is operator number (1-4).   |
+| DRn          | Decay rate. n is operator number (1-4).    |
+| SRn          | Sustain rate. n is operator number (1-4).  |
+| RRn          | Release rate. n is operator number (1-4).  |
+| SLn          | Sustain level. n is operator number (1-4). |
+| TLn          | Total level. n is operator number (1-4).   |
+| KSn          | Key scale. n is operator number (1-4).     |
+| MLn          | Multiple. n is operator number (1-4).      |
+| DTn          | Detune. n is operator number (1-4).        |
+| AMn          | AMS enable. n is operator number (1-4).    |
+| SSGEGn       | SSG-EG. n is operator number (1-4).        |
 
 `param format` specifies printing style of paramer value. There are two options for formatting value:
 * Zero flag. When you write 0 at the beginning of option, it pads 0 to the left of parameter value. When skip this flag, it pads whitespace instead of 0.

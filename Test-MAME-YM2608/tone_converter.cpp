@@ -17,17 +17,17 @@ ToneConverter::ToneConverter()
 				FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1, FmEnvelopeTextType::SR1,
 				FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1, FmEnvelopeTextType::TL1,
 				FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1, FmEnvelopeTextType::DT1,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
+				FmEnvelopeTextType::AM1, FmEnvelopeTextType::AR2, FmEnvelopeTextType::DR2,
 				FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2, FmEnvelopeTextType::SL2,
 				FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2, FmEnvelopeTextType::ML2,
-				FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3,
+				FmEnvelopeTextType::DT2, FmEnvelopeTextType::AM2, FmEnvelopeTextType::AR3,
 				FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3,
 				FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3,
-				FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3, FmEnvelopeTextType::AM3,
 				FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4, FmEnvelopeTextType::SR4,
 				FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4, FmEnvelopeTextType::TL4,
 				FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4, FmEnvelopeTextType::DT4,
-				FmEnvelopeTextType::Skip
+				FmEnvelopeTextType::AM4
 			}
 		},
 		{
@@ -54,17 +54,17 @@ ToneConverter::ToneConverter()
 				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1,
 				FmEnvelopeTextType::SR1, FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1,
 				FmEnvelopeTextType::TL1, FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1,
-				FmEnvelopeTextType::DT1, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2,
+				FmEnvelopeTextType::DT1, FmEnvelopeTextType::AM1, FmEnvelopeTextType::AR2,
 				FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2,
 				FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2,
-				FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2, FmEnvelopeTextType::AM2,
 				FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3, FmEnvelopeTextType::SR3,
 				FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3, FmEnvelopeTextType::TL3,
 				FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3, FmEnvelopeTextType::DT3,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
+				FmEnvelopeTextType::AM3, FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4,
 				FmEnvelopeTextType::SR4, FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4,
 				FmEnvelopeTextType::TL4, FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4,
-				FmEnvelopeTextType::DT4, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AL,
+				FmEnvelopeTextType::DT4, FmEnvelopeTextType::AM4, FmEnvelopeTextType::AL,
 				FmEnvelopeTextType::FB
 			}
 		},
@@ -75,18 +75,18 @@ ToneConverter::ToneConverter()
 				FmEnvelopeTextType::AR1, FmEnvelopeTextType::DR1, FmEnvelopeTextType::SR1,
 				FmEnvelopeTextType::RR1, FmEnvelopeTextType::SL1, FmEnvelopeTextType::TL1,
 				FmEnvelopeTextType::KS1, FmEnvelopeTextType::ML1, FmEnvelopeTextType::DT1,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR2,
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AM1, FmEnvelopeTextType::AR2,
 				FmEnvelopeTextType::DR2, FmEnvelopeTextType::SR2, FmEnvelopeTextType::RR2,
 				FmEnvelopeTextType::SL2, FmEnvelopeTextType::TL2, FmEnvelopeTextType::KS2,
 				FmEnvelopeTextType::ML2, FmEnvelopeTextType::DT2, FmEnvelopeTextType::Skip,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
+				FmEnvelopeTextType::AM2, FmEnvelopeTextType::AR3, FmEnvelopeTextType::DR3,
 				FmEnvelopeTextType::SR3, FmEnvelopeTextType::RR3, FmEnvelopeTextType::SL3,
 				FmEnvelopeTextType::TL3, FmEnvelopeTextType::KS3, FmEnvelopeTextType::ML3,
-				FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip,
+				FmEnvelopeTextType::DT3, FmEnvelopeTextType::Skip, FmEnvelopeTextType::AM3,
 				FmEnvelopeTextType::AR4, FmEnvelopeTextType::DR4, FmEnvelopeTextType::SR4,
 				FmEnvelopeTextType::RR4, FmEnvelopeTextType::SL4, FmEnvelopeTextType::TL4,
 				FmEnvelopeTextType::KS4, FmEnvelopeTextType::ML4, FmEnvelopeTextType::DT4,
-				FmEnvelopeTextType::Skip, FmEnvelopeTextType::Skip
+				FmEnvelopeTextType::Skip, FmEnvelopeTextType::AM4
 			}
 		},
 		{
@@ -157,7 +157,7 @@ ToneConverter::ToneConverter()
 		}
 	};
 
-	loadFormats();
+//	loadFormats();
 }
 
 ToneConverter::~ToneConverter()
@@ -232,6 +232,7 @@ QString ToneConverter::toneToText(const Tone& tone, const QString& type) const
 		out = replaceMacroWithData(out, R"(%\{ML)" + num + R"((:\d+)?\})", op.ML);
 		out = replaceMacroWithData(out, R"(%\{DT)" + num + R"((:\d+)?\})", op.DT);
 		out = replaceMacroWithData(out, R"(%\{AM)" + num + R"((:\d+)?\})", op.AM);
+		out = replaceMacroWithData(out, R"(%\{SSGEG)" + num + R"((:\d+)?\})", op.SSGEG);
 	}
 
 	return utf8ToQString(out);
@@ -329,7 +330,7 @@ Tone* ToneConverter::textToTone(const QString& text, const QString& type) const
 			break;
 		default:
 		{
-			int o = (static_cast<int>(order[i]) - 3) / 10;
+			int o = (static_cast<int>(order[i]) - 3) / 11;
 			switch (order[i]) {
 			case FmEnvelopeTextType::AR1:
 			case FmEnvelopeTextType::AR2:
@@ -399,6 +400,13 @@ Tone* ToneConverter::textToTone(const QString& text, const QString& type) const
 			case FmEnvelopeTextType::AM3:
 			case FmEnvelopeTextType::AM4:
 				if (v < 2) tone->op[o].AM = v;
+				else return nullptr;
+				break;
+			case FmEnvelopeTextType::SSGEG1:
+			case FmEnvelopeTextType::SSGEG2:
+			case FmEnvelopeTextType::SSGEG3:
+			case FmEnvelopeTextType::SSGEG4:
+				if (v < 16) tone->op[o].SSGEG = v;
 				else return nullptr;
 				break;
 			default:
