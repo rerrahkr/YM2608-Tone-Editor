@@ -2,10 +2,10 @@
 
 #include "file_io.hpp"
 
-class DmpIo final : public AbstractSingleToneIo
+class TfiIo final : public AbstractSingleToneIo
 {
 public:
-	DmpIo();
+	TfiIo();
 	Tone* load(const BinaryContainer& container) const override;
 	const BinaryContainer save(const Tone& tone) const override;
 };

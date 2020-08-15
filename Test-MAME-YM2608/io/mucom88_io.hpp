@@ -2,7 +2,7 @@
 
 #include "file_io.hpp"
 
-class Mucom88Io : public AbstractToneBankIo
+class Mucom88Io final : public AbstractToneBankIo
 {
 public:
 	Mucom88Io();
