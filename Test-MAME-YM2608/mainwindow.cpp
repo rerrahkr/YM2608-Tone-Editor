@@ -965,3 +965,12 @@ void MainWindow::on_actionO_pen_Bank_triggered()
 		loadToneBank(file);
 	}
 }
+
+void MainWindow::on_lineEdit_textChanged(const QString &arg1)
+{
+	for (int row = 0; row < ui->listWidget->count(); ++row) {
+		QListWidgetItem* item = ui->listWidget->item(row);
+		bool accept = arg1.isEmpty() || item->text().contains(arg1, Qt::CaseInsensitive);
+		item->setHidden(!accept);
+	}
+}
