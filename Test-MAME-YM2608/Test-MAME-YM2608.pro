@@ -46,6 +46,7 @@ SOURCES += \
     io/wopn/opni_io.cpp \
     io/wopn/wopn_file.c \
     io/wopn/wopn_io.cpp \
+    io/y12_io.cpp \
     main.cpp \
     mainwindow.cpp \
     chips/opna.cpp \
@@ -92,6 +93,7 @@ HEADERS += \
     io/wopn/opni_io.hpp \
     io/wopn/wopn_file.h \
     io/wopn/wopn_io.hpp \
+    io/y12_io.hpp \
     mainwindow.h \
     chips/mame/2608intf.h \
     chips/mame/emu2149.h \
