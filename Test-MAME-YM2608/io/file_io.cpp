@@ -10,6 +10,7 @@
 #include "wopn/wopn_io.hpp"
 #include "wopn/opni_io.hpp"
 #include "dmp_io.hpp"
+#include "mucom88_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -46,6 +47,7 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new BtbIo);
 	TONE_BANK_HANDLER_.add(new FfIo);
 	TONE_BANK_HANDLER_.add(new WopnIo);
+	TONE_BANK_HANDLER_.add(new Mucom88Io);
 }
 
 FileIo& FileIo::getInstance()
