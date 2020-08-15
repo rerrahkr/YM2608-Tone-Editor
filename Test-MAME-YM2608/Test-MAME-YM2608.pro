@@ -38,6 +38,7 @@ SOURCES += \
     io/ff_io.cpp \
     io/file_io.cpp \
     io/file_io_error.cpp \
+    io/mucom88_io.cpp \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
     io/wopn/opni_io.cpp \
@@ -81,6 +82,7 @@ HEADERS += \
     io/file_io.hpp \
     io/file_io_error.hpp \
     io/io_helper.hpp \
+    io/mucom88_io.hpp \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
     io/wopn/opni_io.hpp \
