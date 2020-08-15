@@ -5,12 +5,13 @@
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
-- [#3], [#5] - Support 6 new format import/export (thanks [@freq-mod])
+- [#3], [#5], [#7] - Support 6 new format import/export (thanks [@freq-mod])
   - .bti/.btb (BambooTracker instrument/bank)
   - .ff (PMD FF)
   - .opni/.wopn (OPN2BankEditor imstrument/bank) (import only)
   - .dmp (Deflemask preset)
 - [#6] - Add Nuked OPN-Mod emulation (thanks [@freq-mod])
+- [#8] - Tone search box (thanks [@freq-mod])
 
 ### Changed
 - [#2] - Changed the maximum audio rate from 110933Hz to 55466Hz (thanks [@freq-mod])
@@ -31,6 +32,8 @@
 [#4]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/4
 [#5]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/5
 [#6]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/6
+[#7]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/7
+[#8]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/8
 
 ## v0.2.0 (2018/09/03)
 ### Added

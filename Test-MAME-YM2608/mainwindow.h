@@ -141,6 +141,7 @@ private slots:
 	void on_listWidget_currentRowChanged(int currentRow);
 	void on_actionSave_Bank_As_triggered();
 	void on_actionO_pen_Bank_triggered();
+	void on_lineEdit_textChanged(const QString &arg1);
 
 private:
 	bool saveTone();
