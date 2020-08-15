@@ -12,6 +12,7 @@
 #include "dmp_io.hpp"
 #include "mucom88_io.hpp"
 #include "tfi_io.hpp"
+#include "vgi_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -44,6 +45,7 @@ FileIo::FileIo()
 	SINGLE_TONE_HANDLER_.add(new DmpIo);
 	SINGLE_TONE_HANDLER_.add(new OpniIo);
 	SINGLE_TONE_HANDLER_.add(new TfiIo);
+	SINGLE_TONE_HANDLER_.add(new VgiIo);
 
 	TONE_BANK_HANDLER_.add(new OriginalBankIo);
 	TONE_BANK_HANDLER_.add(new BtbIo);

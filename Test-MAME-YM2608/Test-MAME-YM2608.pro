@@ -42,6 +42,7 @@ SOURCES += \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
     io/tfi_io.cpp \
+    io/vgi_io.cpp \
     io/wopn/opni_io.cpp \
     io/wopn/wopn_file.c \
     io/wopn/wopn_io.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
     io/tfi_io.hpp \
+    io/vgi_io.hpp \
     io/wopn/opni_io.hpp \
     io/wopn/wopn_file.h \
     io/wopn/wopn_io.hpp \
