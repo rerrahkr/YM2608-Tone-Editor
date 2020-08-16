@@ -14,6 +14,7 @@
 #include "tfi_io.hpp"
 #include "vgi_io.hpp"
 #include "y12_io.hpp"
+#include "ins_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -48,6 +49,7 @@ FileIo::FileIo()
 	SINGLE_TONE_HANDLER_.add(new TfiIo);
 	SINGLE_TONE_HANDLER_.add(new VgiIo);
 	SINGLE_TONE_HANDLER_.add(new Y12Io);
+	SINGLE_TONE_HANDLER_.add(new InsIo);
 
 	TONE_BANK_HANDLER_.add(new OriginalBankIo);
 	TONE_BANK_HANDLER_.add(new BtbIo);
