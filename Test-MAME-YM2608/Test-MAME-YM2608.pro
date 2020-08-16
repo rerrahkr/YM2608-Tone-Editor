@@ -93,6 +93,7 @@ HEADERS += \
     io/tfi_io.hpp \
     io/vgi_io.hpp \
     io/wopn/opni_io.hpp \
+    io/wopn/wopn_common.hpp \
     io/wopn/wopn_file.h \
     io/wopn/wopn_io.hpp \
     io/y12_io.hpp \

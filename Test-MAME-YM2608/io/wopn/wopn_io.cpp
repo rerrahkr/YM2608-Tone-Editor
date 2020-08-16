@@ -1,6 +1,9 @@
 #include "wopn_io.hpp"
+#include <algorithm>
+#include <cmath>
 #include "wopn_file.h"
 #include "../file_io_error.hpp"
+#include "wopn_common.hpp"
 
 struct InstEntry
 {
@@ -14,15 +17,15 @@ struct InstEntry
 	} vals;
 };
 
-WopnIo::WopnIo() : AbstractToneBankIo("wopn", "OPN2BankEditor bank", true, false) {}
+struct WOPNDeleter {
+	void operator()(WOPNFile *x) { WOPN_Free(x); }
+};
+
+WopnIo::WopnIo() : AbstractToneBankIo("wopn", "OPN2BankEditor bank", true, true) {}
 
 std::vector<TonePtr> WopnIo::load(const BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
-
-	struct WOPNDeleter {
-		void operator()(WOPNFile *x) { WOPN_Free(x); }
-	};
 
 	std::unique_ptr<WOPNFile, WOPNDeleter> wopn;
 	wopn.reset(WOPN_LoadBankFromMem(const_cast<char*>(container.getPointer()), container.size(), nullptr));
@@ -48,29 +51,47 @@ std::vector<TonePtr> WopnIo::load(const BinaryContainer& container) const
 		ent.inst = &wbank.ins[ent.vals.nth];
 		if ((ent.inst->inst_flags & WOPN_Ins_IsBlank) == 0) {
 			TonePtr tone(new Tone);
-			tone->name = ent.inst->inst_name;
-			tone->AL = ent.inst->fbalg & 7;
-			tone->FB = (ent.inst->fbalg >> 3) & 7;
-
-			const int refOffs[] = { 0, 2, 1, 3 };
-			for (size_t o = 0; o < 4; ++o) {
-				Operator& op = tone->op[o];
-				const WOPNOperator* refOp = ent.inst->operators + refOffs[o];
-				op.ML = refOp->dtfm_30 & 15;
-				op.DT = (refOp->dtfm_30 >> 4) & 7;
-				op.TL = refOp->level_40;
-				op.KS = refOp->rsatk_50 >> 6;
-				op.AR = refOp->rsatk_50 & 31;
-				op.DR = refOp->amdecay1_60 & 31;
-				op.SR = refOp->decay2_70 & 31;
-				op.RR = refOp->susrel_80 & 15;
-				op.SL = refOp->susrel_80 >> 4;
-				op.SSGEG = refOp->ssgeg_90;
-				op.AM = refOp->amdecay1_60 >> 7;
-			}
+			setWOPNInstrumentToTone(*ent.inst, tone.get());
 			bank.push_back(std::move(tone));
 		}
 	}
 
 	return bank;
+}
+
+const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
+{
+	const size_t maxNBank = 128;
+	uint16_t nBank = std::ceil(bank.size() / maxNBank);
+	BinaryContainer container(std::vector<char>(18 + (34 + 69 * maxNBank) * (nBank + 1)));
+
+	std::unique_ptr<WOPNFile, WOPNDeleter> wopn(new WOPNFile);
+	wopn->version = 2;
+	wopn->banks_count_melodic = nBank;
+	wopn->banks_count_percussion = 1;
+	wopn->lfo_freq = 0;
+	wopn->chip_type = WOPN_Chip_OPNA;
+
+	wopn->banks_melodic = new WOPNBank[nBank];
+	for (size_t o = 0; o < nBank; ++o) {
+		WOPNBank& wbank = wopn->banks_melodic[o];
+		wbank.bank_name[0] = '\0';
+		wbank.bank_midi_msb = o >> 7;
+		wbank.bank_midi_lsb = o & 127;
+		size_t max = std::min<size_t>(bank.size() - maxNBank * o, maxNBank);
+		for (size_t i = 0; i < max; ++i) {
+			setToneToWOPNInstrument(*bank.at(nBank * o + i), wbank.ins[i]);
+		}
+	}
+
+	wopn->banks_percussive = new WOPNBank[1];
+	wopn->banks_percussive[0].bank_name[0] = '\0';
+	wopn->banks_percussive[0].bank_midi_lsb = 0;
+	wopn->banks_percussive[0].bank_midi_msb = 127;
+
+	if (WOPN_SaveBankToMem(wopn.get(), const_cast<char*>(container.getPointer()),
+						   static_cast<size_t>(container.size()), 2, 0) != 0)
+		throw FileOutputError(FileIo::FileType::ToneBank);
+
+	return container;
 }

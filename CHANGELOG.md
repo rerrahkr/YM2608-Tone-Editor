@@ -8,7 +8,7 @@
 - [#3], [#5], [#7] - Support 11 new format import/export (thanks [@freq-mod])
   - .bti/.btb (BambooTracker instrument/bank)
   - .ff (PMD FF)
-  - .opni/.wopn (OPN2BankEditor imstrument/bank) (import only)
+  - .opni/.wopn (OPN2BankEditor imstrument/bank)
   - .dmp (Deflemask preset)
   - .dat (MUCOM88 voice data)
   - .tfi (TFM Music Maker instrument)
