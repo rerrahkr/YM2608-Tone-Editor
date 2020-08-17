@@ -62,7 +62,7 @@ std::vector<TonePtr> WopnIo::load(const BinaryContainer& container) const
 const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 {
 	const size_t maxNBank = 128;
-	uint16_t nBank = std::ceil(bank.size() / maxNBank);
+	uint16_t nBank = std::ceil(static_cast<double>(bank.size()) / maxNBank);
 	BinaryContainer container(std::vector<char>(18 + (34 + 69 * maxNBank) * (nBank + 1)));
 
 	std::unique_ptr<WOPNFile, WOPNDeleter> wopn(new WOPNFile);
@@ -80,7 +80,7 @@ const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 		wbank.bank_midi_lsb = o & 127;
 		size_t max = std::min<size_t>(bank.size() - maxNBank * o, maxNBank);
 		for (size_t i = 0; i < max; ++i) {
-			setToneToWOPNInstrument(*bank.at(nBank * o + i), wbank.ins[i]);
+			setToneToWOPNInstrument(*bank.at(maxNBank * o + i), wbank.ins[i]);
 		}
 	}
 
