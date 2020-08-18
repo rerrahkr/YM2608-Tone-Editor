@@ -43,8 +43,8 @@ std::vector<TonePtr> WopnIo::load(const BinaryContainer& container) const
 		InstEntry ent;
 		ent.vals.percussive = (i / 128) >= numM;
 		WOPNBank& wbank = ent.vals.percussive
-						 ? wopn->banks_percussive[(i / 128) - numM]
-						 : wopn->banks_melodic[i / 128];
+						  ? wopn->banks_percussive[(i / 128) - numM]
+						  : wopn->banks_melodic[i / 128];
 		//ent.vals.msb = bank.bank_midi_msb;
 		//ent.vals.lsb = bank.bank_midi_lsb;
 		ent.vals.nth = i % 128;
@@ -65,17 +65,13 @@ const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 	uint16_t nBank = std::ceil(static_cast<double>(bank.size()) / maxNBank);
 	BinaryContainer container(std::vector<char>(18 + (34 + 69 * maxNBank) * (nBank + 1)));
 
-	std::unique_ptr<WOPNFile, WOPNDeleter> wopn(new WOPNFile);
+	std::unique_ptr<WOPNFile, WOPNDeleter> wopn(WOPN_Init(nBank, 0));
 	wopn->version = 2;
-	wopn->banks_count_melodic = nBank;
-	wopn->banks_count_percussion = 1;
 	wopn->lfo_freq = 0;
 	wopn->chip_type = WOPN_Chip_OPNA;
 
-	wopn->banks_melodic = new WOPNBank[nBank];
 	for (size_t o = 0; o < nBank; ++o) {
 		WOPNBank& wbank = wopn->banks_melodic[o];
-		wbank.bank_name[0] = '\0';
 		wbank.bank_midi_msb = o >> 7;
 		wbank.bank_midi_lsb = o & 127;
 		size_t max = std::min<size_t>(bank.size() - maxNBank * o, maxNBank);
@@ -83,11 +79,6 @@ const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 			setToneToWOPNInstrument(*bank.at(maxNBank * o + i), wbank.ins[i]);
 		}
 	}
-
-	wopn->banks_percussive = new WOPNBank[1];
-	wopn->banks_percussive[0].bank_name[0] = '\0';
-	wopn->banks_percussive[0].bank_midi_lsb = 0;
-	wopn->banks_percussive[0].bank_midi_msb = 127;
 
 	if (WOPN_SaveBankToMem(wopn.get(), const_cast<char*>(container.getPointer()),
 						   static_cast<size_t>(container.size()), 2, 0) != 0)
