@@ -15,6 +15,7 @@
 #include "vgi_io.hpp"
 #include "y12_io.hpp"
 #include "ins_io.hpp"
+#include "bnk_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -28,7 +29,7 @@ const BinaryContainer AbstractSingleToneIo::save(const Tone& tone) const
 	throw FileUnsupportedError(FileIo::FileType::SingleTone);
 }
 
-std::vector<TonePtr> AbstractToneBankIo::load(const BinaryContainer& container) const
+std::vector<TonePtr> AbstractToneBankIo::load(BinaryContainer& container) const
 {
 	(void)container;
 	throw FileUnsupportedError(FileIo::FileType::ToneBank);
@@ -56,6 +57,7 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new FfIo);
 	TONE_BANK_HANDLER_.add(new WopnIo);
 	TONE_BANK_HANDLER_.add(new Mucom88Io);
+	TONE_BANK_HANDLER_.add(new BnkIo);
 }
 
 FileIo& FileIo::getInstance()

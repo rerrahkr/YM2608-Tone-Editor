@@ -3,7 +3,7 @@
 
 OriginalBankIo::OriginalBankIo() : AbstractToneBankIo("bank", "FM bank file", true, true) {}
 
-std::vector<TonePtr> OriginalBankIo::load(const BinaryContainer& container) const
+std::vector<TonePtr> OriginalBankIo::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 

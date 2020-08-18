@@ -5,7 +5,7 @@
 
 FfIo::FfIo() : AbstractToneBankIo("ff", "PMD FF", true, true) {}
 
-std::vector<TonePtr> FfIo::load(const BinaryContainer& container) const
+std::vector<TonePtr> FfIo::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 

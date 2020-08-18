@@ -5,16 +5,17 @@
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
-- [#3], [#5], [#7] - Support 11 new format import/export (thanks [@freq-mod])
+- [#3], [#5], [#7] - Support 12 new format import/export (thanks [@freq-mod])
+  - .bnk (GEMS bank) (import only)
   - .bti/.btb (BambooTracker instrument/bank)
-  - .ff (PMD FF)
-  - .opni/.wopn (OPN2BankEditor imstrument/bank)
-  - .dmp (Deflemask preset)
   - .dat (MUCOM88 voice data)
+  - .dmp (Deflemask preset)
+  - .ff (PMD FF)
+  - .ins (MVSTracker instrument)
+  - .opni/.wopn (OPN2BankEditor imstrument/bank)
   - .tfi (TFM Music Maker instrument)
   - .vgi (VGM Music Maker instrument)
   - .y12 (Gens KMod dump) (import only)
-  - .ins (MVSTracker instrument)
 - [#6] - Add Nuked OPN-Mod emulation (thanks [@freq-mod])
 - [#8] - Tone search box (thanks [@freq-mod])
 

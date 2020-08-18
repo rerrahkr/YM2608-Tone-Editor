@@ -5,7 +5,7 @@
 
 Mucom88Io::Mucom88Io() : AbstractToneBankIo("dat", "MUCOM88 voice data", true, true) {}
 
-std::vector<TonePtr> Mucom88Io::load(const BinaryContainer& container) const
+std::vector<TonePtr> Mucom88Io::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 
