@@ -23,7 +23,7 @@ struct WOPNDeleter {
 
 WopnIo::WopnIo() : AbstractToneBankIo("wopn", "OPN2BankEditor bank", true, true) {}
 
-std::vector<TonePtr> WopnIo::load(const BinaryContainer& container) const
+std::vector<TonePtr> WopnIo::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 

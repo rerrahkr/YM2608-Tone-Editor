@@ -31,7 +31,7 @@ class AbstractToneBankIo
 public:
 	AbstractToneBankIo(std::string ext, std::string desc, bool loadable, bool savable)
 		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
-	virtual std::vector<TonePtr> load(const BinaryContainer& container) const;
+	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
 	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const;
 	inline std::string getExtension() const { return ext_; }
 	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }

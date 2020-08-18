@@ -4,7 +4,7 @@
 
 BtbIo::BtbIo() : AbstractToneBankIo("btb", "BambooTracker bank", true, true) {}
 
-std::vector<TonePtr> BtbIo::load(const BinaryContainer& container) const
+std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 
