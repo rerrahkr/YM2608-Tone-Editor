@@ -37,9 +37,8 @@ inline void setToneToWOPNInstrument(const Tone& tone, WOPNInstrument& inst)
 	inst.note_offset = 0;
 	inst.percussion_key_number = 0;
 	inst.lfosens = 0;
-	inst.inst_flags = 0;
-	inst.delay_on_ms = 0;
-	inst.delay_off_ms = 0;
+	inst.delay_on_ms = 1;	// TODO: calculate
+	inst.delay_off_ms = 1;	// TODO: calculate
 
 	const int refOffs[] = { 0, 2, 1, 3 };
 	for (size_t o = 0; o < 4; ++o) {
