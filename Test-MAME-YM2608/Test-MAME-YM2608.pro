@@ -39,6 +39,7 @@ SOURCES += \
     io/ff_io.cpp \
     io/file_io.cpp \
     io/file_io_error.cpp \
+    io/gyb_io.cpp \
     io/ins_io.cpp \
     io/mucom88_io.cpp \
     io/original_bank_io.cpp \
@@ -87,6 +88,7 @@ HEADERS += \
     io/ff_io.hpp \
     io/file_io.hpp \
     io/file_io_error.hpp \
+    io/gyb_io.hpp \
     io/ins_io.hpp \
     io/io_helper.hpp \
     io/mucom88_io.hpp \

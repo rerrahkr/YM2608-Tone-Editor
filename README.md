@@ -26,6 +26,24 @@ Z X CV B N M, . /
 F1, F2 is octave up/down, and F3 toggles FM/PSG.  
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
+### Import/Export to file
+YM2608 Tone Editor supports importing/exporting a tone and a bank.
+
+- .tone/.bank (Default FM tone/bank format)
+- .bnk (GEMS bank) (import only)
+- .bti/.btb (BambooTracker instrument/bank)
+- .dat (MUCOM88 voice data)
+- .dmp (Deflemask preset)
+- .ff (PMD bank)
+- .gyb (GYB bank) (import only)
+- .ins (MVSTracker instrument)
+- .opni/.wopn (OPN2BankEditor imstrument/bank)
+- .tfi (TFM Music Maker instrument)
+- .vgi (VGM Music Maker instrument)
+- .y12 (Gens KMod dump) (import only)
+
+To export tones as a bank, you need to select them in the tone list which you want to do.
+
 ### Convert to text
 It enables to convert tone data to text formatted by "Setup" -> "Output". It is a text file containing some parameter macros.  
 This app parses it and replaces macros with tone parameters. It means that you can customize text output by editing format.  

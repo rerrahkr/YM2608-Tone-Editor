@@ -16,6 +16,7 @@
 #include "y12_io.hpp"
 #include "ins_io.hpp"
 #include "bnk_io.hpp"
+#include "gyb_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -58,6 +59,7 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new WopnIo);
 	TONE_BANK_HANDLER_.add(new Mucom88Io);
 	TONE_BANK_HANDLER_.add(new BnkIo);
+	TONE_BANK_HANDLER_.add(new GybIo);
 }
 
 FileIo& FileIo::getInstance()
