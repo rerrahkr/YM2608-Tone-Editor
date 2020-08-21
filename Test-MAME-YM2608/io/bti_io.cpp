@@ -24,7 +24,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 	instCsr += 4;
 	std::string name = u8"";
 	if (nameLen > 0) {
-		name = container.readString(instCsr, nameLen);
+		tone->name = container.readString(instCsr, nameLen);
 		instCsr += nameLen;
 	}
 	if (container.readUint8(instCsr++) != 0x00)	// Not FM
@@ -42,7 +42,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 		while (instPropCsr < globCsr) {
 			uint8_t secId = container.readUint8(instPropCsr++);
 			if (secId == 0x00) {
-				/*uint8_t ofs = container.readUint8(instPropCsr);*/
+				uint8_t ofs = container.readUint8(instPropCsr);
 				size_t csr = instPropCsr + 1;
 				uint8_t tmp = container.readUint8(csr++);
 				tone->AL = tmp >> 4;
@@ -67,10 +67,21 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 					op.ML = tmp & 0x0f;
 					op.SSGEG = (tmp >> 4) ^ 0x08;
 				}
-				break;
+				instPropCsr += ofs;
 			}
 			else if (secId == 0x01) {	// FM LFO
 				uint8_t ofs = container.readUint8(instPropCsr);
+				size_t csr = instPropCsr + 1;
+				uint8_t tmp = container.readUint8(csr++);
+				tone->FREQ_LFO = (tmp >> 4) | 8;
+				tone->PMS_LFO = tmp & 7;
+				tmp = container.readUint8(csr++);
+				tone->AMS_LFO = tmp & 3;
+				if (tmp & 0x10) tone->op[0].AM = 1;
+				if (tmp & 0x20) tone->op[1].AM = 1;
+				if (tmp & 0x40) tone->op[2].AM = 1;
+				if (tmp & 0x80) tone->op[3].AM = 1;
+				// Skip LFO wait count
 				instPropCsr += ofs;
 			}
 			else if (secId == 0x40) {	// ADPCM sample
@@ -121,8 +132,7 @@ const BinaryContainer BtiIo::save(const Tone& tone) const
 	// FM envelope
 	{
 		container.appendUint8(0x00);
-		size_t ofs = container.size();
-		container.appendUint8(0);	// Dummy offset
+		container.appendUint8(26);
 		container.appendUint8(tone.AL << 4 | tone.FB);
 		// Operators
 		for (size_t o = 0; o < 4; ++o) {
@@ -134,7 +144,17 @@ const BinaryContainer BtiIo::save(const Tone& tone) const
 			container.appendUint8(op.TL);
 			container.appendUint8(((op.SSGEG ^ 8) << 4)| op.ML);
 		}
-		container.writeUint8(ofs, static_cast<uint8_t>(container.size() - ofs));
+	}
+
+	// FM LFO
+	if (tone.FREQ_LFO & 8) {
+		container.appendUint8(0x01);
+		container.appendUint8(4);
+		container.appendUint8(((tone.FREQ_LFO & 7) << 4) | tone.PMS_LFO);
+		uint8_t am = 0;
+		for (size_t i = 0; i < 4; i++) if (tone.op[i].AM) am |= (0x10 << i);
+		container.appendUint8(am | tone.AMS_LFO);
+		container.appendUint8(0);
 	}
 
 	container.writeUint32(instPropOfs, container.size() - instPropOfs);

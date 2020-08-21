@@ -27,6 +27,8 @@ inline void setWOPNInstrumentToTone(const WOPNInstrument& inst, Tone* tone)
 		op.SSGEG = refOp->ssgeg_90;
 		op.AM = refOp->amdecay1_60 >> 7;
 	}
+	tone->PMS_LFO = inst.lfosens & 7;
+	tone->AMS_LFO = (inst.lfosens >> 4) & 3;
 }
 
 inline void setToneToWOPNInstrument(const Tone& tone, WOPNInstrument& inst)
@@ -36,7 +38,7 @@ inline void setToneToWOPNInstrument(const Tone& tone, WOPNInstrument& inst)
 	inst.inst_name[nameLen] = '\0';
 	inst.note_offset = 0;
 	inst.percussion_key_number = 0;
-	inst.lfosens = 0;
+	inst.lfosens = (tone.AMS_LFO << 4) | tone.PMS_LFO;
 	inst.delay_on_ms = 1;	// TODO: calculate
 	inst.delay_off_ms = 1;	// TODO: calculate
 

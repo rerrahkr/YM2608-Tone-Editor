@@ -30,10 +30,11 @@ Tone* DmpIo::load(const BinaryContainer& container) const
 		throw  FileUnsupportedError(FileIo::FileType::SingleTone);
 
 	if (fileVersion == 9) csr++; // skip version 9's total operators field
-	csr++;	// Skip PMS
+	tone->PMS_LFO = container.readUint8(csr++);
 	tone->FB = container.readUint8(csr++);
 	tone->AL = container.readUint8(csr++);
-	csr++;	// Skip AMS
+	tone->AMS_LFO = container.readUint8(csr++);
+	if (tone->PMS_LFO && tone->AMS_LFO) tone->FREQ_LFO = 8;
 
 	Operator* ops[] = { tone->op, tone->op + 2, tone->op + 1, tone->op + 3 };
 	for (Operator* op : ops) {
@@ -61,10 +62,10 @@ const BinaryContainer DmpIo::save(const Tone& tone) const
 	container.appendUint8(2);	// System: genesis
 	container.appendUint8(1);	// FM
 
-	container.appendUint8(0);	// PMS
+	container.appendUint8(tone.PMS_LFO);
 	container.appendUint8(tone.FB);
 	container.appendUint8(tone.AL);
-	container.appendUint8(0);	// AMS
+	container.appendUint8(tone.AMS_LFO);
 	for (const size_t o : { 0, 2, 1, 3}) {
 		const Operator& op = tone.op[o];
 		container.appendUint8(op.ML);

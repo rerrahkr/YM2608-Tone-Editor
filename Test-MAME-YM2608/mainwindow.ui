@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>600</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -118,6 +118,45 @@
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QGroupBox" name="lfoGroupBox">
+        <property name="title">
+         <string>LFO</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="LabeledHSlider" name="freqSlider" native="true"/>
+         </item>
+         <item>
+          <widget class="LabeledHSlider" name="pmsSlider" native="true"/>
+         </item>
+         <item>
+          <widget class="LabeledHSlider" name="amsSlider" native="true"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -278,6 +317,7 @@
   <tabstop>listWidget</tabstop>
   <tabstop>newTonePushButton</tabstop>
   <tabstop>removeTonePushButton</tabstop>
+  <tabstop>lfoGroupBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

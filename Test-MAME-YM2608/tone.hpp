@@ -22,6 +22,9 @@ struct Operator {
 struct Tone {
 	std::string name = "name";
 	std::string path = "./";
+	uint8_t FREQ_LFO = 0;
+	uint8_t PMS_LFO = 0;
+	uint8_t AMS_LFO = 0;
 	uint8_t AL = 4;
 	uint8_t FB = 0;
 	Operator op[4] = {

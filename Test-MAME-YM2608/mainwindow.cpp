@@ -80,12 +80,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->statusBar->showMessage(pressedKeyNameFM_ + " | " + pressedKeyNamePSG_);
 
+	ui->freqSlider->setText("FREQ.: ");
+	ui->pmsSlider->setText("PMS: ");
+	ui->amsSlider->setText("AMS: ");
 	ui->alSlider->setText("AL: ");
 	ui->fbSlider->setText("FB: ");
 
+	ui->freqSlider->setMaximum(7);
+	ui->pmsSlider->setMaximum(7);
+	ui->amsSlider->setMaximum(3);
 	ui->alSlider->setMaximum(7);
 	ui->fbSlider->setMaximum(7);
 
+	connect(ui->freqSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onFreqChanged);
+	connect(ui->pmsSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onPMSChanged);
+	connect(ui->amsSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onAMSChanged);
 	connect(ui->alSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onALChanged);
 	connect(ui->fbSlider, &LabeledHSlider::valueChanged, this, &MainWindow::onFBChanged);
 	connect(ui->op1Sliders, &OperatorSliders::parameterChanged, this, &MainWindow::onParameterChanged);
@@ -107,7 +116,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	chip_.setRegister(0x29, 0x80);	// Init interrupt
 	chip_.setRegister(0x07, 0xff);  // PSG mix
 	chip_.setRegister(0x11, 0x3f);  // Drum total volume
-	InitPan();
 
 	addToneTo(0);
 	setWindowModified(false);
@@ -226,7 +234,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 		chip_.setRegister(0x29, 0x80);	// Init interrupt
 		chip_.setRegister(0x07, 0xff);  // PSG mix
 		chip_.setRegister(0x11, 0x3f);  // Drum total volume
-		InitPan();
 		for (int i = 1; i <= 6; ++i) {
 			SetFMTone(i);
 		}
@@ -477,6 +484,11 @@ void MainWindow::SetFMTone(int channel)
 		data = tone->op[i].SSGEG;
 		chip_.setRegister(0x90 + bch + offset, data);
 	}
+
+	data = tone->FREQ_LFO;
+	chip_.setRegister(0x22, data);
+	data = 0xc0 | (tone->AMS_LFO << 4) | tone->PMS_LFO;
+	chip_.setRegister(0xb4 + bch, data);
 }
 
 void MainWindow::SetFMKeyOn(int channel)
@@ -567,13 +579,6 @@ void MainWindow::SetPSGKey(int channel, int octave, int keynum)
 	chip_.setRegister(0x01 + offset, data >> 8);
 }
 
-void MainWindow::InitPan()
-{
-	chip_.setRegister(0xb4, 0xc0);
-	chip_.setRegister(0xb5, 0xc0);
-	chip_.setRegister(0xb6, 0xc0);
-}
-
 QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 {
 	return NOTE_NAME_TBL_[jamKeyNumber % 12];
@@ -582,6 +587,54 @@ QString MainWindow::keyNumberToNameString(int jamKeyNumber)
 QString MainWindow::modifyDisplayedToneName(const QString& src) const
 {
 	return nameFontMet_->elidedText(src, Qt::ElideRight, ui->nameLabel->width());
+}
+
+void MainWindow::on_lfoGroupBox_clicked(bool checked)
+{
+	auto tone = getCurrentTone();
+	tone->FREQ_LFO = (checked ? 8 : 0) | ui->freqSlider->value();
+	chip_.setRegister(0x22, tone->FREQ_LFO);
+
+	setWindowModified(true);
+}
+
+void MainWindow::onFreqChanged(int value)
+{
+	auto tone = getCurrentTone();
+	tone->FREQ_LFO = (ui->lfoGroupBox->isChecked() ? 8 : 0) | value;
+	chip_.setRegister(0x22, tone->FREQ_LFO);
+
+	setWindowModified(true);
+}
+
+void MainWindow::onPMSChanged(int value)
+{
+	auto tone = getCurrentTone();
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			uint32_t chOffset = 0x100 * i + j;
+			tone->PMS_LFO = value;
+			uint8_t reg = 0xc0 | (tone->AMS_LFO << 4) | value;
+			chip_.setRegister(0xb4 + chOffset, reg);
+		}
+	}
+
+	setWindowModified(true);
+}
+
+void MainWindow::onAMSChanged(int value)
+{
+	auto tone = getCurrentTone();
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < 3; ++j) {
+			uint32_t chOffset = 0x100 * i + j;
+			tone->AMS_LFO = value;
+			uint8_t reg = 0xc0 | (value << 4) | tone->PMS_LFO;
+			chip_.setRegister(0xb4 + chOffset, reg);
+		}
+	}
+
+	setWindowModified(true);
 }
 
 void MainWindow::onALChanged(int value)
@@ -906,8 +959,12 @@ void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 	Q_UNUSED(currentRow)
 	auto tone = getCurrentTone();
 	ui->nameLabel->setText(modifyDisplayedToneName(utf8ToQString(tone->name)));
-	QSignalBlocker bal(ui->alSlider);
-	QSignalBlocker bfb(ui->fbSlider);
+	QSignalBlocker blfo(ui->lfoGroupBox), bfreq(ui->freqSlider), bpms(ui->pmsSlider);
+	QSignalBlocker bams(ui->amsSlider), bal(ui->alSlider), bfb(ui->fbSlider);
+	ui->lfoGroupBox->setChecked((tone->FREQ_LFO & 0x08) != 0);
+	ui->freqSlider->setValue(tone->FREQ_LFO & 0x07);
+	ui->pmsSlider->setValue(tone->PMS_LFO);
+	ui->amsSlider->setValue(tone->AMS_LFO);
 	ui->alSlider->setValue(tone->AL);
 	ui->fbSlider->setValue(tone->FB);
 	for (int i = 0; i< 4; ++i) {

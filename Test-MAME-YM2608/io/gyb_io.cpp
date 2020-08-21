@@ -19,7 +19,7 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 		uint8_t nTone = mCnt + dCnt;
 		bank.reserve(nTone);
 		csr += 0x100;	// Instrument map
-		if (version == 2) csr++;	// LFO speed
+		uint8_t lfoFreq = (version == 2) ? container.readUint8(csr++) : 0;
 		for (size_t i = 0; i < nTone; ++i) {
 			TonePtr tone(new Tone);
 			uint8_t tmp;
@@ -56,8 +56,17 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 			tmp = container.readUint8(csr++);
 			tone->FB = tmp >> 3;
 			tone->AL = tmp & 0x07;
+			if (version == 2) {
+				tmp = container.readUint8(csr++);
+				tone->PMS_LFO = tmp & 7;
+				tone->AMS_LFO = (tmp >> 4) & 3;
+				tone->FREQ_LFO = lfoFreq;
+				csr += 2;
+			}
+			else {
+				csr++;
+			}
 			bank.push_back(std::move(tone));
-			csr += ((version == 2) ? 3 : 1);
 		}
 		for (TonePtr& tone: bank) {
 			uint8_t strLen = container.readUint8(csr++);
@@ -66,7 +75,7 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 		}
 	}
 	else {
-		csr++;	// LFO speed
+		uint8_t lfoFreq = container.readUint8(csr++);
 		if (container.readUint32(csr) != container.size())
 			throw FileCorruptionError(FileIo::FileType::ToneBank);
 		csr += 4;
@@ -111,7 +120,11 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 			tmp = container.readUint8(instCsr++);
 			tone->FB = tmp >> 3;
 			tone->AL = tmp & 0x07;
-			instCsr += 2;
+			tmp = container.readUint8(instCsr++);
+			tone->PMS_LFO = tmp & 7;
+			tone->AMS_LFO = (tmp >> 4) & 3;
+			tone->FREQ_LFO = lfoFreq;
+			instCsr++;
 			uint8_t flags = container.readUint8(instCsr++);
 			if (flags & 1) {	// Chord
 				uint8_t n = container.readUint8(instCsr++);
