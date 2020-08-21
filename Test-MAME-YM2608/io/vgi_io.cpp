@@ -12,7 +12,10 @@ Tone* VgiIo::load(const BinaryContainer& container) const
 	size_t csr = 0;
 	tone->AL = container.readUint8(csr++);
 	tone->FB = container.readUint8(csr++);
-	csr++;	// PMS / AMS
+	uint8_t tmp = container.readUint8(csr++);
+	tone->PMS_LFO = tmp & 7;
+	tone->AMS_LFO = (tmp >> 4) & 3;
+	if (tmp) tone->FREQ_LFO = 8;
 	for (size_t o = 0; o < 4; ++o) {
 		Operator& op = tone->op[o];
 		op.ML = container.readUint8(csr++);
@@ -38,7 +41,7 @@ const BinaryContainer VgiIo::save(const Tone& tone) const
 
 	container.appendUint8(tone.AL);
 	container.appendUint8(tone.FB);
-	container.appendUint8(0);
+	container.appendUint8((tone.AMS_LFO << 4) | tone.PMS_LFO);
 	for (size_t o = 0; o < 4; ++o) {
 		const Operator& op = tone.op[o];
 		container.appendUint8(op.ML);

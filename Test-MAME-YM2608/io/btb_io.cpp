@@ -18,6 +18,7 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 
 	/***** Instrument section *****/
 	std::unordered_map<int, std::vector<size_t>> envToneMap;
+	std::unordered_map<int, std::vector<size_t>> lfoToneMap;
 	if (container.readString(globCsr, 8) != "INSTRMNT")
 		throw FileCorruptionError(FileIo::FileType::ToneBank);
 	globCsr += 8;
@@ -44,6 +45,13 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 				envToneMap[envNum] = { bank.size() };
 			TonePtr tone = std::make_shared<Tone>();
 			tone->name = name;
+			uint8_t lfoNum = container.readUint8(iCsr++);
+			if (!(lfoNum & 0x80)) {
+				if (lfoToneMap.count(lfoNum))
+					lfoToneMap[lfoNum].push_back(bank.size());
+				else
+					lfoToneMap[lfoNum] = { bank.size() };
+			}
 			bank.push_back(tone);
 		}
 		instCsr += iOfs;	// Jump to next
@@ -101,8 +109,27 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 		else if (secId == 0x01) {	// FM LFO
 			uint8_t cnt = container.readUint8(instPropCsr++);
 			for (size_t i = 0; i < cnt; ++i) {
-				instPropCsr++;	// Skip index
+				uint8_t idx = container.readUint8(instPropCsr++);
 				uint8_t ofs = container.readUint8(instPropCsr);
+				if (lfoToneMap.count(idx)) {
+					std::vector<size_t> toneIdcs = lfoToneMap.at(idx);
+					size_t csr = instPropCsr + 1;
+					uint8_t tmp = container.readUint8(csr++);
+					uint8_t freq = (tmp >> 4) | 8;
+					uint8_t pms = tmp & 7;
+					uint8_t amst = container.readUint8(csr++);
+					uint8_t ams = amst & 3;
+					for (const size_t toneIdx : toneIdcs) {
+						TonePtr& tone = bank[toneIdx];
+						tone->FREQ_LFO = freq;
+						tone->PMS_LFO = pms;
+						tone->AMS_LFO = ams;
+						if (amst & 0x10) tone->op[0].AM = 1;
+						if (amst & 0x20) tone->op[1].AM = 1;
+						if (amst & 0x40) tone->op[2].AM = 1;
+						if (amst & 0x80) tone->op[3].AM = 1;
+					}
+				}
 				instPropCsr += ofs;
 			}
 		}
@@ -147,6 +174,7 @@ const BinaryContainer BtbIo::save(const std::vector<TonePtr>& bank) const
 	size_t instOfs = container.size();
 	container.appendUint32(0);	// Dummy instrument section offset
 	container.appendUint8(bank.size());
+	std::vector<size_t> lfoUser;
 	for (size_t i = 0; i < bank.size(); ++i) {
 		TonePtr tone = bank[i];
 		container.appendUint8(static_cast<uint8_t>(i));
@@ -157,7 +185,14 @@ const BinaryContainer BtbIo::save(const std::vector<TonePtr>& bank) const
 		if (!name.empty()) container.appendString(name);
 		container.appendUint8(0x00);	// FM
 		container.appendUint8(static_cast<uint8_t>(i));	// Envelope number
-		for (int i = 0; i < 41; ++i) container.appendUint8(0x80);
+		if (tone->FREQ_LFO & 8) {	// LFO number
+			container.appendUint8(static_cast<uint8_t>(lfoUser.size()));
+			lfoUser.push_back(i);
+		}
+		else {
+			container.appendUint8(0x80);
+		}
+		for (int i = 0; i < 40; ++i) container.appendUint8(0x80);
 		container.appendUint8(0);
 		for (int i = 0; i < 8; ++i) container.appendUint8(0x80);
 		container.writeUint32(iOfs, container.size() - iOfs);
@@ -175,8 +210,7 @@ const BinaryContainer BtbIo::save(const std::vector<TonePtr>& bank) const
 	container.appendUint8(static_cast<uint8_t>(bank.size()));
 	for (size_t i = 0; i < bank.size(); ++i) {
 		container.appendUint8(static_cast<uint8_t>(i));
-		size_t ofs = container.size();
-		container.appendUint8(0);	// Dummy offset
+		container.appendUint8(26);
 		TonePtr tone = bank[i];
 		container.appendUint8((tone->AL << 4) | tone->FB);
 		// Operators
@@ -189,7 +223,22 @@ const BinaryContainer BtbIo::save(const std::vector<TonePtr>& bank) const
 			container.appendUint8(op.TL);
 			container.appendUint8(((op.SSGEG ^ 8) << 4)| op.ML);
 		}
-		container.writeUint8(ofs, static_cast<uint8_t>(container.size() - ofs));
+	}
+
+	// FM LFO
+	if (!lfoUser.empty()) {
+		container.appendUint8(0x01);
+		container.appendUint8(static_cast<uint8_t>(lfoUser.size()));
+		for (size_t i = 0; i < lfoUser.size(); ++i) {
+			container.appendUint8(static_cast<uint8_t>(i));
+			container.appendUint8(4);
+			TonePtr tone = bank[i];
+			container.appendUint8(((tone->FREQ_LFO & 7) << 4) | tone->PMS_LFO);
+			uint8_t am = 0;
+			for (size_t i = 0; i < 4; i++) if (tone->op[i].AM) am |= (0x10 << i);
+			container.appendUint8(am | tone->AMS_LFO);
+			container.appendUint8(0);
+		}
 	}
 
 	container.writeUint32(instPropOfs, container.size() - instPropOfs);

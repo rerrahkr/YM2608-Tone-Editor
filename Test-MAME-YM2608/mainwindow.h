@@ -62,7 +62,6 @@ private:
 	void SetPSGKeyOff(int channel);
 	void SetFMKey(int channel, int octave, int keynum);
 	void SetPSGKey(int channel, int octave, int keynum);
-	void InitPan();
 
 	void JamKeyOnFM(int jamKeyNumber, bool isRepeat);
 	void JamKeyOnPSG(int jamKeyNumber, bool isRepeat);
@@ -124,6 +123,10 @@ private:
 	}
 
 private slots:
+	void on_lfoGroupBox_clicked(bool checked);
+	void onFreqChanged(int value);
+	void onPMSChanged(int value);
+	void onAMSChanged(int value);
 	void onALChanged(int value);
 	void onFBChanged(int value);
 	void onParameterChanged(int op, OperatorParameter param, int value);

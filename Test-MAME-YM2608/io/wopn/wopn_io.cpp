@@ -51,6 +51,7 @@ std::vector<TonePtr> WopnIo::load(BinaryContainer& container) const
 		ent.inst = &wbank.ins[ent.vals.nth];
 		if ((ent.inst->inst_flags & WOPN_Ins_IsBlank) == 0) {
 			TonePtr tone(new Tone);
+			tone->FREQ_LFO = wopn->lfo_freq;
 			setWOPNInstrumentToTone(*ent.inst, tone.get());
 			bank.push_back(std::move(tone));
 		}
@@ -67,7 +68,7 @@ const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 
 	std::unique_ptr<WOPNFile, WOPNDeleter> wopn(WOPN_Init(nBank, 0));
 	wopn->version = 2;
-	wopn->lfo_freq = 0;
+	wopn->lfo_freq = bank.front()->FREQ_LFO;
 	wopn->chip_type = WOPN_Chip_OPNA;
 
 	for (size_t o = 0; o < nBank; ++o) {

@@ -34,7 +34,7 @@ Tone* OriginalToneIo::load(const BinaryContainer& container) const
 			op.AM = container.readUint8(csr++);
 		}
 	}
-	else if (ident == "TNV2") {
+	else if (ident == "TNV2" || ident == "TNV3") {
 		uint8_t strLen = container.readUint8(csr++);
 		tone->name = container.readString(csr, strLen);
 		csr += strLen;
@@ -54,6 +54,11 @@ Tone* OriginalToneIo::load(const BinaryContainer& container) const
 			op.AM = container.readUint8(csr++);
 			op.SSGEG = container.readUint8(csr++);
 		}
+		if (ident == "TNV3") {
+			tone->FREQ_LFO = container.readUint8(csr++);
+			tone->PMS_LFO = container.readUint8(csr++);
+			tone->AMS_LFO = container.readUint8(csr++);
+		}
 	}
 	else {
 		throw FileCorruptionError(FileIo::FileType::SingleTone);
@@ -65,7 +70,7 @@ Tone* OriginalToneIo::load(const BinaryContainer& container) const
 const BinaryContainer OriginalToneIo::save(const Tone& tone) const
 {
 	BinaryContainer container;
-	container.appendString("TNV2");
+	container.appendString("TNV3");
 	uint8_t nameLen = static_cast<uint8_t>(tone.name.size());
 	container.appendUint8(nameLen);
 	container.appendString(tone.name);
@@ -84,5 +89,9 @@ const BinaryContainer OriginalToneIo::save(const Tone& tone) const
 		container.appendUint8(op.AM);
 		container.appendUint8(op.SSGEG);
 	}
+	container.appendUint8(tone.FREQ_LFO);
+	container.appendUint8(tone.PMS_LFO);
+	container.appendUint8(tone.AMS_LFO);
+
 	return container;
 }

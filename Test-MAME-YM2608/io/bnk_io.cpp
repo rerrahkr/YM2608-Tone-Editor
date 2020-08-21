@@ -23,11 +23,15 @@ std::vector<TonePtr> BnkIo::load(BinaryContainer& container) const
 		for (; nameLen <= 28 && container.readChar(csr + nameLen) != '\0'; ++nameLen)
 			;
 		tone->name = container.readString(csr, std::min<size_t>(nameLen, 28));
-		csr += 30;
+		csr += 28;
+		tone->FREQ_LFO = container.readUint8(csr++);
+		csr++;
 		uint8_t tmp = container.readUint8(csr++);
 		tone->FB = (tmp >> 3) & 7;
 		tone->AL = tmp & 7;
-		csr++;
+		tmp = container.readUint8(csr++);
+		tone->PMS_LFO = tmp & 7;
+		tone->AMS_LFO = (tmp >> 4) & 3;
 		for (size_t o : { 0, 2, 1, 3 }) {
 			Operator& op = tone->op[o];
 			tmp = container.readUint8(csr++);

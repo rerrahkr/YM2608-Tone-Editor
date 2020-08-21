@@ -3,6 +3,7 @@
 ## Unreleased
 ### Added
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
+- [#9] - Support LFO edit (thanks [@freq-mod])
 - Bank support
 - FM/PSG switch key
 - [#3], [#5], [#7] - Support 13 new format import/export (thanks [@freq-mod])
@@ -41,6 +42,7 @@
 [#6]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/6
 [#7]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/7
 [#8]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/8
+[#9]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/9
 
 ## v0.2.0 (2018/09/03)
 ### Added
