@@ -1,5 +1,5 @@
 # YM2608 Tone Editor
-[![GitHub release](https://img.shields.io/badge/release-v0.2.0-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
+[![GitHub release](https://img.shields.io/badge/release-v0.3.0-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
 ![Platform: windows](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 [![LICENSE](https://img.shields.io/github/license/rerrahkr/YM2608-Tone-Editor.svg)](./LICENSE)
 
@@ -26,7 +26,7 @@ Z X CV B N M, . /
 F1, F2 is octave up/down, and F3 toggles FM/PSG.  
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
-### Import/Export to file
+### Import/Export
 YM2608 Tone Editor supports importing/exporting a tone and a bank.
 
 - .tone/.bank (Default FM tone/bank format)

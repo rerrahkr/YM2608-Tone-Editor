@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v0.3.0 (2020/09/05)
 ### Added
 - [#6] - Support SSG-EG edit (thanks [@freq-mod])
 - [#9] - Support LFO edit (thanks [@freq-mod])

@@ -21,8 +21,8 @@
      </property>
      <property name="text">
       <string>YM2608 Tone Editor
-Version 0.2.0
-Copyright © 2018 Rerrah</string>
+Version 0.3.0
+Copyright © 2018-2020 Rerrah</string>
      </property>
      <property name="textFormat">
       <enum>Qt::PlainText</enum>
