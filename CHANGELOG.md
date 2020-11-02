@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+### Added
+- [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
+
+[#12]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/12
+[#13]: https://github.com/rerrahkr/YM2608-Tone-Editor/pull/13
 
 ## v0.3.0 (2020/09/05)
 ### Added
