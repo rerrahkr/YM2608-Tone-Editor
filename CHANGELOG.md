@@ -5,11 +5,13 @@
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
 
 ### Fixed
-- [#14] - Fix the parameter order of MUCOM88 output preset (thanks [@freq-mod])
+- [#14] - Fix the parameter order of the default MUCOM88 output preset (thanks [@freq-mod])
+- [#15] - Fix the default MMLDRV output format (thank [@freq-mod])
 
 [#12]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/12
 [#13]: https://github.com/rerrahkr/YM2608-Tone-Editor/pull/13
 [#14]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/14
+[#15]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/15
 
 ## v0.3.0 (2020/09/05)
 ### Added
