@@ -98,6 +98,24 @@ It also enable to read tone data from text.
 When you paste the tone data text in "Read text" dialog ("File" -> "Read Text"), this app reads digits from the text and set to tone parameters in the order specified by "Setup" -> "Input".  
 Note: This app reads digits in the order of appearance. This means that it also reads digits included in comments like tone name. Please remove the comments before reading.
 
+## Build instructions
+### Dependecies
+
+The following dependecies are required for building under Ubuntu/Debian Linux:
+`qt5-default`
+`qttools5-dev-tools`
+`qt5-multimedia5-dev`
+`libqt5multimedia5-plugins`
+`libasound2-dev`
+`libpulse-dev //OPTIONAL(?)` 
+
+### Compilation
+
+- `https://github.com/rerrahkr/YM2608-Tone-Editor.git`
+- `cd YM2608-Tone-Editor/src`
+- `qmake`
+- `make && make install`
+
 ## Changelog
 *See [CHANGELOG.md](./CHANGELOG.md).*
 
