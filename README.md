@@ -105,9 +105,7 @@ The following dependecies are required for building under Ubuntu/Debian Linux:
 `qt5-default`
 `qttools5-dev-tools`
 `qt5-multimedia5-dev`
-`libqt5multimedia5-plugins`
-`libasound2-dev`
-`libpulse-dev //OPTIONAL(?)` 
+`libqt5multimedia5-plugins` 
 
 ### Compilation
 
