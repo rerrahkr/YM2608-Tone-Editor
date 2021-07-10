@@ -26,7 +26,7 @@ class RegisterRecorder
 public:
 	explicit RegisterRecorder(uint32_t rate);
 
-	enum Chip { YM2203, YM2608, YM2610, YM2612, LAST, FIRST = YM2203 };
+	enum Chip { YM2203, YM2608, YM2610, YM2612, LAST, FIRST = YM2203, Unsupported = -1 };
 
 	void writeA(uint8_t address, uint8_t data, Chip chip = YM2608);
 	void writeB(uint8_t address, uint8_t data, Chip chip = YM2608);

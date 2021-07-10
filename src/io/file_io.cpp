@@ -18,6 +18,7 @@
 #include "bnk_io.hpp"
 #include "gyb_io.hpp"
 #include "vgm_io.hpp"
+#include "s98_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -69,6 +70,7 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new GybIo);
 
 	SONG_FILE_HANDLER_.add(new VgmIo);
+	SONG_FILE_HANDLER_.add(new S98Io);
 }
 
 FileIo& FileIo::getInstance()

@@ -49,6 +49,7 @@ SOURCES += \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
     io/register_recorder.cpp \
+    io/s98_io.cpp \
     io/tfi_io.cpp \
     io/vgi_io.cpp \
     io/vgm_io.cpp \
@@ -101,6 +102,7 @@ HEADERS += \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
     io/register_recorder.hpp \
+    io/s98_io.hpp \
     io/tfi_io.hpp \
     io/vgi_io.hpp \
     io/vgm_io.hpp \

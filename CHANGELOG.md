@@ -2,7 +2,8 @@
 
 ## Unreleased
 ### Added
-- [#18] - Support 1 new format import
+- [#18] - Support 2 new format import
+  - .s98 (S98 file)
   - .vgm (Video Game Music)
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
 

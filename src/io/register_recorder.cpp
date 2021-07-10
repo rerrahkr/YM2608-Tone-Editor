@@ -144,11 +144,13 @@ RegisterRecorder::RegisterRecorder(uint32_t rate)
 
 void RegisterRecorder::writeA(uint8_t address, uint8_t data, Chip chip)
 {
+	if (chip == Chip::Unsupported) return;
 	write(address, data, mem_[chip].memory[0], mem_[chip].updated, 0);
 }
 
 void RegisterRecorder::writeB(uint8_t address, uint8_t data, Chip chip)
 {
+	if (chip == Chip::Unsupported) return;
 	write(address, data, mem_[chip].memory[1], mem_[chip].updated, 1);
 }
 
