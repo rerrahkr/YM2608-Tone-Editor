@@ -48,8 +48,10 @@ SOURCES += \
     io/mucom88_io.cpp \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
+    io/register_recorder.cpp \
     io/tfi_io.cpp \
     io/vgi_io.cpp \
+    io/vgm_io.cpp \
     io/wopn/opni_io.cpp \
     io/wopn/wopn_file.c \
     io/wopn/wopn_io.cpp \
@@ -98,8 +100,10 @@ HEADERS += \
     io/mucom88_io.hpp \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
+    io/register_recorder.hpp \
     io/tfi_io.hpp \
     io/vgi_io.hpp \
+    io/vgm_io.hpp \
     io/wopn/opni_io.hpp \
     io/wopn/wopn_common.hpp \
     io/wopn/wopn_file.h \

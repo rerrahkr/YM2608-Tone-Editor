@@ -108,6 +108,7 @@ private:
 
 	void loadSingleTone(const QString& file);
 	void loadToneBank(const QString& file);
+	void loadSongFile(const QString& file);
 
 	void addToneTo(int n);
 	void addToneTo(int n, Tone* tone);
@@ -145,6 +146,8 @@ private slots:
 	void on_actionSave_Bank_As_triggered();
 	void on_actionO_pen_Bank_triggered();
 	void on_lineEdit_textChanged(const QString &arg1);
+
+	void on_actionOpe_n_Song_triggered();
 
 private:
 	bool saveTone();

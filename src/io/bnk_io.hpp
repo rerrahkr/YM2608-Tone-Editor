@@ -6,5 +6,5 @@ class BnkIo final : public AbstractToneBankIo
 {
 public:
 	BnkIo();
-	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
+	std::vector<TonePtr> load(BinaryContainer& container) const override;
 };

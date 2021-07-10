@@ -276,6 +276,7 @@ void MainWindow::dropEvent(QDropEvent* event)
 	switch (FileIo::getInstance().detectFileType(file)) {
 	case FileIo::FileType::SingleTone:	loadSingleTone(file);	break;
 	case FileIo::FileType::ToneBank:	loadToneBank(file);		break;
+	case FileIo::FileType::SongFile:	loadSongFile(file);		break;
 	default:	break;
 	}
 }
@@ -758,7 +759,7 @@ void MainWindow::loadSingleTone(const QString& file)
 		ui->removeTonePushButton->setEnabled(true);
 	}
 	catch (FileIoError& e) {
-		QMessageBox::critical(this, "Error", ("Failed to load tone.\n\n") + QString(e.what()));
+		QMessageBox::critical(this, "Error", ("Failed to load the tone.\n\n") + QString(e.what()));
 	}
 }
 
@@ -770,7 +771,19 @@ void MainWindow::loadToneBank(const QString& file)
 		ui->removeTonePushButton->setEnabled(true);
 	}
 	catch (FileIoError& e) {
-		QMessageBox::critical(this, "Error", ("Failed to load bank.\n\n") + QString(e.what()));
+		QMessageBox::critical(this, "Error", ("Failed to load the bank.\n\n") + QString(e.what()));
+	}
+}
+
+void MainWindow::loadSongFile(const QString& file)
+{
+	try {
+		std::vector<TonePtr> list = FileIo::getInstance().loadSongFileFrom(file);
+		for (TonePtr tone : list) addToneTo(ui->listWidget->count(), tone);
+		ui->removeTonePushButton->setEnabled(true);
+	}
+	catch (FileIoError& e) {
+		QMessageBox::critical(this, "Error", ("Failed to load the song.\n\n") + QString(e.what()));
 	}
 }
 
@@ -1029,5 +1042,14 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 		QListWidgetItem* item = ui->listWidget->item(row);
 		bool accept = arg1.isEmpty() || item->text().contains(arg1, Qt::CaseInsensitive);
 		item->setHidden(!accept);
+	}
+}
+
+void MainWindow::on_actionOpe_n_Song_triggered()
+{
+	QStringList filters = FileIo::getInstance().getSongFileLoadFilter();
+	QString file = QFileDialog::getOpenFileName(this, "Open song", ".", filters.join(";;"));
+	if (!file.isNull()) {
+		loadSongFile(file);
 	}
 }

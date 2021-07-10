@@ -193,7 +193,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -206,6 +206,8 @@
     <addaction name="separator"/>
     <addaction name="actionO_pen_Bank"/>
     <addaction name="actionSave_Bank_As"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpe_n_Song"/>
     <addaction name="separator"/>
     <addaction name="actionConvert_To_Text_C"/>
     <addaction name="actionRead_Text_R"/>
@@ -293,6 +295,11 @@
   <action name="actionO_pen_Bank">
    <property name="text">
     <string>O&amp;pen Bank...</string>
+   </property>
+  </action>
+  <action name="actionOpe_n_Song">
+   <property name="text">
+    <string>Ope&amp;n Song...</string>
    </property>
   </action>
  </widget>

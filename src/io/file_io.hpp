@@ -12,8 +12,9 @@
 class AbstractSingleToneIo
 {
 public:
-	AbstractSingleToneIo(std::string ext, std::string desc, bool loadable, bool savable)
+	AbstractSingleToneIo(const std::string& ext, const std::string& desc, bool loadable, bool savable)
 		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	virtual ~AbstractSingleToneIo() = default;
 	virtual Tone* load(const BinaryContainer& container) const;
 	virtual const BinaryContainer save(const Tone& tone) const;
 	inline std::string getExtension() const { return ext_; }
@@ -22,15 +23,16 @@ public:
 	inline bool isSavable() const { return savable_; }
 
 private:
-	std::string ext_, desc_;
+	const std::string ext_, desc_;
 	bool loadable_, savable_;
 };
 
 class AbstractToneBankIo
 {
 public:
-	AbstractToneBankIo(std::string ext, std::string desc, bool loadable, bool savable)
+	AbstractToneBankIo(const std::string& ext, const std::string& desc, bool loadable, bool savable)
 		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	virtual ~AbstractToneBankIo() = default;
 	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
 	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const;
 	inline std::string getExtension() const { return ext_; }
@@ -39,14 +41,30 @@ public:
 	inline bool isSavable() const { return savable_; }
 
 private:
-	std::string ext_, desc_;
+	const std::string ext_, desc_;
 	bool loadable_, savable_;
+};
+
+class AbstractSongFileIo
+{
+public:
+	AbstractSongFileIo(const std::string& ext, const std::string& desc)
+		: ext_(ext), desc_(desc) {}
+	virtual ~AbstractSongFileIo() = default;
+	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
+	inline std::string getExtension() const { return ext_; }
+	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
+	inline bool isLoadable() const { return true; }
+	inline bool isSavable() const { return false; }
+
+private:
+	const std::string ext_, desc_;
 };
 
 class FileIo
 {
 public:
-	enum class FileType { SingleTone, ToneBank, Unknown };
+	enum class FileType { SingleTone, ToneBank, SongFile, Unknown };
 
 	static FileIo& getInstance();
 
@@ -59,6 +77,8 @@ public:
 	QStringList getToneBankSaveFilter() const;
 	std::vector<TonePtr> loadToneBankFrom(const QString& file) const;
 	void saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const;
+	QStringList getSongFileLoadFilter() const;
+	std::vector<TonePtr> loadSongFileFrom(const QString& file) const;
 
 private:
 	FileIo();
@@ -93,4 +113,5 @@ private:
 
 	IoManagerMap<AbstractSingleToneIo> SINGLE_TONE_HANDLER_;
 	IoManagerMap<AbstractToneBankIo> TONE_BANK_HANDLER_;
+	IoManagerMap<AbstractSongFileIo> SONG_FILE_HANDLER_;
 };

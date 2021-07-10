@@ -2,6 +2,8 @@
 
 ## Unreleased
 ### Added
+- [#18] - Support 1 new format import
+  - .vgm (Video Game Music)
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
 
 ### Fixed
@@ -12,6 +14,7 @@
 [#13]: https://github.com/rerrahkr/YM2608-Tone-Editor/pull/13
 [#14]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/14
 [#15]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/15
+[#18]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/18
 
 ## v0.3.0 (2020/09/05)
 ### Added

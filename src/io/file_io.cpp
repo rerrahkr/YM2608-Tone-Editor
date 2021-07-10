@@ -17,6 +17,7 @@
 #include "ins_io.hpp"
 #include "bnk_io.hpp"
 #include "gyb_io.hpp"
+#include "vgm_io.hpp"
 
 Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
 {
@@ -42,6 +43,12 @@ const BinaryContainer AbstractToneBankIo::save(const std::vector<TonePtr>& bank)
 	throw FileUnsupportedError(FileIo::FileType::ToneBank);
 }
 
+std::vector<TonePtr> AbstractSongFileIo::load(BinaryContainer& container) const
+{
+	(void)container;
+	throw FileUnsupportedError(FileIo::FileType::SongFile);
+}
+
 FileIo::FileIo()
 {
 	SINGLE_TONE_HANDLER_.add(new OriginalToneIo);
@@ -60,6 +67,8 @@ FileIo::FileIo()
 	TONE_BANK_HANDLER_.add(new Mucom88Io);
 	TONE_BANK_HANDLER_.add(new BnkIo);
 	TONE_BANK_HANDLER_.add(new GybIo);
+
+	SONG_FILE_HANDLER_.add(new VgmIo);
 }
 
 FileIo& FileIo::getInstance()
@@ -74,6 +83,7 @@ FileIo::FileType FileIo::detectFileType(const QString& file) const
 
 	if (SINGLE_TONE_HANDLER_.containExtension(ext)) return FileType::SingleTone;
 	if (TONE_BANK_HANDLER_.containExtension(ext)) return FileType::ToneBank;
+	if (SONG_FILE_HANDLER_.containExtension(ext)) return FileType::SongFile;
 
 	return FileType::Unknown;
 }
@@ -158,4 +168,28 @@ void FileIo::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& b
 		if (!f.open(QIODevice::WriteOnly)) throw FileOutputError(FileType::ToneBank);
 		f.write(container.getPointer(), container.size());
 	}
+}
+
+QStringList FileIo::getSongFileLoadFilter() const
+{
+	return SONG_FILE_HANDLER_.getLoadFilterList();
+}
+
+std::vector<TonePtr> FileIo::loadSongFileFrom(const QString& file) const
+{
+	const std::string ext = FileIo::extractExtention(file);
+
+	if (SONG_FILE_HANDLER_.containExtension(ext)) {
+		QFile f(file);
+		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::SongFile);
+		QByteArray array = f.readAll();
+		f.close();
+		BinaryContainer ctr(std::vector<char>(array.begin(), array.end()));
+		std::vector<TonePtr> list = SONG_FILE_HANDLER_.at(ext)->load(ctr);
+
+		for (TonePtr& tone : list) tone->path = (file + ".tone").toUtf8().toStdString();
+		return list;
+	}
+
+	throw FileUnsupportedError(FileType::SongFile);
 }

@@ -27,7 +27,7 @@ F1, F2 is octave up/down, and F3 toggles FM/PSG.
 If sound doesn't stop despite releasing key, try pressing F12 which is audio stream reset key.
 
 ### Import/Export
-YM2608 Tone Editor supports importing/exporting a tone and a bank.
+YM2608 Tone Editor supports importing/exporting a tone/bank/song.
 
 - .tone/.bank (Default FM tone/bank format)
 - .bnk (GEMS bank) (import only)
@@ -40,6 +40,7 @@ YM2608 Tone Editor supports importing/exporting a tone and a bank.
 - .opni/.wopn (OPN2BankEditor imstrument/bank)
 - .tfi (TFM Music Maker instrument)
 - .vgi (VGM Music Maker instrument)
+- .vgm (Video Game Music) (import only)
 - .y12 (Gens KMod dump) (import only)
 
 To export tones as a bank, you need to select them in the tone list which you want to do.
