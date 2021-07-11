@@ -1,0 +1,4 @@
+[submodule "src/chips/emu2149"]
+	path = src/chips/emu2149
+	url = https://github.com/rerrahkr/emu2149.git
+	branch = opna-ssg

@@ -37,7 +37,6 @@
 #define YM3438_H
 
 #include "../chip_def.h"
-#include "../mame/mamedef.h"
 #include "../mame/ymdeltat.h"
 
 #ifdef __cplusplus

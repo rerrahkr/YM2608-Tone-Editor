@@ -1,7 +1,9 @@
 #pragma once
 
 #include "chip.hpp"
+#include <memory>
 #include "chip_misc.h"
+#include "2608_interface.hpp"
 
 namespace chip
 {
@@ -11,7 +13,7 @@ namespace chip
 		// [rate]
 		// 0 = rate is 110933 (internal FM sample rate in 3993600 * 2 clock)
 		OPNA(Emu emu, int clock, int rate);
-		~OPNA();
+		~OPNA() override;
 
 		void reset() override;
 		void setRegister(uint32_t offset, uint8_t value) override;
@@ -22,7 +24,7 @@ namespace chip
 	private:
 		static size_t count_;
 
-		intf2608* intf_;
+		std::unique_ptr<Ym2608Interface> intf_;
 
 		/*static const int DEF_AMP_FM_, DEF_AMP_SSG_;*/
 

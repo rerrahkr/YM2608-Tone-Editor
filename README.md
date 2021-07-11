@@ -104,6 +104,6 @@ Note: This app reads digits in the order of appearance. This means that it also 
 *See [CHANGELOG.md](./CHANGELOG.md).*
 
 ## License
-This program and its source code are licensed under the GNU General License Version 2.
+This program and its source code are licensed under the GNU General License Version 2 or later.
 
-*See [LICENSE](./LICENSE) and [list.md](./licenses/list.md) of libraries.*
+*See [LICENSE](./LICENSE) and [license_list.md](./license_list.md) of libraries.*

@@ -1,21 +1,6 @@
 #include "chip.hpp"
 #include "chip_misc.h"
 
-#ifdef  __cplusplus
-extern "C"
-{
-#endif //  __cplusplus
-
-#include "mame/mamedef.h"
-
-UINT8 CHIP_SAMPLING_MODE = 0x00;
-INT32 CHIP_SAMPLE_RATE;
-stream_sample_t* DUMMYBUF[] = { nullptr, nullptr };
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
-
 namespace chip
 {
 	//const int Chip::MAX_AMP_ = 32767;	// half-max of int16
@@ -30,7 +15,7 @@ namespace chip
 
 		for (int pan = LEFT; pan <= RIGHT; ++pan) {
 			for (auto& buf : buffer_) {
-				buf[pan] = new stream_sample_t[SMPL_BUF_SIZE_];
+				buf[pan] = new sample[SMPL_BUF_SIZE_];
 			}
 		}
 	}
@@ -64,7 +49,7 @@ namespace chip
 
 	void Chip::funcSetRate(int rate)
 	{
-		rate_ = CHIP_SAMPLE_RATE = ((rate) ? rate : autoRate_);
+		rate_ = (rate) ? rate : autoRate_;
 	}
 
 	int Chip::getRate() const

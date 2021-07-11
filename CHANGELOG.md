@@ -7,6 +7,10 @@
   - .vgm (Video Game Music)
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
 
+### Changed
+- Update MAME emulation
+- Apply GPL v2+ to the project
+
 ### Fixed
 - [#14] - Fix the parameter order of the default MUCOM88 output preset (thanks [@freq-mod])
 - [#15] - Fix the default MMLDRV output format (thank [@freq-mod])

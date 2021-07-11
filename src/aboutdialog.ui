@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
+    <width>221</width>
     <height>120</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
      <property name="text">
       <string>YM2608 Tone Editor
 Version 0.3.0
-Copyright © 2018-2020 Rerrah</string>
+Copyright © 2018-2021 Rerrah</string>
      </property>
      <property name="textFormat">
       <enum>Qt::PlainText</enum>

@@ -2,18 +2,8 @@
 #include <cstdint>
 #include <algorithm>
 #include "chip_misc.h"
-
-#ifdef  __cplusplus
-extern "C"
-{
-#endif //  __cplusplus
-
-#include "mame/2608intf.h"
-#include "nuked/nuke2608intf.h"
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+#include "mame/mame_2608.hpp"
+#include "nuked/nuked_2608.hpp"
 
 namespace chip
 {
@@ -31,25 +21,18 @@ namespace chip
 			/* fall through */
 		case Emu::Mame:
 			fprintf(stderr, "Using emulator: MAME YM2608\n");
-			intf_ = &mame_intf2608;
+			intf_ = std::make_unique<Mame2608>();
 			break;
 		case Emu::Nuked:
 			fprintf(stderr, "Using emulator: Nuked OPN-Mod\n");
-			intf_ = &nuked_intf2608;
+			intf_ = std::make_unique<Nuked2608>();
 			break;
 		}
 
 		funcSetRate(rate);
 
-		uint8_t EmuCore = 0;
-		intf_->set_ay_emu_core(EmuCore);
-
-		uint8_t AYDisable = 0;	// Enable
-		uint8_t AYFlags = 0;	// None
-		size_t dramSize = 4;	// Dummy
-		internalRate_[FM] = intf_->device_start(
-								id_, clock, AYDisable, AYFlags,
-								reinterpret_cast<int*>(&internalRate_[SSG]), dramSize);
+		constexpr size_t dramSize = 4;	// Dummy
+		internalRate_[FM] = intf_->startDevice(clock, internalRate_[SSG], dramSize);
 
 		initResampler();
 
@@ -60,16 +43,14 @@ namespace chip
 
 	OPNA::~OPNA()
 	{
-		intf_->device_stop(id_);
-
+		intf_->stopDevice();
 		--count_;
 	}
 
 	void OPNA::reset()
 	{
 		std::lock_guard<std::mutex> lg(mutex_);
-
-		intf_->device_reset(id_);
+		intf_->resetDevice();
 	}
 
 	void OPNA::setRegister(uint32_t offset, uint8_t value)
@@ -77,26 +58,20 @@ namespace chip
 		std::lock_guard<std::mutex> lg(mutex_);
 
 		if (offset & 0x100) {
-			intf_->control_port_b_w(id_, 2, offset & 0xff);
-			intf_->data_port_b_w(id_, 3, value & 0xff);
+			intf_->writeAddressToPortB(offset & 0xff);
+			intf_->writeDataToPortB(value & 0xff);
 		}
-		else
-		{
-			intf_->control_port_a_w(id_, 0, offset & 0xff);
-			intf_->data_port_a_w(id_, 1, value & 0xff);
+		else {
+			intf_->writeAddressToPortA(offset & 0xff);
+			intf_->writeDataToPortA(value & 0xff);
 		}
 	}
 
 	uint8_t OPNA::getRegister(uint32_t offset) const
 	{
-		if (offset & 0x100) {
-			intf_->control_port_b_w(id_, 2, offset & 0xff);
-		}
-		else
-		{
-			intf_->control_port_a_w(id_, 0, offset & 0xff);
-		}
-		return intf_->read_port_r(id_, 1);
+		if (offset & 0x100) intf_->writeAddressToPortB(offset & 0xff);
+		else intf_->writeAddressToPortA(offset & 0xff);
+		return intf_->readData();
 	}
 
 	// TODO: Volume settings
@@ -122,23 +97,23 @@ namespace chip
 
 		// Set FM buffer
 		if (internalRate_[FM] == rate_) {
-			intf_->stream_update(id_, buffer_[FM], nSamples);
+			intf_->updateStream(buffer_[FM], nSamples);
 			bufFM = buffer_[FM];
 		}
 		else {
 			size_t intrSize = resampler_[FM].calculateInternalSampleSize(nSamples);
-			intf_->stream_update(id_, buffer_[FM], intrSize);
+			intf_->updateStream(buffer_[FM], intrSize);
 			bufFM = resampler_[FM].interpolate(buffer_[FM], nSamples);
 		}
 
 		// Set PSG buffer
 		if (internalRate_[SSG] == rate_) {
-			intf_->stream_update_ay(id_, buffer_[SSG], nSamples);
+			intf_->updateSsgStream(buffer_[SSG], nSamples);
 			bufPSG = buffer_[SSG];
 		}
 		else {
 			size_t intrSize = resampler_[SSG].calculateInternalSampleSize(nSamples);
-			intf_->stream_update_ay(id_, buffer_[SSG], intrSize);
+			intf_->updateSsgStream(buffer_[SSG], intrSize);
 			bufPSG = resampler_[SSG].interpolate(buffer_[SSG], nSamples);
 		}
 		for (size_t i = 0; i < nSamples; ++i) {

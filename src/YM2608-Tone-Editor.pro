@@ -31,7 +31,11 @@ CONFIG += c++17
 
 
 SOURCES += \
-    chips/nuked/nuke2608intf.c \
+    chips/emu2149/emu2149.c \
+    chips/mame/fmopn.c \
+    chips/mame/mame_2608.cpp \
+    chips/mame/ymdeltat.c \
+    chips/nuked/nuked_2608.cpp \
     chips/nuked/ym3438.c \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
@@ -60,10 +64,6 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     chips/opna.cpp \
-    chips/mame/2608intf.c \
-    chips/mame/emu2149.c \
-    chips/mame/fm.c \
-    chips/mame/ymdeltat.c \
     audio_stream.cpp \
     audio_stream_mixier.cpp \
     widgets/labeled_hslider.cpp \
@@ -82,8 +82,15 @@ SOURCES += \
     widgets/ssgeg_slider.cpp
 
 HEADERS += \
+    chips/2608_interface.hpp \
     chips/chip_def.h \
-    chips/nuked/nuke2608intf.h \
+    chips/emu2149/emu2149.h \
+    chips/mame/fmopn.h \
+    chips/mame/fmopn_2608rom.h \
+    chips/mame/mame_2608.hpp \
+    chips/mame/mamedefs.h \
+    chips/mame/ymdeltat.h \
+    chips/nuked/nuked_2608.hpp \
     chips/nuked/ym3438.h \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
@@ -112,12 +119,6 @@ HEADERS += \
     io/wopn/wopn_io.hpp \
     io/y12_io.hpp \
     mainwindow.h \
-    chips/mame/2608intf.h \
-    chips/mame/emu2149.h \
-    chips/mame/emutypes.h \
-    chips/mame/fm.h \
-    chips/mame/mamedef.h \
-    chips/mame/ymdeltat.h \
     chips/opna.hpp \
     text_conversion.hpp \
     audio_stream.hpp \
