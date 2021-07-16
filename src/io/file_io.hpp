@@ -1,10 +1,9 @@
 #pragma once
 
-#include <unordered_map>
 #include <memory>
+#include <QHash>
 #include <QString>
 #include <QStringList>
-#include <QFileInfo>
 #include "../tone.hpp"
 #include "binary_container.hpp"
 #include "../text_conversion.hpp"
@@ -12,53 +11,77 @@
 class AbstractSingleToneIo
 {
 public:
-	AbstractSingleToneIo(const std::string& ext, const std::string& desc, bool loadable, bool savable)
-		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	AbstractSingleToneIo(const QStringList& exts, const QString& desc, bool loadable, bool savable)
+		: exts_(exts), desc_(desc), loadable_(loadable), savable_(savable) {}
+	AbstractSingleToneIo(const QString& ext, const QString& desc, bool loadable, bool savable)
+		: AbstractSingleToneIo(QStringList{ ext }, desc, loadable, savable) {}
 	virtual ~AbstractSingleToneIo() = default;
 	virtual Tone* load(const BinaryContainer& container) const;
 	virtual const BinaryContainer save(const Tone& tone) const;
-	inline std::string getExtension() const { return ext_; }
-	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
-	inline bool isLoadable() const { return loadable_; }
-	inline bool isSavable() const { return savable_; }
+	QStringList getExtensions() const { return exts_; }
+	QString getFilterText() const
+	{
+		QStringList list = exts_;
+		std::transform(list.begin(), list.end(), list.begin(), [](QString& s) { return "*." + s; });
+		return desc_ + "(" + list.join(" ") + ")";
+	}
+	bool isLoadable() const { return loadable_; }
+	bool isSavable() const { return savable_; }
 
 private:
-	const std::string ext_, desc_;
+	const QStringList exts_;
+	const QString desc_;
 	bool loadable_, savable_;
 };
 
 class AbstractToneBankIo
 {
 public:
-	AbstractToneBankIo(const std::string& ext, const std::string& desc, bool loadable, bool savable)
-		: ext_(ext), desc_(desc), loadable_(loadable), savable_(savable) {}
+	AbstractToneBankIo(const QStringList& exts, const QString& desc, bool loadable, bool savable)
+		: exts_(exts), desc_(desc), loadable_(loadable), savable_(savable) {}
+	AbstractToneBankIo(const QString& ext, const QString& desc, bool loadable, bool savable)
+		: AbstractToneBankIo(QStringList{ ext }, desc, loadable, savable) {}
 	virtual ~AbstractToneBankIo() = default;
 	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
 	virtual const BinaryContainer save(const std::vector<TonePtr>& bank) const;
-	inline std::string getExtension() const { return ext_; }
-	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
-	inline bool isLoadable() const { return loadable_; }
-	inline bool isSavable() const { return savable_; }
+	QStringList getExtensions() const { return exts_; }
+	QString getFilterText() const
+	{
+		QStringList list = exts_;
+		std::transform(list.begin(), list.end(), list.begin(), [](QString& s) { return "*." + s; });
+		return desc_ + "(" + list.join(" ") + ")";
+	}
+	bool isLoadable() const { return loadable_; }
+	bool isSavable() const { return savable_; }
 
 private:
-	const std::string ext_, desc_;
+	const QStringList exts_;
+	const QString desc_;
 	bool loadable_, savable_;
 };
 
 class AbstractSongFileIo
 {
 public:
-	AbstractSongFileIo(const std::string& ext, const std::string& desc)
-		: ext_(ext), desc_(desc) {}
+	AbstractSongFileIo(const QStringList& exts, const QString& desc)
+		: exts_(exts), desc_(desc) {}
+	AbstractSongFileIo(const QString& ext, const QString& desc)
+		: AbstractSongFileIo(QStringList{ ext }, desc) {}
 	virtual ~AbstractSongFileIo() = default;
 	virtual std::vector<TonePtr> load(BinaryContainer& container) const;
-	inline std::string getExtension() const { return ext_; }
-	inline std::string getFilterText() const { return desc_ + "(*." + ext_ + ")"; }
-	inline bool isLoadable() const { return true; }
-	inline bool isSavable() const { return false; }
+	QStringList getExtensions() const { return exts_; }
+	QString getFilterText() const
+	{
+		QStringList list = exts_;
+		std::transform(list.begin(), list.end(), list.begin(), [](QString& s) { return "*." + s; });
+		return desc_ + "(" + list.join(" ") + ")";
+	}
+	bool isLoadable() const { return true; }
+	bool isSavable() const { return false; }
 
 private:
-	const std::string ext_, desc_;
+	const QStringList exts_;
+	const QString desc_;
 };
 
 class FileIo
@@ -83,31 +106,27 @@ public:
 private:
 	FileIo();
 
-	inline std::string extractExtention(const QString& file) const
-	{
-		return QFileInfo(file).suffix().toLower().toUtf8().toStdString();
-	}
-
 	static inline std::unique_ptr<FileIo> instance_;
 
 	template<class T>
 	class IoManagerMap
 	{
 	public:
-		inline void add(T* handler)
+		void add(T* handler)
 		{
-			map_[handler->getExtension()].reset(handler);
-			QString filter = utf8ToQString(handler->getFilterText());
+			std::shared_ptr<T> ptr(handler);
+			for (const auto& ext : handler->getExtensions()) map_[ext] = ptr;
+			QString filter = handler->getFilterText();
 			if (handler->isLoadable()) ldFilters_.push_back(filter);
 			if (handler->isSavable()) svFilters_.push_back(filter);
 		}
-		inline bool containExtension(std::string ext) const { return map_.count(ext); }
-		inline const std::unique_ptr<T>& at(std::string ext) const { return map_.at(ext); }
-		inline QStringList getLoadFilterList() const { return ldFilters_; }
-		inline QStringList getSaveFilterList() const { return svFilters_; }
+		bool containExtension(const QString& ext) const { return map_.contains(ext); }
+		const std::shared_ptr<T>& at(const QString& ext) const { return map_[ext]; }
+		QStringList getLoadFilterList() const { return ldFilters_; }
+		QStringList getSaveFilterList() const { return svFilters_; }
 
 	private:
-		std::unordered_map<std::string, std::unique_ptr<T>> map_;
+		QHash<QString, std::shared_ptr<T>> map_;
 		QStringList ldFilters_, svFilters_;
 	};
 

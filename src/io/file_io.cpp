@@ -1,5 +1,6 @@
 #include "file_io.hpp"
 #include <QFile>
+#include <QFileInfo>
 #include <QIODevice>
 #include "file_io_error.hpp"
 #include "original_tone_io.hpp"
@@ -50,6 +51,14 @@ std::vector<TonePtr> AbstractSongFileIo::load(BinaryContainer& container) const
 	throw FileUnsupportedError(FileIo::FileType::SongFile);
 }
 
+namespace
+{
+QString extractExtention(const QString& file)
+{
+	return QFileInfo(file).suffix().toLower();
+}
+}
+
 FileIo::FileIo()
 {
 	SINGLE_TONE_HANDLER_.add(new OriginalToneIo);
@@ -81,7 +90,7 @@ FileIo& FileIo::getInstance()
 
 FileIo::FileType FileIo::detectFileType(const QString& file) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.containExtension(ext)) return FileType::SingleTone;
 	if (TONE_BANK_HANDLER_.containExtension(ext)) return FileType::ToneBank;
@@ -102,7 +111,7 @@ QStringList FileIo::getSingleToneSaveFilter() const
 
 Tone* FileIo::loadSingleToneFrom(const QString& file) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
 		QFile f(file);
@@ -121,7 +130,7 @@ Tone* FileIo::loadSingleToneFrom(const QString& file) const
 
 void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
 		const BinaryContainer&& container = SINGLE_TONE_HANDLER_.at(ext)->save(tone);
@@ -143,7 +152,7 @@ QStringList FileIo::getToneBankSaveFilter() const
 
 std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (TONE_BANK_HANDLER_.containExtension(ext)) {
 		QFile f(file);
@@ -162,7 +171,7 @@ std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 
 void FileIo::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (TONE_BANK_HANDLER_.containExtension(ext)) {
 		const BinaryContainer&& container = TONE_BANK_HANDLER_.at(ext)->save(bank);
@@ -179,7 +188,7 @@ QStringList FileIo::getSongFileLoadFilter() const
 
 std::vector<TonePtr> FileIo::loadSongFileFrom(const QString& file) const
 {
-	const std::string ext = FileIo::extractExtention(file);
+	const QString ext = extractExtention(file);
 
 	if (SONG_FILE_HANDLER_.containExtension(ext)) {
 		QFile f(file);
