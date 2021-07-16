@@ -830,7 +830,12 @@ TonePtr MainWindow::getCurrentTone() const
 void MainWindow::on_actionOpen_O_triggered()
 {
 	QStringList filters = FileIo::getInstance().getSingleToneLoadFilter();
-	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path), filters.join(";;"));
+	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path),
+												filters.join(";;"), nullptr
+											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
+												, QFileDialog::DontUseNativeDialog
+											#endif
+												);
 	if (!file.isNull()) {
 		loadSingleTone(file);
 	}
@@ -874,7 +879,12 @@ bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
 	QStringList filters = FileIo::getInstance().getSingleToneSaveFilter();
-	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path), filters.join(";;"));
+	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path),
+												filters.join(";;"), nullptr
+											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
+												, QFileDialog::DontUseNativeDialog
+											#endif
+												);
 	if (file.isNull()) return false;
 	//	if (!file.endsWith(".tone")) file += ".tone";   // For Linux
 
@@ -1009,7 +1019,11 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 	}
 
 	QStringList filters = FileIo::getInstance().getToneBankSaveFilter();
-	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"));
+	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"), nullptr
+											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
+												, QFileDialog::DontUseNativeDialog
+											#endif
+												);
 	if (file.isNull()) return;
 
 	std::vector<TonePtr> bank;
@@ -1030,7 +1044,11 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
 	QStringList filters = FileIo::getInstance().getToneBankLoadFilter();
-	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"));
+	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"), nullptr
+											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
+												, QFileDialog::DontUseNativeDialog
+											#endif
+												);
 	if (!file.isNull()) {
 		loadToneBank(file);
 	}
@@ -1048,7 +1066,11 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 void MainWindow::on_actionOpe_n_Song_triggered()
 {
 	QStringList filters = FileIo::getInstance().getSongFileLoadFilter();
-	QString file = QFileDialog::getOpenFileName(this, "Open song", ".", filters.join(";;"));
+	QString file = QFileDialog::getOpenFileName(this, "Open song", ".", filters.join(";;"), nullptr
+											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
+												, QFileDialog::DontUseNativeDialog
+											#endif
+												);
 	if (!file.isNull()) {
 		loadSongFile(file);
 	}
