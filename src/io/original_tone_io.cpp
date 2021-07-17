@@ -61,7 +61,7 @@ Tone* OriginalToneIo::load(const BinaryContainer& container) const
 		}
 	}
 	else {
-		throw FileCorruptionError(FileIo::FileType::SingleTone);
+		throw FileCorruptionError(io::FileType::SingleTone);
 	}
 
 	return tone.release();

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "file_io.hpp"
+#include "abstract_file_handler.hpp"
 
 class Y12Io final : public AbstractSingleToneIo
 {
 public:
 	Y12Io();
-	Tone* load(const BinaryContainer& container) const override;
+	[[nodiscard]] Tone* load(const BinaryContainer& container) const override;
 };

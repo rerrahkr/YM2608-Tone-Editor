@@ -12,7 +12,7 @@ Tone* OpniIo::load(const BinaryContainer& container) const
 	OPNIFile opni;
 	if (WOPN_LoadInstFromMem(&opni, const_cast<char*>(container.getPointer()),
 							 static_cast<size_t>(container.size())) != 0)
-		throw FileCorruptionError(FileIo::FileType::SingleTone);
+		throw FileCorruptionError(io::FileType::SingleTone);
 
 	setWOPNInstrumentToTone(opni.inst, tone.get());
 
@@ -31,7 +31,7 @@ const BinaryContainer OpniIo::save(const Tone& tone) const
 
 	if (WOPN_SaveInstToMem(&opni, const_cast<char*>(container.getPointer()),
 						   static_cast<size_t>(container.size()), 2) != 0)
-		throw FileOutputError(FileIo::FileType::SingleTone);
+		throw FileOutputError(io::FileType::SingleTone);
 
 	return container;
 }

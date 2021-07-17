@@ -7,7 +7,7 @@ Tone* Y12Io::load(const BinaryContainer& container) const
 {
 	auto tone = std::make_unique<Tone>();
 
-	if (container.size() != 128) throw FileCorruptionError(FileIo::FileType::SingleTone);
+	if (container.size() != 128) throw FileCorruptionError(io::FileType::SingleTone);
 	size_t csr = 0;
 	Operator* ops[] = { tone->op, tone->op + 2, tone->op + 1, tone->op + 3 };
 	for (Operator* op : ops) {

@@ -10,7 +10,7 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 	size_t csr = 0;
 	uint8_t sig1 = container.readUint8(csr++);
 	uint8_t sig2 = container.readUint8(csr++);
-	if (sig1 != 26 || sig2 != 12) throw FileCorruptionError(FileIo::FileType::ToneBank);
+	if (sig1 != 26 || sig2 != 12) throw FileCorruptionError(io::FileType::ToneBank);
 
 	uint8_t version = container.readUint8(csr++);
 	if (version < 3) {
@@ -77,7 +77,7 @@ std::vector<TonePtr> GybIo::load(BinaryContainer& container) const
 	else {
 		uint8_t lfoFreq = container.readUint8(csr++);
 		if (container.readUint32(csr) != container.size())
-			throw FileCorruptionError(FileIo::FileType::ToneBank);
+			throw FileCorruptionError(io::FileType::ToneBank);
 		csr += 4;
 		csr = container.readUint32(csr);	// Jump to instrument bank
 		uint16_t cnt = container.readUint16(csr);

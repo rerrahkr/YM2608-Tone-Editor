@@ -13,7 +13,7 @@ std::vector<TonePtr> Mucom88Io::load(BinaryContainer& container) const
 	// File size check
 	size_t ctrSize = container.size();
 	if (!ctrSize || ctrSize != 0x2000)
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 
 	size_t opOffs[] = { 0, 2, 1, 3 };
 	QTextCodec* codec = QTextCodec::codecForName("Shift-JIS");

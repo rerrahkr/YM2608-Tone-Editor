@@ -9,14 +9,14 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 
 	size_t globCsr = 0;
 	if (container.readString(globCsr, 16) != "BambooTrackerIst")
-		throw FileCorruptionError(FileIo::FileType::SingleTone);
+		throw FileCorruptionError(io::FileType::SingleTone);
 	globCsr += 16;
 	/*size_t eofOfs = */container.readUint32(globCsr);
 	globCsr += 8;	// Skip also file version
 
 	/***** Instrument section *****/
 	if (container.readString(globCsr, 8) != "INSTRMNT")
-		throw FileCorruptionError(FileIo::FileType::SingleTone);
+		throw FileCorruptionError(io::FileType::SingleTone);
 	globCsr += 8;
 	size_t instOfs = container.readUint32(globCsr);
 	size_t instCsr = globCsr + 4;
@@ -28,12 +28,12 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 		instCsr += nameLen;
 	}
 	if (container.readUint8(instCsr++) != 0x00)	// Not FM
-		throw FileUnsupportedError(FileIo::FileType::SingleTone);
+		throw FileUnsupportedError(io::FileType::SingleTone);
 	globCsr += instOfs;
 
 	/***** Instrument property section *****/
 	if (container.readString(globCsr, 8) != "INSTPROP")
-		throw FileCorruptionError(FileIo::FileType::SingleTone);
+		throw FileCorruptionError(io::FileType::SingleTone);
 	else {
 		globCsr += 8;
 		size_t instPropOfs = container.readUint32(globCsr);
@@ -94,7 +94,7 @@ Tone* BtiIo::load(const BinaryContainer& container) const
 				instPropCsr += ofs;
 			}
 			else {
-				throw FileCorruptionError(FileIo::FileType::SingleTone);
+				throw FileCorruptionError(io::FileType::SingleTone);
 			}
 		}
 	}

@@ -10,7 +10,7 @@ std::vector<TonePtr> OriginalBankIo::load(BinaryContainer& container) const
 	size_t csr = 0;
 	std::string ident = container.readString(csr, 4);
 	if (ident != "BANK" && ident != "BKV2" && ident != "BKV3")
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 	csr += 4;
 
 	uint16_t cnt = container.readUint16(csr);

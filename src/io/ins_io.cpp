@@ -8,7 +8,7 @@ Tone* InsIo::load(const BinaryContainer& container) const
 	auto tone = std::make_unique<Tone>();
 
 	size_t csr = 0;
-	if (container.readString(csr, 4) != "MVSI") throw FileInputError(FileIo::FileType::SingleTone);
+	if (container.readString(csr, 4) != "MVSI") throw FileInputError(io::FileType::SingleTone);
 	csr += 4;
 	/*uint8_t fileVersion = */std::stoi(container.readString(csr++, 1));
 	size_t nameCsr = 0;
@@ -17,7 +17,7 @@ Tone* InsIo::load(const BinaryContainer& container) const
 	tone->name = container.readString(csr, nameCsr - csr);
 	csr = nameCsr;
 
-	if (container.size() - csr != 25) throw FileInputError(FileIo::FileType::SingleTone);
+	if (container.size() - csr != 25) throw FileInputError(io::FileType::SingleTone);
 
 	uint8_t tmp;
 	for (size_t o = 0; o < 4; ++o) {

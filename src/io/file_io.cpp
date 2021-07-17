@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QIODevice>
+#include "abstract_file_handler.hpp"
 #include "file_io_error.hpp"
 #include "original_tone_io.hpp"
 #include "original_bank_io.hpp"
@@ -21,105 +22,114 @@
 #include "vgm_io.hpp"
 #include "s98_io.hpp"
 
-Tone* AbstractSingleToneIo::load(const BinaryContainer& container) const
-{
-	(void)container;
-	throw FileUnsupportedError(FileIo::FileType::SingleTone);
-}
-
-const BinaryContainer AbstractSingleToneIo::save(const Tone& tone) const
-{
-	(void)tone;
-	throw FileUnsupportedError(FileIo::FileType::SingleTone);
-}
-
-std::vector<TonePtr> AbstractToneBankIo::load(BinaryContainer& container) const
-{
-	(void)container;
-	throw FileUnsupportedError(FileIo::FileType::ToneBank);
-}
-
-const BinaryContainer AbstractToneBankIo::save(const std::vector<TonePtr>& bank) const
-{
-	(void)bank;
-	throw FileUnsupportedError(FileIo::FileType::ToneBank);
-}
-
-std::vector<TonePtr> AbstractSongFileIo::load(BinaryContainer& container) const
-{
-	(void)container;
-	throw FileUnsupportedError(FileIo::FileType::SongFile);
-}
-
 namespace
 {
-QString extractExtention(const QString& file)
+template<class T>
+class IoManagerMap
+{
+public:
+	IoManagerMap(std::initializer_list<T*> handlers)
+	{
+		QStringList ldExts, svExts;
+		for (T* handler : handlers) {
+			std::shared_ptr<T> ptr(handler);
+			QStringList exts = handler->getExtensions();
+			for (const auto& ext : exts) map_[ext] = ptr;
+			QString filter = handler->getFilterText();
+			std::transform(exts.begin(), exts.end(), exts.begin(), [](QString& s) { return "*." + s; });
+			if (handler->isLoadable()) {
+				ldFilters_.push_back(filter);
+				ldExts += exts;
+			}
+			if (handler->isSavable()) {
+				svFilters_.push_back(filter);
+				svExts += exts;
+			}
+		}
+		const QString allSupp = "All supported formats (%1)";
+		ldFilters_.push_front(allSupp.arg(ldExts.join(" ")));
+		svFilters_.push_front(allSupp.arg(svExts.join(" ")));
+
+		const QString all = "All files (*)";
+		ldFilters_.push_back(all);
+		svFilters_.push_back(all);
+	}
+
+	bool containExtension(const QString& ext) const { return map_.contains(ext); }
+	const std::shared_ptr<T> operator[](const QString& ext) const { return map_[ext]; }
+	QStringList getLoadFilterList() const noexcept { return ldFilters_; }
+	QStringList getSaveFilterList() const noexcept { return svFilters_; }
+
+private:
+	QHash<QString, std::shared_ptr<T>> map_;
+	QStringList ldFilters_, svFilters_;
+	QString ldExts_, svExts_;
+};
+
+IoManagerMap<AbstractSingleToneIo> SINGLE_TONE_HANDLERS = {
+	new OriginalToneIo,
+	new BtiIo,
+	new DmpIo,
+	new OpniIo,
+	new TfiIo,
+	new VgiIo,
+	new Y12Io,
+	new InsIo,
+};
+
+IoManagerMap<AbstractToneBankIo> TONE_BANK_HANDLERS = {
+	new OriginalBankIo,
+	new BtbIo,
+	new FfIo,
+	new WopnIo,
+	new Mucom88Io,
+	new BnkIo,
+	new GybIo,
+};
+
+IoManagerMap<AbstractSongFileIo> SONG_FILE_HANDLERS = {
+	new VgmIo,
+	new S98Io
+};
+
+inline QString extractExtention(const QString& file)
 {
 	return QFileInfo(file).suffix().toLower();
 }
 }
 
-FileIo::FileIo()
-{
-	SINGLE_TONE_HANDLER_.add(new OriginalToneIo);
-	SINGLE_TONE_HANDLER_.add(new BtiIo);
-	SINGLE_TONE_HANDLER_.add(new DmpIo);
-	SINGLE_TONE_HANDLER_.add(new OpniIo);
-	SINGLE_TONE_HANDLER_.add(new TfiIo);
-	SINGLE_TONE_HANDLER_.add(new VgiIo);
-	SINGLE_TONE_HANDLER_.add(new Y12Io);
-	SINGLE_TONE_HANDLER_.add(new InsIo);
-
-	TONE_BANK_HANDLER_.add(new OriginalBankIo);
-	TONE_BANK_HANDLER_.add(new BtbIo);
-	TONE_BANK_HANDLER_.add(new FfIo);
-	TONE_BANK_HANDLER_.add(new WopnIo);
-	TONE_BANK_HANDLER_.add(new Mucom88Io);
-	TONE_BANK_HANDLER_.add(new BnkIo);
-	TONE_BANK_HANDLER_.add(new GybIo);
-
-	SONG_FILE_HANDLER_.add(new VgmIo);
-	SONG_FILE_HANDLER_.add(new S98Io);
-}
-
-FileIo& FileIo::getInstance()
-{
-	if (!instance_) instance_.reset(new FileIo);
-	return *instance_;
-}
-
-FileIo::FileType FileIo::detectFileType(const QString& file) const
+io::FileType io::detectFileType(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.containExtension(ext)) return FileType::SingleTone;
-	if (TONE_BANK_HANDLER_.containExtension(ext)) return FileType::ToneBank;
-	if (SONG_FILE_HANDLER_.containExtension(ext)) return FileType::SongFile;
+	if (SINGLE_TONE_HANDLERS.containExtension(ext)) return FileType::SingleTone;
+	if (TONE_BANK_HANDLERS.containExtension(ext)) return FileType::ToneBank;
+	if (SONG_FILE_HANDLERS.containExtension(ext)) return FileType::SongFile;
 
 	return FileType::Unknown;
 }
 
-QStringList FileIo::getSingleToneLoadFilter() const
+QStringList io::getSingleToneLoadFilter()
 {
-	return SINGLE_TONE_HANDLER_.getLoadFilterList();
+	return SINGLE_TONE_HANDLERS.getLoadFilterList();
 }
 
-QStringList FileIo::getSingleToneSaveFilter() const
+QStringList io::getSingleToneSaveFilter()
 {
-	return SINGLE_TONE_HANDLER_.getSaveFilterList();
+	return SINGLE_TONE_HANDLERS.getSaveFilterList();
 }
 
-Tone* FileIo::loadSingleToneFrom(const QString& file) const
+Tone* io::loadSingleToneFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
+	if (SINGLE_TONE_HANDLERS.containExtension(ext)) {
 		QFile f(file);
 		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::SingleTone);
 		QByteArray array = f.readAll();
 		f.close();
 		BinaryContainer ctr(std::vector<char>(array.begin(), array.end()));
-		Tone* tone = SINGLE_TONE_HANDLER_.at(ext)->load(ctr);
+		Tone* tone = SINGLE_TONE_HANDLERS[ext]->load(ctr);
 
 		tone->path = (file + ((ext == "tone") ? "" : ".tone")).toUtf8().toStdString();
 		return tone;
@@ -128,39 +138,39 @@ Tone* FileIo::loadSingleToneFrom(const QString& file) const
 	throw FileUnsupportedError(FileType::SingleTone);
 }
 
-void FileIo::saveSingleToneFrom(const QString& file, const Tone& tone) const
+void io::saveSingleToneFrom(const QString& file, const Tone& tone)
 {
 	const QString ext = extractExtention(file);
 
-	if (SINGLE_TONE_HANDLER_.containExtension(ext)) {
-		const BinaryContainer&& container = SINGLE_TONE_HANDLER_.at(ext)->save(tone);
+	if (SINGLE_TONE_HANDLERS.containExtension(ext)) {
+		const BinaryContainer&& container = SINGLE_TONE_HANDLERS[ext]->save(tone);
 		QFile f(file);
 		if (!f.open(QIODevice::WriteOnly)) throw FileOutputError(FileType::SingleTone);
 		f.write(container.getPointer(), container.size());
 	}
 }
 
-QStringList FileIo::getToneBankLoadFilter() const
+QStringList io::getToneBankLoadFilter()
 {
-	return TONE_BANK_HANDLER_.getLoadFilterList();
+	return TONE_BANK_HANDLERS.getLoadFilterList();
 }
 
-QStringList FileIo::getToneBankSaveFilter() const
+QStringList io::getToneBankSaveFilter()
 {
-	return TONE_BANK_HANDLER_.getSaveFilterList();
+	return TONE_BANK_HANDLERS.getSaveFilterList();
 }
 
-std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
+std::vector<TonePtr> io::loadToneBankFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
-	if (TONE_BANK_HANDLER_.containExtension(ext)) {
+	if (TONE_BANK_HANDLERS.containExtension(ext)) {
 		QFile f(file);
 		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::ToneBank);
 		QByteArray array = f.readAll();
 		f.close();
 		BinaryContainer ctr(std::vector<char>(array.begin(), array.end()));
-		std::vector<TonePtr> bank = TONE_BANK_HANDLER_.at(ext)->load(ctr);
+		std::vector<TonePtr> bank = TONE_BANK_HANDLERS[ext]->load(ctr);
 
 		for (TonePtr& tone : bank) tone->path = (file + ".tone").toUtf8().toStdString();
 		return bank;
@@ -169,34 +179,34 @@ std::vector<TonePtr> FileIo::loadToneBankFrom(const QString& file) const
 	throw FileUnsupportedError(FileType::ToneBank);
 }
 
-void FileIo::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank) const
+void io::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank)
 {
 	const QString ext = extractExtention(file);
 
-	if (TONE_BANK_HANDLER_.containExtension(ext)) {
-		const BinaryContainer&& container = TONE_BANK_HANDLER_.at(ext)->save(bank);
+	if (TONE_BANK_HANDLERS.containExtension(ext)) {
+		const BinaryContainer&& container = TONE_BANK_HANDLERS[ext]->save(bank);
 		QFile f(file);
 		if (!f.open(QIODevice::WriteOnly)) throw FileOutputError(FileType::ToneBank);
 		f.write(container.getPointer(), container.size());
 	}
 }
 
-QStringList FileIo::getSongFileLoadFilter() const
+QStringList io::getSongFileLoadFilter()
 {
-	return SONG_FILE_HANDLER_.getLoadFilterList();
+	return SONG_FILE_HANDLERS.getLoadFilterList();
 }
 
-std::vector<TonePtr> FileIo::loadSongFileFrom(const QString& file) const
+std::vector<TonePtr> io::loadSongFileFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
-	if (SONG_FILE_HANDLER_.containExtension(ext)) {
+	if (SONG_FILE_HANDLERS.containExtension(ext)) {
 		QFile f(file);
 		if (!f.open(QIODevice::ReadOnly)) throw FileInputError(FileType::SongFile);
 		QByteArray array = f.readAll();
 		f.close();
 		BinaryContainer ctr(std::vector<char>(array.begin(), array.end()));
-		std::vector<TonePtr> list = SONG_FILE_HANDLER_.at(ext)->load(ctr);
+		std::vector<TonePtr> list = SONG_FILE_HANDLERS[ext]->load(ctr);
 
 		for (TonePtr& tone : list) tone->path = (file + ".tone").toUtf8().toStdString();
 		return list;

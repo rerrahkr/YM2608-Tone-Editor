@@ -259,25 +259,31 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
 	auto mime = event->mimeData();
-	if (mime->hasUrls() && mime->urls().length() == 1) {
-		switch (FileIo::getInstance().detectFileType(mime->urls().first().toLocalFile())) {
-		case FileIo::FileType::Unknown:
-			break;
-		default:
-			event->acceptProposedAction();
-			break;
+	if (mime->hasUrls()) {
+		const auto urls = mime->urls();
+		for (auto& url : urls) {
+			switch (io::detectFileType(url.toLocalFile())) {
+			case io::FileType::Unknown:
+				return;
+			default:
+				break;
+			}
 		}
+		event->acceptProposedAction();
 	}
 }
 
 void MainWindow::dropEvent(QDropEvent* event)
 {
-	QString file = event->mimeData()->urls().first().toLocalFile();
-	switch (FileIo::getInstance().detectFileType(file)) {
-	case FileIo::FileType::SingleTone:	loadSingleTone(file);	break;
-	case FileIo::FileType::ToneBank:	loadToneBank(file);		break;
-	case FileIo::FileType::SongFile:	loadSongFile(file);		break;
-	default:	break;
+	const auto urls = event->mimeData()->urls();
+	for (const auto& url : urls) {
+		QString file = url.toLocalFile();
+		switch (io::detectFileType(file)) {
+		case io::FileType::SingleTone:	loadSingleTone(file);	break;
+		case io::FileType::ToneBank:	loadToneBank(file);		break;
+		case io::FileType::SongFile:	loadSongFile(file);		break;
+		default:	break;
+		}
 	}
 }
 
@@ -754,7 +760,7 @@ void MainWindow::onParameterChanged(int op, OperatorParameter param, int value)
 void MainWindow::loadSingleTone(const QString& file)
 {
 	try {
-		Tone* t = FileIo::getInstance().loadSingleToneFrom(file);
+		Tone* t = io::loadSingleToneFrom(file);
 		addToneTo(ui->listWidget->count(), t);
 		ui->removeTonePushButton->setEnabled(true);
 	}
@@ -766,7 +772,7 @@ void MainWindow::loadSingleTone(const QString& file)
 void MainWindow::loadToneBank(const QString& file)
 {
 	try {
-		std::vector<TonePtr> bank = FileIo::getInstance().loadToneBankFrom(file);
+		std::vector<TonePtr> bank = io::loadToneBankFrom(file);
 		for (TonePtr tone : bank) addToneTo(ui->listWidget->count(), tone);
 		ui->removeTonePushButton->setEnabled(true);
 	}
@@ -778,7 +784,7 @@ void MainWindow::loadToneBank(const QString& file)
 void MainWindow::loadSongFile(const QString& file)
 {
 	try {
-		std::vector<TonePtr> list = FileIo::getInstance().loadSongFileFrom(file);
+		std::vector<TonePtr> list = io::loadSongFileFrom(file);
 		for (TonePtr tone : list) addToneTo(ui->listWidget->count(), tone);
 		ui->removeTonePushButton->setEnabled(true);
 	}
@@ -829,7 +835,7 @@ TonePtr MainWindow::getCurrentTone() const
 
 void MainWindow::on_actionOpen_O_triggered()
 {
-	QStringList filters = FileIo::getInstance().getSingleToneLoadFilter();
+	QStringList filters = io::getSingleToneLoadFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path),
 												filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
@@ -861,7 +867,7 @@ bool MainWindow::saveTone()
 	auto tone = getCurrentTone();
 	if (tone->path != "./" && QFile::exists(utf8ToQString(tone->path))) {
 		try {
-			FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+			io::saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 		}
 		catch (FileIoError& e) {
 			QMessageBox::critical(this, "Error", ("Failed to save the tone.\n\n") + QString(e.what()));
@@ -878,7 +884,7 @@ bool MainWindow::saveTone()
 bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
-	QStringList filters = FileIo::getInstance().getSingleToneSaveFilter();
+	QStringList filters = io::getSingleToneSaveFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path),
 												filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
@@ -890,7 +896,7 @@ bool MainWindow::saveToneAs()
 
 	tone->path = file.toUtf8().toStdString();
 	try {
-		FileIo::getInstance().saveSingleToneFrom(utf8ToQString(tone->path), *tone);
+		io::saveSingleToneFrom(utf8ToQString(tone->path), *tone);
 	}
 	catch (FileIoError& e) {
 		QMessageBox::critical(this, "Error", ("Failed to save the tone.\n\n") + QString(e.what()));
@@ -1018,7 +1024,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 		return;
 	}
 
-	QStringList filters = FileIo::getInstance().getToneBankSaveFilter();
+	QStringList filters = io::getToneBankSaveFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save bank", ".", filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
 												, QFileDialog::DontUseNativeDialog
@@ -1032,7 +1038,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 				   [](const QListWidgetItem* item) { return item->data(Qt::UserRole).value<TonePtr>(); });
 
 	try {
-		FileIo::getInstance().saveToneBankFrom(file, bank);
+		io::saveToneBankFrom(file, bank);
 	}
 	catch (FileIoError& e) {
 		QMessageBox::critical(this, "Error", ("Failed to save the bank.\n\n") + QString(e.what()));
@@ -1043,7 +1049,7 @@ void MainWindow::on_actionSave_Bank_As_triggered()
 
 void MainWindow::on_actionO_pen_Bank_triggered()
 {
-	QStringList filters = FileIo::getInstance().getToneBankLoadFilter();
+	QStringList filters = io::getToneBankLoadFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open bank", ".", filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
 												, QFileDialog::DontUseNativeDialog
@@ -1065,7 +1071,7 @@ void MainWindow::on_lineEdit_textChanged(const QString &arg1)
 
 void MainWindow::on_actionOpe_n_Song_triggered()
 {
-	QStringList filters = FileIo::getInstance().getSongFileLoadFilter();
+	QStringList filters = io::getSongFileLoadFilter();
 	QString file = QFileDialog::getOpenFileName(this, "Open song", ".", filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
 												, QFileDialog::DontUseNativeDialog

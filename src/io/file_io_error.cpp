@@ -1,23 +1,23 @@
 #include "file_io_error.hpp"
 
-FileIoError::FileIoError(std::string text, const FileIo::FileType type)
+FileIoError::FileIoError(const std::string& text, const io::FileType type)
 	: std::runtime_error(text), type_(type)
 {
 }
 
-FileIo::FileType FileIoError::getFileType() const
+io::FileType FileIoError::getFileType() const
 {
 	return type_;
 }
 
 /******************************/
-FileInputError::FileInputError(const FileIo::FileType type)
+FileInputError::FileInputError(const io::FileType type)
 	: FileIoError("File input error", type)
 {
 }
 
 /******************************/
-FileOutputError::FileOutputError(const FileIo::FileType type)
+FileOutputError::FileOutputError(const io::FileType type)
 	: FileIoError("File output error", type)
 {
 }
@@ -29,13 +29,13 @@ FileOutputError::FileOutputError(const FileIo::FileType type)
 //}
 
 /******************************/
-FileCorruptionError::FileCorruptionError(const FileIo::FileType type)
+FileCorruptionError::FileCorruptionError(const io::FileType type)
 	: FileIoError("File corruption error", type)
 {
 }
 
 /******************************/
-FileUnsupportedError::FileUnsupportedError(const FileIo::FileType type)
+FileUnsupportedError::FileUnsupportedError(const io::FileType type)
 	: FileIoError("File unsupported error", type)
 {
 }

@@ -10,7 +10,7 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 
 	size_t globCsr = 0;
 	if (container.readString(globCsr, 16) != "BambooTrackerBnk")
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 	globCsr += 16;
 	/*size_t eofOfs = */container.readUint32(globCsr);
 	globCsr += 8;	// Skip also file version
@@ -20,7 +20,7 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 	std::unordered_map<int, std::vector<size_t>> envToneMap;
 	std::unordered_map<int, std::vector<size_t>> lfoToneMap;
 	if (container.readString(globCsr, 8) != "INSTRMNT")
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 	globCsr += 8;
 	size_t instOfs = container.readUint32(globCsr);
 	size_t instCsr = globCsr + 4;
@@ -60,7 +60,7 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 
 	/***** Instrument property section *****/
 	if (container.readString(globCsr, 8) != "INSTPROP")
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 	globCsr += 8;
 	size_t instPropOfs = container.readUint32(globCsr);
 	size_t instPropCsr = globCsr + 4;
@@ -151,7 +151,7 @@ std::vector<TonePtr> BtbIo::load(BinaryContainer& container) const
 			}
 		}
 		else {
-			throw FileCorruptionError(FileIo::FileType::ToneBank);
+			throw FileCorruptionError(io::FileType::ToneBank);
 		}
 	}
 

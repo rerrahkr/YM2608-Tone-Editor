@@ -5,14 +5,11 @@ namespace chip
 {
 	//const int Chip::MAX_AMP_ = 32767;	// half-max of int16
 
-	Chip::Chip(int id, int clock, int rate, int autoRate) :
+	Chip::Chip(int id, int /*clock*/, int /*rate*/, int autoRate) :
 		id_(id),
 		rate_(1),	// Dummy set
 		autoRate_(autoRate)
 	{
-		(void)clock;
-		(void)rate;
-
 		for (int pan = LEFT; pan <= RIGHT; ++pan) {
 			for (auto& buf : buffer_) {
 				buf[pan] = new sample[SMPL_BUF_SIZE_];

@@ -18,7 +18,7 @@ namespace chip
 		switch (emu) {
 		default:
 			fprintf(stderr, "Unknown emulator choice. Using the default.\n");
-			/* fall through */
+			[[fallthrough]];
 		case Emu::Mame:
 			fprintf(stderr, "Using emulator: MAME YM2608\n");
 			intf_ = std::make_unique<Mame2608>();
@@ -75,10 +75,8 @@ namespace chip
 	}
 
 	// TODO: Volume settings
-	void OPNA::setVolume(float dBFM, float dBSSG)
+	void OPNA::setVolume(float /*dBFM*/, float /*dBSSG*/)
 	{
-		(void)dBFM;
-		(void)dBSSG;
 		std::lock_guard<std::mutex> lg(mutex_);
 
 		/*dB_[FM] = dBFM;*/

@@ -30,7 +30,7 @@ std::vector<TonePtr> WopnIo::load(BinaryContainer& container) const
 	std::unique_ptr<WOPNFile, WOPNDeleter> wopn;
 	wopn.reset(WOPN_LoadBankFromMem(const_cast<char*>(container.getPointer()), container.size(), nullptr));
 	if (!wopn)
-		throw FileCorruptionError(FileIo::FileType::ToneBank);
+		throw FileCorruptionError(io::FileType::ToneBank);
 
 	unsigned numM = wopn->banks_count_melodic;
 	unsigned numP = wopn->banks_count_percussion;
@@ -83,7 +83,7 @@ const BinaryContainer WopnIo::save(const std::vector<TonePtr>& bank) const
 
 	if (WOPN_SaveBankToMem(wopn.get(), const_cast<char*>(container.getPointer()),
 						   static_cast<size_t>(container.size()), 2, 0) != 0)
-		throw FileOutputError(FileIo::FileType::ToneBank);
+		throw FileOutputError(io::FileType::ToneBank);
 
 	return container;
 }

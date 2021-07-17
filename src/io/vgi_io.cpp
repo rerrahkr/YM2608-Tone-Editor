@@ -8,7 +8,7 @@ Tone* VgiIo::load(const BinaryContainer& container) const
 {
 	auto tone = std::make_unique<Tone>();
 
-	if (container.size() != 43) throw FileCorruptionError(FileIo::FileType::SingleTone);
+	if (container.size() != 43) throw FileCorruptionError(io::FileType::SingleTone);
 	size_t csr = 0;
 	tone->AL = container.readUint8(csr++);
 	tone->FB = container.readUint8(csr++);

@@ -7,39 +7,39 @@
 class FileIoError : public std::runtime_error
 {
 public:
-	FileIo::FileType getFileType() const;
+	io::FileType getFileType() const;
 
 protected:
-	FileIoError(std::string text, const FileIo::FileType type);
-	const FileIo::FileType type_;
+	FileIoError(const std::string& text, const io::FileType type);
+	const io::FileType type_;
 };
 
 class FileInputError : public FileIoError
 {
 public:
-	FileInputError(const FileIo::FileType type);
+	explicit FileInputError(const io::FileType type);
 };
 
 class FileOutputError : public FileIoError
 {
 public:
-	FileOutputError(const FileIo::FileType type);
+	explicit FileOutputError(const io::FileType type);
 };
 
 //class FileVersionError : public FileIOError
 //{
 //public:
-//	FileVersionError(const FileIo::FileType type);
+//	explicit FileVersionError(const FileIo::FileType type);
 //};
 
 class FileCorruptionError : public FileIoError
 {
 public:
-	FileCorruptionError(const FileIo::FileType type);
+	explicit FileCorruptionError(const io::FileType type);
 };
 
 class FileUnsupportedError : public FileIoError
 {
 public:
-	FileUnsupportedError(const FileIo::FileType type);
+	explicit FileUnsupportedError(const io::FileType type);
 };

@@ -12,22 +12,22 @@ Tone* DmpIo::load(const BinaryContainer& container) const
 	uint8_t insType = 1; // default to FM
 	uint8_t fileVersion = container.readUint8(csr++);
 	if (fileVersion == 0) { // older, unversioned dmp
-		if (container.size() != 49) throw FileCorruptionError(FileIo::FileType::SingleTone);
+		if (container.size() != 49) throw FileCorruptionError(io::FileType::SingleTone);
 	}
 	else {
-		if (fileVersion < 9) throw FileCorruptionError(FileIo::FileType::SingleTone);
+		if (fileVersion < 9) throw FileCorruptionError(io::FileType::SingleTone);
 		if (fileVersion == 9 && container.size() != 51) { // make sure it's not for that discontinued chip
-			throw FileCorruptionError(FileIo::FileType::SingleTone);
+			throw FileCorruptionError(io::FileType::SingleTone);
 		}
 		uint8_t system = 2; // default to genesis
 		if (fileVersion >= 11) system = container.readUint8(csr++);
 		if (system != 2 && system != 8) { // genesis and arcade only
-			throw FileUnsupportedError(FileIo::FileType::SingleTone);
+			throw FileUnsupportedError(io::FileType::SingleTone);
 		}
 		insType = container.readUint8(csr++);
 	}
 	if (insType != 1)	// Fm only
-		throw  FileUnsupportedError(FileIo::FileType::SingleTone);
+		throw  FileUnsupportedError(io::FileType::SingleTone);
 
 	if (fileVersion == 9) csr++; // skip version 9's total operators field
 	tone->PMS_LFO = container.readUint8(csr++);

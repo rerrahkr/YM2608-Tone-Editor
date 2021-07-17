@@ -11,14 +11,14 @@ VgmIo::VgmIo() : AbstractSongFileIo("vgm", "VGM file") {}
 
 std::vector<TonePtr> VgmIo::load(BinaryContainer& container) const
 {
-    if (container.size() < 256) throw FileCorruptionError(FileIo::FileType::SongFile);
+    if (container.size() < 256) throw FileCorruptionError(io::FileType::SongFile);
 
     std::string ident = container.readString(0, 4);
-    if (ident != "Vgm ") throw FileCorruptionError(FileIo::FileType::SongFile);
+    if (ident != "Vgm ") throw FileCorruptionError(io::FileType::SongFile);
 
 	container.setEndian(true);
     uint32_t eof = container.readUint32(4);
-    if (container.size() - 4 != eof) throw FileCorruptionError(FileIo::FileType::SongFile);
+    if (container.size() - 4 != eof) throw FileCorruptionError(io::FileType::SongFile);
 
 	RegisterRecorder rec(44100);
 
@@ -85,7 +85,7 @@ std::vector<TonePtr> VgmIo::load(BinaryContainer& container) const
 				rec.elapse(com - 0x6f);
 			}
 			else {
-				throw FileUnsupportedError(FileIo::FileType::SongFile);
+				throw FileUnsupportedError(io::FileType::SongFile);
 			}
 			break;
 		}

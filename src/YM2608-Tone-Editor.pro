@@ -39,6 +39,7 @@ SOURCES += \
     chips/nuked/ym3438.c \
     fmenvelopeformatdialog.cpp \
     fmenvelopeorderdialog.cpp \
+    io/abstract_file_handler.cpp \
     io/binary_container.cpp \
     io/bnk_io.cpp \
     io/btb_io.cpp \
@@ -94,6 +95,7 @@ HEADERS += \
     chips/nuked/ym3438.h \
     fmenvelopeformatdialog.hpp \
     fmenvelopeorderdialog.hpp \
+    io/abstract_file_handler.hpp \
     io/binary_container.hpp \
     io/bnk_io.hpp \
     io/btb_io.hpp \

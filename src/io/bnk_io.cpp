@@ -7,7 +7,7 @@ std::vector<TonePtr> BnkIo::load(BinaryContainer& container) const
 {
 	std::vector<TonePtr> bank;
 	container.setEndian(false);
-	if (container.size() < 100) throw FileCorruptionError(FileIo::FileType::ToneBank);
+	if (container.size() < 100) throw FileCorruptionError(io::FileType::ToneBank);
 	size_t nMax = (container.size() - 100) / 84;
 	bank.reserve(nMax);
 	size_t csr = 100;
@@ -53,7 +53,7 @@ std::vector<TonePtr> BnkIo::load(BinaryContainer& container) const
 		bank.push_back(std::move(tone));
 	}
 
-	if (bank.empty()) throw FileUnsupportedError(FileIo::FileType::ToneBank);
+	if (bank.empty()) throw FileUnsupportedError(io::FileType::ToneBank);
 
 	return bank;
 }

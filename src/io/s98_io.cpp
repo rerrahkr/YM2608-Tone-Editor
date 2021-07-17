@@ -12,12 +12,12 @@ S98Io::S98Io() : AbstractSongFileIo("s98", "S98 file") {}
 
 std::vector<TonePtr> S98Io::load(BinaryContainer& container) const
 {
-	if (container.size() < 0x20) throw FileCorruptionError(FileIo::FileType::SongFile);
+	if (container.size() < 0x20) throw FileCorruptionError(io::FileType::SongFile);
 
 	std::string ident = container.readString(0, 3);
-	if (ident != "S98") throw FileCorruptionError(FileIo::FileType::SongFile);
+	if (ident != "S98") throw FileCorruptionError(io::FileType::SongFile);
 	char version = container.readChar(3);
-	if (version != '3') throw  FileUnsupportedError(FileIo::FileType::SongFile);
+	if (version != '3') throw  FileUnsupportedError(io::FileType::SongFile);
 
 	size_t devCnt = container.readUint32(0x1c);
 	std::vector<RegisterRecorder::Chip> chips;
