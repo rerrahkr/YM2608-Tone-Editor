@@ -2,7 +2,8 @@
 
 ## Unreleased
 ### Added
-- [#18] - Support 2 new format import
+- [#18], [#19] - Support 3 new format import
+  - .m/.m2 (PMD song file) (thanks [@OPNA2608])
   - .s98 (S98 file)
   - .vgm (Video Game Music)
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])
@@ -15,11 +16,14 @@
 - [#14] - Fix the parameter order of the default MUCOM88 output preset (thanks [@freq-mod])
 - [#15] - Fix the default MMLDRV output format (thank [@freq-mod])
 
+[@OPNA2608]: https://github.com/OPNA2608
+
 [#12]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/12
 [#13]: https://github.com/rerrahkr/YM2608-Tone-Editor/pull/13
 [#14]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/14
 [#15]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/15
 [#18]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/18
+[#19]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/19
 
 ## v0.3.0 (2020/09/05)
 ### Added

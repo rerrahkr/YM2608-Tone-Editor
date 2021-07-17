@@ -37,6 +37,7 @@ YM2608 Tone Editor supports importing/exporting a tone/bank/song.
 - .ff (PMD bank)
 - .gyb (GYB bank) (import only)
 - .ins (MVSTracker instrument)
+- .m/.m2 (PMD song file)
 - .opni/.wopn (OPN2BankEditor imstrument/bank)
 - .s98 (S98 file) (import only)
 - .tfi (TFM Music Maker instrument)

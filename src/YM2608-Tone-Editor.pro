@@ -53,6 +53,7 @@ SOURCES += \
     io/mucom88_io.cpp \
     io/original_bank_io.cpp \
     io/original_tone_io.cpp \
+    io/pmd_io.cpp \
     io/register_recorder.cpp \
     io/s98_io.cpp \
     io/tfi_io.cpp \
@@ -110,6 +111,7 @@ HEADERS += \
     io/mucom88_io.hpp \
     io/original_bank_io.hpp \
     io/original_tone_io.hpp \
+    io/pmd_io.hpp \
     io/register_recorder.hpp \
     io/s98_io.hpp \
     io/tfi_io.hpp \

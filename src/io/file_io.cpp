@@ -21,6 +21,7 @@
 #include "gyb_io.hpp"
 #include "vgm_io.hpp"
 #include "s98_io.hpp"
+#include "pmd_io.hpp"
 
 namespace
 {
@@ -89,7 +90,8 @@ IoManagerMap<AbstractToneBankIo> TONE_BANK_HANDLERS = {
 
 IoManagerMap<AbstractSongFileIo> SONG_FILE_HANDLERS = {
 	new VgmIo,
-	new S98Io
+	new S98Io,
+	new PmdIo
 };
 
 inline QString extractExtention(const QString& file)
