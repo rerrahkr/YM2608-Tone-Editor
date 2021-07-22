@@ -4,6 +4,7 @@
 ### Added
 - [#18], [#19] - Support 3 new format import
   - .m/.m2 (PMD song file) (thanks [@OPNA2608])
+  - .opi, .ovi, .ozi, .m26, .m86 (FMP song file)
   - .s98 (S98 file)
   - .vgm (Video Game Music)
 - [#13] - Add `make install` rules ([#12]; thanks [@freq-mod])

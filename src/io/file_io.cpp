@@ -22,7 +22,10 @@
 #include "vgm_io.hpp"
 #include "s98_io.hpp"
 #include "pmd_io.hpp"
+#include "fmp_io.hpp"
 
+namespace io
+{
 namespace
 {
 template<class T>
@@ -91,7 +94,8 @@ IoManagerMap<AbstractToneBankIo> TONE_BANK_HANDLERS = {
 IoManagerMap<AbstractSongFileIo> SONG_FILE_HANDLERS = {
 	new VgmIo,
 	new S98Io,
-	new PmdIo
+	new PmdIo,
+	new FmpIo
 };
 
 inline QString extractExtention(const QString& file)
@@ -100,7 +104,7 @@ inline QString extractExtention(const QString& file)
 }
 }
 
-io::FileType io::detectFileType(const QString& file)
+FileType detectFileType(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
@@ -111,17 +115,17 @@ io::FileType io::detectFileType(const QString& file)
 	return FileType::Unknown;
 }
 
-QStringList io::getSingleToneLoadFilter()
+QStringList getSingleToneLoadFilter()
 {
 	return SINGLE_TONE_HANDLERS.getLoadFilterList();
 }
 
-QStringList io::getSingleToneSaveFilter()
+QStringList getSingleToneSaveFilter()
 {
 	return SINGLE_TONE_HANDLERS.getSaveFilterList();
 }
 
-Tone* io::loadSingleToneFrom(const QString& file)
+Tone* loadSingleToneFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
@@ -140,7 +144,7 @@ Tone* io::loadSingleToneFrom(const QString& file)
 	throw FileUnsupportedError(FileType::SingleTone);
 }
 
-void io::saveSingleToneFrom(const QString& file, const Tone& tone)
+void saveSingleToneFrom(const QString& file, const Tone& tone)
 {
 	const QString ext = extractExtention(file);
 
@@ -152,17 +156,17 @@ void io::saveSingleToneFrom(const QString& file, const Tone& tone)
 	}
 }
 
-QStringList io::getToneBankLoadFilter()
+QStringList getToneBankLoadFilter()
 {
 	return TONE_BANK_HANDLERS.getLoadFilterList();
 }
 
-QStringList io::getToneBankSaveFilter()
+QStringList getToneBankSaveFilter()
 {
 	return TONE_BANK_HANDLERS.getSaveFilterList();
 }
 
-std::vector<TonePtr> io::loadToneBankFrom(const QString& file)
+std::vector<TonePtr> loadToneBankFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
@@ -181,7 +185,7 @@ std::vector<TonePtr> io::loadToneBankFrom(const QString& file)
 	throw FileUnsupportedError(FileType::ToneBank);
 }
 
-void io::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank)
+void saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank)
 {
 	const QString ext = extractExtention(file);
 
@@ -193,12 +197,12 @@ void io::saveToneBankFrom(const QString& file, const std::vector<TonePtr>& bank)
 	}
 }
 
-QStringList io::getSongFileLoadFilter()
+QStringList getSongFileLoadFilter()
 {
 	return SONG_FILE_HANDLERS.getLoadFilterList();
 }
 
-std::vector<TonePtr> io::loadSongFileFrom(const QString& file)
+std::vector<TonePtr> loadSongFileFrom(const QString& file)
 {
 	const QString ext = extractExtention(file);
 
@@ -215,4 +219,5 @@ std::vector<TonePtr> io::loadSongFileFrom(const QString& file)
 	}
 
 	throw FileUnsupportedError(FileType::SongFile);
+}
 }
