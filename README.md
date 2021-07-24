@@ -1,5 +1,5 @@
 # YM2608 Tone Editor
-[![GitHub release](https://img.shields.io/badge/release-v0.3.0-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
+[![GitHub release](https://img.shields.io/badge/release-v0.4.0-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
 ![Platform: windows](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 [![LICENSE](https://img.shields.io/github/license/rerrahkr/YM2608-Tone-Editor.svg)](./LICENSE)
 
@@ -38,7 +38,7 @@ YM2608 Tone Editor supports importing/exporting a tone/bank/song.
 - .gyb (GYB bank) (import only)
 - .ins (MVSTracker instrument)
 - .m/.m2 (PMD song file) (import only)
-- .opi, .ovi, .ozi, .m26, .m86 (FMP song file) (import only)
+- .opi/.ovi/.ozi/.m26/.m86 (FMP song file) (import only)
 - .opni/.wopn (OPN2BankEditor imstrument/bank)
 - .s98 (S98 file) (import only)
 - .tfi (TFM Music Maker instrument)
