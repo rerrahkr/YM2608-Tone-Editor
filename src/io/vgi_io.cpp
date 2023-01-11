@@ -16,20 +16,20 @@ Tone* VgiIo::load(const BinaryContainer& container) const
 	tone->PMS_LFO = tmp & 7;
 	tone->AMS_LFO = (tmp >> 4) & 3;
 	if (tmp) tone->FREQ_LFO = 8;
-	for (size_t o = 0; o < 4; ++o) {
-		Operator& op = tone->op[o];
-		op.ML = container.readUint8(csr++);
-		op.DT = DT_CONV_IN[container.readUint8(csr++)];
-		op.TL = container.readUint8(csr++);
-		op.KS = container.readUint8(csr++);
-		op.AR = container.readUint8(csr++);
+	Operator* ops[] = { tone->op, tone->op + 2, tone->op + 1, tone->op + 3 };
+	for (Operator* op: ops) {
+		op->ML = container.readUint8(csr++);
+		op->DT = DT_CONV_IN[container.readUint8(csr++)];
+		op->TL = container.readUint8(csr++);
+		op->KS = container.readUint8(csr++);
+		op->AR = container.readUint8(csr++);
 		uint8_t tmp = container.readUint8(csr++);
-		op.DR = tmp & 31;
-		op.AM = tmp >> 7;
-		op.SR = container.readUint8(csr++);
-		op.RR = container.readUint8(csr++);
-		op.SL = container.readUint8(csr++);
-		op.SSGEG = container.readUint8(csr++);
+		op->DR = tmp & 31;
+		op->AM = tmp >> 7;
+		op->SR = container.readUint8(csr++);
+		op->RR = container.readUint8(csr++);
+		op->SL = container.readUint8(csr++);
+		op->SSGEG = container.readUint8(csr++);
 	}
 
 	return tone.release();
@@ -42,7 +42,7 @@ const BinaryContainer VgiIo::save(const Tone& tone) const
 	container.appendUint8(tone.AL);
 	container.appendUint8(tone.FB);
 	container.appendUint8((tone.AMS_LFO << 4) | tone.PMS_LFO);
-	for (size_t o = 0; o < 4; ++o) {
+	for (size_t o : { 0, 2, 1, 3 }) {
 		const Operator& op = tone.op[o];
 		container.appendUint8(op.ML);
 		container.appendUint8(DT_CONV_OUT[op.DT]);
