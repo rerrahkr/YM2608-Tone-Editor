@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.4.1 (2023-01-13)
+
 ### Fixed
 
 - [#21] - Fix incorrect .vgi import/export (thanks [@bryc])
