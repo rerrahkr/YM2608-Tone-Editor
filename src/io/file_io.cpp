@@ -23,6 +23,7 @@
 #include "s98_io.hpp"
 #include "pmd_io.hpp"
 #include "fmp_io.hpp"
+#include "fui_io.hpp"
 
 namespace io
 {
@@ -79,6 +80,7 @@ IoManagerMap<AbstractSingleToneIo> SINGLE_TONE_HANDLERS = {
 	new VgiIo,
 	new Y12Io,
 	new InsIo,
+	new FuiIO,
 };
 
 IoManagerMap<AbstractToneBankIo> TONE_BANK_HANDLERS = {

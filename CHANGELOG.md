@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v0.4.2 (2023-02-04)
+
+### Added
+
+- Support .fui (Furnace instrument file) import and export
+
 ## v0.4.1 (2023-01-13)
 
 ### Fixed

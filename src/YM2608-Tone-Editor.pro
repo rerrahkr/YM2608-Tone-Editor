@@ -49,6 +49,7 @@ SOURCES += \
     io/file_io.cpp \
     io/file_io_error.cpp \
     io/fmp_io.cpp \
+    io/fui_io.cpp \
     io/gyb_io.cpp \
     io/ins_io.cpp \
     io/mucom88_io.cpp \
@@ -107,6 +108,7 @@ HEADERS += \
     io/file_io.hpp \
     io/file_io_error.hpp \
     io/fmp_io.hpp \
+    io/fui_io.hpp \
     io/gyb_io.hpp \
     io/ins_io.hpp \
     io/io_helper.hpp \
