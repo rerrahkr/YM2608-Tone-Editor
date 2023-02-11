@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## v0.4.3 (2023-02-11)
+
+### Fixed
+
+- [#22] - Fix incorrect .vgm import (thanks [@OPNA2608])
+
+[#22]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/22
+
 ## v0.4.2 (2023-02-04)
 
 ### Added

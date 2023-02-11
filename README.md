@@ -1,6 +1,6 @@
 # YM2608 Tone Editor
 
-[![GitHub release](https://img.shields.io/badge/release-v0.4.2-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
+[![GitHub release](https://img.shields.io/badge/release-v0.4.3-brightgreen.svg)](https://github.com/rerrahkr/YM2608-Tone-Editor/releases)
 ![Platform: windows](https://img.shields.io/badge/platform-windows-lightgrey.svg)
 [![LICENSE](https://img.shields.io/github/license/rerrahkr/YM2608-Tone-Editor.svg)](./LICENSE)
 

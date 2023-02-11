@@ -11,7 +11,7 @@ VgmIo::VgmIo() : AbstractSongFileIo("vgm", "VGM file") {}
 
 std::vector<TonePtr> VgmIo::load(BinaryContainer& container) const
 {
-    if (container.size() < 256) throw FileCorruptionError(io::FileType::SongFile);
+	if (container.size() < 0x40) throw FileCorruptionError(io::FileType::SongFile);
 
     std::string ident = container.readString(0, 4);
     if (ident != "Vgm ") throw FileCorruptionError(io::FileType::SongFile);
@@ -20,9 +20,12 @@ std::vector<TonePtr> VgmIo::load(BinaryContainer& container) const
     uint32_t eof = container.readUint32(4);
     if (container.size() - 4 != eof) throw FileCorruptionError(io::FileType::SongFile);
 
+	uint32_t version = container.readUint32(0x08);
+	size_t csr = (version < 0x150) ? 0x40 : (0x34 + container.readUint32(0x34));
+	if (container.size() <= csr) throw FileCorruptionError(io::FileType::SongFile);
+
 	RegisterRecorder rec(44100);
 
-    size_t csr = 0x100;
 	for (bool flag = true; flag;) {
 		switch (uint8_t com = container.readUint8(csr++)) {
 		case 0x52:	// YM2612 Port A
