@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Changed
+
+- [#23] - Enable to remove last tone (thanks [@Phroneris])
+
+[@Phroneris]: https://github.com/Phroneris
+
+[#23]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/23
+
 ## v0.4.3 (2023-02-11)
 
 ### Fixed

@@ -141,21 +141,18 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 			case Qt::Key_Insert:
 				on_newTonePushButton_clicked();
 				return true;
-			case Qt::Key_Delete:
-				if (ui->listWidget->count() > 1) {
-					auto items = ui->listWidget->selectedItems();
-					if (!items.size()) {	// No selection
-						removeToneAt(ui->listWidget->currentRow());
-					}
-					else {
-						if (items.size() == ui->listWidget->count())
-							items.pop_front();	// Leave first tone
-						for (const auto& item : items)
-							removeToneAt(ui->listWidget->row(item));
-					}
-					return true;
-				}
-				break;
+            case Qt::Key_Delete:
+            {
+                auto items = ui->listWidget->selectedItems();
+                if (!items.size()) {	// No selection
+                    removeToneAt(ui->listWidget->currentRow());
+                }
+                else {
+                    for (const auto& item : items)
+                        removeToneAt(ui->listWidget->row(item));
+                }
+                return true;
+            }
 			default:
 				break;
 			}
@@ -453,6 +450,7 @@ void MainWindow::SetFMTone(int channel)
 
 	uint8_t data;
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	data = tone->FB << 3;
 	data += tone->AL;
 	chip_.setRegister(0xb0 + bch, data);
@@ -599,6 +597,7 @@ QString MainWindow::modifyDisplayedToneName(const QString& src) const
 void MainWindow::on_lfoGroupBox_clicked(bool checked)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	tone->FREQ_LFO = (checked ? 8 : 0) | ui->freqSlider->value();
 	chip_.setRegister(0x22, tone->FREQ_LFO);
 
@@ -608,6 +607,7 @@ void MainWindow::on_lfoGroupBox_clicked(bool checked)
 void MainWindow::onFreqChanged(int value)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	tone->FREQ_LFO = (ui->lfoGroupBox->isChecked() ? 8 : 0) | value;
 	chip_.setRegister(0x22, tone->FREQ_LFO);
 
@@ -617,6 +617,7 @@ void MainWindow::onFreqChanged(int value)
 void MainWindow::onPMSChanged(int value)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
@@ -632,6 +633,7 @@ void MainWindow::onPMSChanged(int value)
 void MainWindow::onAMSChanged(int value)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
@@ -647,6 +649,7 @@ void MainWindow::onAMSChanged(int value)
 void MainWindow::onALChanged(int value)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
@@ -662,6 +665,7 @@ void MainWindow::onALChanged(int value)
 void MainWindow::onFBChanged(int value)
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 3; ++j) {
 			uint32_t chOffset = 0x100 * i + j;
@@ -676,8 +680,11 @@ void MainWindow::onFBChanged(int value)
 
 void MainWindow::onParameterChanged(int op, OperatorParameter param, int value)
 {
+    auto tone = getCurrentTone();
+    if (tone == nullptr) return;
+
 	uint8_t v = static_cast<uint8_t>(value);
-	Operator& slot = getCurrentTone()->op[op - 1];
+    Operator& slot = tone->op[op - 1];
 
 	uint32_t opOffset;
 	switch (op) {
@@ -823,6 +830,9 @@ void MainWindow::removeToneAt(int n)
 	setWindowModified(true);
 
 	ui->listWidget->clearSelection();
+
+    if (ui->listWidget->count() == 0) return;
+
 	ui->listWidget->setCurrentRow(std::min(n, ui->listWidget->count() - 1));
 
 	ui->removeTonePushButton->setEnabled(ui->listWidget->count() != 1);
@@ -830,13 +840,23 @@ void MainWindow::removeToneAt(int n)
 
 TonePtr MainWindow::getCurrentTone() const
 {
-	return ui->listWidget->currentItem()->data(Qt::UserRole).value<TonePtr>();
+    if (auto* item = ui->listWidget->currentItem()) {
+        return item->data(Qt::UserRole).value<TonePtr>();
+    }
+    else {
+        return {};
+    }
 }
 
 void MainWindow::on_actionOpen_O_triggered()
 {
+    static QString dir("./");
+    if (auto tone = getCurrentTone()) {
+        dir = utf8ToQString(tone->path);
+    }
+
 	QStringList filters = io::getSingleToneLoadFilter();
-	QString file = QFileDialog::getOpenFileName(this, "Open tone", utf8ToQString(getCurrentTone()->path),
+    QString file = QFileDialog::getOpenFileName(this, "Open tone", dir,
 												filters.join(";;"), nullptr
 											#if defined(Q_OS_LINUX) || (defined(Q_OS_BSD4) && !defined(Q_OS_DARWIN))
 												, QFileDialog::DontUseNativeDialog
@@ -865,6 +885,7 @@ void MainWindow::on_actionSave_As_triggered()
 bool MainWindow::saveTone()
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return false;
 	if (tone->path != "./" && QFile::exists(utf8ToQString(tone->path))) {
 		try {
 			io::saveSingleToneFrom(utf8ToQString(tone->path), *tone);
@@ -884,6 +905,7 @@ bool MainWindow::saveTone()
 bool MainWindow::saveToneAs()
 {
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return false;
 	QStringList filters = io::getSingleToneSaveFilter();
 	QString file = QFileDialog::getSaveFileName(this, "Save tone", utf8ToQString(tone->path),
 												filters.join(";;"), nullptr
@@ -909,21 +931,27 @@ bool MainWindow::saveToneAs()
 
 void MainWindow::on_nameButton_clicked()
 {
+    auto tone = getCurrentTone();
+    if (tone == nullptr) return;
+
 	NameDialog dialog(this);
 	if (dialog.exec() == QDialog::Accepted) {
 		ui->nameLabel->setText(modifyDisplayedToneName(dialog.toneName()));
 		ui->listWidget->currentItem()->setText(dialog.toneName());
-		getCurrentTone()->name = dialog.toneName().toUtf8().toStdString();
+        tone->name = dialog.toneName().toUtf8().toStdString();
 		setWindowModified(true);
 	}
 }
 
 void MainWindow::on_actionConvert_To_Text_C_triggered()
 {
+    auto tone = getCurrentTone();
+    if (tone == nullptr) return;
+
 	if (converter_.getOutputFormats().empty())
 		QMessageBox::critical(this, "Error", "No output format is saved.");
 
-	ToneTextDialog diag(*getCurrentTone(), converter_);
+    ToneTextDialog diag(*tone, converter_);
 	diag.exec();
 }
 
@@ -987,6 +1015,7 @@ void MainWindow::on_listWidget_currentRowChanged(int currentRow)
 {
 	Q_UNUSED(currentRow)
 	auto tone = getCurrentTone();
+    if (tone == nullptr) return;
 	ui->nameLabel->setText(modifyDisplayedToneName(utf8ToQString(tone->name)));
 	QSignalBlocker blfo(ui->lfoGroupBox), bfreq(ui->freqSlider), bpms(ui->pmsSlider);
 	QSignalBlocker bams(ui->amsSlider), bal(ui->alSlider), bfb(ui->fbSlider);
