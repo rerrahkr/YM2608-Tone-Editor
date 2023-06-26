@@ -934,7 +934,7 @@ void MainWindow::on_nameButton_clicked()
     auto tone = getCurrentTone();
     if (tone == nullptr) return;
 
-	NameDialog dialog(this);
+    NameDialog dialog(utf8ToQString(tone->name), this);
 	if (dialog.exec() == QDialog::Accepted) {
 		ui->nameLabel->setText(modifyDisplayedToneName(dialog.toneName()));
 		ui->listWidget->currentItem()->setText(dialog.toneName());

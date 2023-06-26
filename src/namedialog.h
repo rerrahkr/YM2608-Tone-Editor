@@ -13,7 +13,7 @@ class NameDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit NameDialog(QWidget *parent = 0);
+    explicit NameDialog(const QString& name, QWidget* parent = nullptr);
     ~NameDialog();
     QString toneName();
 

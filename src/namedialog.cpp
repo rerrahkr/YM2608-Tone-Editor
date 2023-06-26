@@ -1,11 +1,13 @@
 #include "namedialog.h"
 #include "ui_namedialog.h"
 
-NameDialog::NameDialog(QWidget *parent) :
+NameDialog::NameDialog(const QString& name, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::NameDialog)
 {
     ui->setupUi(this);
+
+    ui->lineEdit->setText(name);
 
 	setFixedSize(size());
 	setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);

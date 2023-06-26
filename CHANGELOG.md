@@ -5,10 +5,12 @@
 ### Changed
 
 - [#23] - Enable to remove last tone (thanks [@Phroneris])
+- [#24] - Set the name of selected tone as the default in the edit tone name dialog (thanks [@Phroneris])
 
 [@Phroneris]: https://github.com/Phroneris
 
 [#23]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/23
+[#24]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/24
 
 ## v0.4.3 (2023-02-11)
 
