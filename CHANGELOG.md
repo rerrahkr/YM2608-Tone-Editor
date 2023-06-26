@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v0.4.4 (2023-06-26)
+
 ### Changed
 
 - [#23] - Enable to remove last tone (thanks [@Phroneris])
