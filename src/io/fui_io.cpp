@@ -191,7 +191,7 @@ const BinaryContainer FuiIO::save(const Tone& tone) const
 		container.appendUint8(op.TL);
 		container.appendUint8((op.KS << 6) | op.AR);
 		container.appendUint8((op.AM << 7) | op.DR);
-		container.appendUint8(op.SR);
+		container.appendUint8(op.SR | 0x20);
 		container.appendUint8((op.SL << 4) | op.RR);
 		container.appendUint8(op.SSGEG);
 		container.appendUint8(0);
