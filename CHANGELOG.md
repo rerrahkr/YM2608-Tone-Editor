@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## v0.4.5 (2024-10-18)
+
+### Fixed
+
+- [#27] - Enable TL scaling by default when creating Furnace instruments ([#25]; thanks [@defensem3ch], [@damifortune])
+
+[#25]: https://github.com/rerrahkr/YM2608-Tone-Editor/issues/25
+[#27]: https://github.com/rerrahkr/YM2608-Tone-Editor/pull/27
+
+[@defensem3ch]: https://github.com/defensem3ch
+[@damifortune]: https://github.com/damifortune
+
 ## v0.4.4 (2023-06-26)
 
 ### Changed
