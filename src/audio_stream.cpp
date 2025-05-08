@@ -4,14 +4,22 @@
 AudioStream::AudioStream(chip::Chip& chip, uint32_t rate, uint32_t duration) :
     chip_(chip)
 {
+    format_.setSampleRate(rate);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    format_.setChannelConfig(QAudioFormat::ChannelConfigStereo);
+    format_.setSampleFormat(QAudioFormat::Int16);
+
+    audio_ = std::make_unique<QAudioSink>(format_);
+#else
     format_.setByteOrder(QAudioFormat::Endian(QSysInfo::ByteOrder));
     format_.setChannelCount(2); // Stereo
     format_.setCodec("audio/pcm");
-    format_.setSampleRate(rate);
     format_.setSampleSize(16);   // int16
     format_.setSampleType(QAudioFormat::SignedInt);
 
     audio_ = std::make_unique<QAudioOutput>(format_);
+#endif
+
     mixer_ = std::make_unique<AudioStreamMixier>(chip_, rate, duration);
     start();
 }
@@ -25,7 +33,11 @@ void AudioStream::setRate(uint32_t rate)
 {
     stop();
     format_.setSampleRate(rate);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    audio_ = std::make_unique<QAudioSink>(format_);
+#else
     audio_ = std::make_unique<QAudioOutput>(format_);
+#endif
     mixer_->setRate(rate);
     start();
 }
