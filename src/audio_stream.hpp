@@ -1,6 +1,11 @@
 #pragma once
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QAudioSink>
+#else
 #include <QAudioOutput>
+#endif
 #include <QAudioFormat>
 #include <memory>
 #include "chips/chip_def.h"
@@ -20,7 +25,11 @@ public:
 private:
     chip::Chip& chip_;
     QAudioFormat format_;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    std::unique_ptr<QAudioSink> audio_;
+#else
     std::unique_ptr<QAudioOutput> audio_;
+#endif
     std::unique_ptr<AudioStreamMixier> mixer_;
 
     void start();

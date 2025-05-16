@@ -1,5 +1,6 @@
 #include "opna.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <algorithm>
 #include "chip_misc.h"
 #include "mame/mame_2608.hpp"
