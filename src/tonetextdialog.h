@@ -18,7 +18,7 @@ public:
     ~ToneTextDialog();
 
 private slots:
-	void on_comboBox_currentIndexChanged(const QString &arg1);
+	void on_comboBox_currentIndexChanged(int index);
 
 private:
     Ui::ToneTextDialog *ui;
