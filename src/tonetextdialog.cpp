@@ -24,7 +24,8 @@ ToneTextDialog::~ToneTextDialog()
 	delete ui;
 }
 
-void ToneTextDialog::on_comboBox_currentIndexChanged(const QString &arg1)
+void ToneTextDialog::on_comboBox_currentIndexChanged(int index)
 {
-	ui->textEdit->setText(converter_.toneToText(tone_, arg1));
+	QString text = ui->comboBox->itemText(index);
+	ui->textEdit->setText(converter_.toneToText(tone_, text));
 }
