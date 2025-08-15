@@ -59,6 +59,7 @@ const BinaryContainer InsIo::save(const Tone& tone) const
 	container.appendString("MVSI");
 	container.appendChar('1');
 	container.appendString(tone.name);
+	container.appendChar('\0');	// Null-termination
 
 	const Operator* ops[] = { tone.op, tone.op + 1, tone.op + 2, tone.op + 3 };
 	for (const auto op : ops)
